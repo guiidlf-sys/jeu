@@ -11,6 +11,9 @@ plus dangereuses.
 
 Le menu principal reprend la maquette : le nom du jeu en haut, puis
 **JOUER**, **BOUTIQUE** et **CRÉDIT** empilés au centre d'un grand cadre.
+**JOUER** ouvre une seconde page, dans le même cadre, avec trois
+destinations : **IN THE GAME** (le hall), **DONJONS** (choisir une faille) et
+**HUB AFK** (gains passifs).
 
 ---
 
@@ -74,23 +77,32 @@ dans Studio.
 | `G` | Domaine Restreint (niveau 30) |
 | `C` | Statistiques |
 | `Q` | Quêtes quotidiennes |
+| `J` | Donjons |
 | `B` | Boutique |
 | `M` | Menu principal |
+| `E` (près d'un PNJ) | Parler |
 
 ---
 
 ## Contenu
 
 - **Progression** : 120 niveaux, 6 grades (Grade 4 → Grade Spécial), 3 points
-  de statistique par niveau à répartir entre Force, Agilité, Vitalité et
-  Énergie.
+  de statistique par niveau à répartir entre :
+  - **Magie** — dégâts de toutes les techniques, et réserve d'énergie
+  - **Force** — dégâts de l'attaque de base, qui ne coûte rien
+  - **Vie** — points de vie
+  - **Agilité** — vitesse de déplacement et réduction des recharges
+- **Zone sûre** : le hall est protégé, aucun esprit ne peut y entrer. Quatre
+  PNJ y tiennent boutique et conseil, dont Maître Renzo qui indique en
+  permanence la prochaine étape à accomplir (le HUD l'affiche aussi).
+- **Hub AFK** : une île flottante où l'XP et les yens tombent tout seuls.
 - **5 techniques maudites** débloquées par niveau, avec coût en énergie,
   recharge et zone d'effet calculée côté serveur.
 - **6 esprits maudits**, de la Larve au Roi des Ombres Maudites.
 - **5 failles** (rangs E, D, C, B, S) : donjons à vagues instanciés par
   joueur dans une arène créée à la volée, avec récompenses à la clé.
-- **Zone d'entraînement** dans le hall, où des esprits de bas rang
-  réapparaissent en continu.
+- **Terrain d'entraînement** au nord du hall, hors de la zone sûre, où des
+  esprits de bas rang réapparaissent en continu.
 - **Boutique** : armes (bonus permanents), auras (cosmétiques) et reliques.
 - **Quêtes quotidiennes** qui récompensent en points de statistique.
 - **Sauvegarde DataStore** avec réessais, autosave et sauvegarde à la
@@ -111,6 +123,8 @@ src/
 │   ├── RiftCatalog.lua      failles et leurs vagues
 │   ├── ShopCatalog.lua      articles de la boutique
 │   ├── QuestCatalog.lua     quêtes quotidiennes
+│   ├── NpcCatalog.lua       PNJ de la zone sûre et leurs dialogues
+│   ├── Guide.lua            fil conducteur : la prochaine étape du joueur
 │   └── Util.lua             utilitaires partagés
 │
 ├── server/                  → ServerScriptService.Server
@@ -125,8 +139,10 @@ src/
 │       ├── CombatService.lua      résolution des techniques
 │       ├── ShopService.lua        achats et équipement
 │       ├── RiftService.lua        failles instanciées
-│       ├── TrainingService.lua    zone d'entraînement du hall
-│       └── WorldBuilder.lua       génération du hall et des arènes
+│       ├── ZoneService.lua        zone sûre, téléportations, hub AFK
+│       ├── NpcService.lua         PNJ et dialogues
+│       ├── TrainingService.lua    terrain d'entraînement
+│       └── WorldBuilder.lua       génération du monde
 │
 └── client/                  → StarterPlayer.StarterPlayerScripts.Client
     ├── init.client.lua      assemblage de l'UI et raccourcis
@@ -134,8 +150,10 @@ src/
     ├── CombatController.lua entrées → techniques
     └── UI/
         ├── Theme.lua        helpers d'interface
-        ├── MainMenu.lua     menu de la maquette
-        ├── HUD.lua          jauges, techniques, suivi de faille
+        ├── MainMenu.lua     menu de la maquette (2 pages)
+        ├── DungeonList.lua  registre des failles
+        ├── Dialogue.lua     boîte de dialogue des PNJ
+        ├── HUD.lua          jauges, techniques, objectif, suivi de faille
         ├── Shop.lua         boutique
         ├── Credits.lua      fenêtre CRÉDIT
         ├── StatsPanel.lua   répartition des points
@@ -162,12 +180,17 @@ décidé côté client.
 - **Ajouter un esprit ou une faille** : `MobCatalog.lua` / `RiftCatalog.lua`.
   Un portail est créé automatiquement dans le hall pour chaque faille.
 - **Ajouter un article** : `ShopCatalog.lua`, avec son bonus et son prix.
+- **Ajouter un PNJ ou changer ses répliques** : `NpcCatalog.lua` (position,
+  couleur, dialogue, action du bouton).
+- **Changer le fil conducteur** : `Guide.lua` — chaque étape a un titre, un
+  détail et une condition d'accomplissement.
 
 ---
 
 ## Idées pour la suite
 
 - Invocation d'ombres (les esprits vaincus combattent à tes côtés).
+- Quêtes données par les PNJ, avec suivi et récompenses dédiées.
 - Failles coopératives à plusieurs joueurs.
 - Classement des meilleurs sorciers (OrderedDataStore).
 - Animations et effets sonores sur les techniques.

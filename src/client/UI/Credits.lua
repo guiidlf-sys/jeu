@@ -20,11 +20,11 @@ local SECTIONS = {
 	},
 	{
 		title = "COMMANDES",
-		body = "Clic gauche — Poing Maudit\nE — Lame de Vide\nR — Éclat d'Âme\nF — Chaînes Funestes\nG — Domaine Restreint\nC — Statistiques   •   Q — Quêtes   •   B — Boutique   •   M — Menu",
+		body = "Clic gauche — Poing Maudit\nE — Lame de Vide\nR — Éclat d'Âme\nF — Chaînes Funestes\nG — Domaine Restreint\nC — Statistiques   •   Q — Quêtes   •   J — Donjons   •   B — Boutique   •   M — Menu",
 	},
 	{
 		title = "COMMENT PROGRESSER",
-		body = "Élimine les esprits de la zone d'entraînement pour tes premiers niveaux, puis franchis les portails de failles autour du hall. Chaque niveau octroie 3 points à répartir : Force, Agilité, Vitalité, Énergie.",
+		body = "Le hall est une zone sûre : quatre PNJ t'y attendent, dont Maître Renzo qui t'indique toujours ta prochaine étape. Traverse le pont au nord pour t'entraîner sur les esprits de bas rang, puis lance-toi dans les failles.\n\nChaque niveau octroie 3 points à répartir : MAGIE (dégâts des techniques et réserve d'énergie), FORCE (coups à mains nues), VIE (points de vie), AGILITÉ (vitesse et recharge).",
 	},
 }
 

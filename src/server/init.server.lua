@@ -22,6 +22,8 @@ local ORDER = {
 	"CombatService",
 	"ShopService",
 	"RiftService",
+	"ZoneService",
+	"NpcService",
 	"TrainingService",
 }
 

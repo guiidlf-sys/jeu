@@ -17,8 +17,11 @@ local EVENTS = {
 	"SystemMessage", -- notification style "Système"
 	"CombatFeedback", -- dégâts infligés / reçus, pour les chiffres flottants
 	"RiftStateChanged", -- progression de la faille en cours
+	"NpcDialogue", -- ouverture d'un dialogue de PNJ
+	"ZoneChanged", -- hall / faille / hub AFK
 	-- Client -> serveur
 	"UseSkill",
+	"Teleport", -- "hall" ou "afk"
 	"SpendStatPoint",
 	"EnterRift",
 	"LeaveRift",

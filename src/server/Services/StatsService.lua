@@ -20,7 +20,8 @@ local DataService = require(script.Parent.DataService)
 export type Derived = {
 	maxHealth: number,
 	maxEnergy: number,
-	damage: number,
+	damage: number, -- attaques physiques (Force)
+	magicDamage: number, -- techniques maudites (Magie)
 	walkSpeed: number,
 	cooldownMultiplier: number,
 }
@@ -64,9 +65,13 @@ function StatsService.derive(profile: any): Derived
 		math.min(stats.agilite * GameConfig.CooldownReductionPerAgility, GameConfig.MaxCooldownReduction)
 
 	return {
-		maxHealth = GameConfig.BaseHealth + level * 6 + stats.vitalite * GameConfig.HealthPerVitality + bonus.health,
-		maxEnergy = GameConfig.BaseEnergy + stats.energie * GameConfig.EnergyPerEnergyStat + bonus.energy,
+		maxHealth = GameConfig.BaseHealth + level * 6 + stats.vie * GameConfig.HealthPerVie + bonus.health,
+		maxEnergy = GameConfig.BaseEnergy + stats.magie * GameConfig.EnergyPerMagie + bonus.energy,
 		damage = GameConfig.BaseDamage + level * 1.5 + stats.force * GameConfig.DamagePerStrength + bonus.damage,
+		magicDamage = GameConfig.BaseMagicDamage
+			+ level * 2
+			+ stats.magie * GameConfig.MagicDamagePerMagie
+			+ bonus.damage,
 		walkSpeed = GameConfig.BaseWalkSpeed + stats.agilite * GameConfig.SpeedPerAgility + bonus.speed,
 		cooldownMultiplier = 1 - cooldownReduction,
 	}
@@ -96,6 +101,7 @@ local function publish(player: Player)
 	player:SetAttribute("Energie", math.floor(energy[player] or 0))
 	player:SetAttribute("EnergieMax", math.floor(derived.maxEnergy))
 	player:SetAttribute("Degats", math.floor(derived.damage))
+	player:SetAttribute("DegatsMagie", math.floor(derived.magicDamage))
 	player:SetAttribute("Vitesse", derived.walkSpeed)
 	player:SetAttribute("ReductionCooldown", 1 - derived.cooldownMultiplier)
 end

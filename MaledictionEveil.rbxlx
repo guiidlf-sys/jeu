@@ -77,21 +77,24 @@ function GameConfig.rankForLevel(level: number)
 end
 
 -- Statistiques ----------------------------------------------------------
--- Les 4 stats investissables. `apply` décrit l'effet d'un point.
+-- Les 4 stats investissables.
+-- La Force porte les coups physiques, la Magie porte les techniques.
 GameConfig.Stats = {
-	{ id = "force", name = "Force", description = "+2 dégâts par point" },
-	{ id = "agilite", name = "Agilité", description = "+0.4 vitesse, -0.5% cooldown" },
-	{ id = "vitalite", name = "Vitalité", description = "+8 points de vie" },
-	{ id = "energie", name = "Énergie", description = "+6 énergie maudite" },
+	{ id = "magie", name = "Magie", description = "+3 dégâts de technique, +6 énergie" },
+	{ id = "force", name = "Force", description = "+2 dégâts d'attaque physique" },
+	{ id = "vie", name = "Vie", description = "+8 points de vie" },
+	{ id = "agilite", name = "Agilité", description = "+0.4 vitesse, -0.5 % de recharge" },
 }
 
 GameConfig.BaseHealth = 100
 GameConfig.BaseEnergy = 100
 GameConfig.BaseDamage = 10
+GameConfig.BaseMagicDamage = 12
 GameConfig.BaseWalkSpeed = 16
 
-GameConfig.HealthPerVitality = 8
-GameConfig.EnergyPerEnergyStat = 6
+GameConfig.HealthPerVie = 8
+GameConfig.EnergyPerMagie = 6
+GameConfig.MagicDamagePerMagie = 3
 GameConfig.DamagePerStrength = 2
 GameConfig.SpeedPerAgility = 0.4
 GameConfig.CooldownReductionPerAgility = 0.005 -- 0.5 %, plafonné plus bas
@@ -106,6 +109,11 @@ GameConfig.Currencies = {
 	yens = { name = "Yens", color = Color3.fromRGB(255, 205, 90) },
 	fragments = { name = "Fragments", color = Color3.fromRGB(190, 110, 255) },
 }
+
+-- Zone sûre & hub AFK ---------------------------------------------------
+GameConfig.SafeZoneRadius = 105 -- rayon du hall, aucun esprit n'y entre
+GameConfig.AfkRewardInterval = 15
+GameConfig.AfkCenter = Vector3.new(0, 3000, 0)
 
 -- Combat ----------------------------------------------------------------
 GameConfig.RespawnTime = 5
@@ -131,6 +139,133 @@ return GameConfig
         </Properties>
       </Item>
       <Item class="ModuleScript" referent="4">
+        <Properties>
+          <string name="Name">Guide</string>
+          <string name="Source"><![CDATA[--!strict
+--[[
+	Guide
+	Fil conducteur du joueur : à partir du profil, indique la prochaine étape.
+	Partagé, pour que le PNJ guide et le HUD affichent exactement la même chose.
+]]
+
+export type Step = {
+	id: string,
+	title: string,
+	detail: string,
+	done: (profile: any) -> boolean,
+}
+
+local Guide = {}
+
+local function spentPoints(profile: any): number
+	local total = 0
+	for _, value in pairs(profile.stats) do
+		total += value
+	end
+	return total
+end
+
+local STEPS: { Step } = {
+	{
+		id = "premiers_esprits",
+		title = "Élimine 5 esprits maudits",
+		detail = "Traverse le pont au nord du hall : le terrain d'entraînement t'attend. Clic gauche pour frapper.",
+		done = function(profile)
+			return profile.totals.kills >= 5
+		end,
+	},
+	{
+		id = "premier_point",
+		title = "Dépense un point de statistique",
+		detail = "Chaque niveau te donne 3 points. Ouvre les statistiques (touche C) et investis-les en Magie, Force, Vie ou Agilité.",
+		done = function(profile)
+			return spentPoints(profile) >= 1
+		end,
+	},
+	{
+		id = "niveau_3",
+		title = "Atteins le niveau 3",
+		detail = "Au niveau 3 tu débloques la Lame de Vide (touche E), ta première vraie technique.",
+		done = function(profile)
+			return profile.level >= 3
+		end,
+	},
+	{
+		id = "premiere_faille",
+		title = "Nettoie une faille de rang E",
+		detail = "Menu (M) → JOUER → DONJONS, ou approche-toi d'un portail dans le hall. Trois vagues à survivre.",
+		done = function(profile)
+			return profile.totals.riftsCleared >= 1
+		end,
+	},
+	{
+		id = "premier_achat",
+		title = "Équipe ta première arme",
+		detail = "Le marchand du hall vend le Katana d'École pour 500 yens. Touche B pour ouvrir la boutique.",
+		done = function(profile)
+			return next(profile.owned) ~= nil
+		end,
+	},
+	{
+		id = "quete_du_jour",
+		title = "Termine une quête quotidienne",
+		detail = "Touche Q. Les quêtes rapportent des points de statistique en plus de l'XP.",
+		done = function(profile)
+			return next(profile.quests.claimed) ~= nil
+		end,
+	},
+	{
+		id = "niveau_8",
+		title = "Atteins le niveau 8",
+		detail = "L'Éclat d'Âme (touche R) se débloque au niveau 8, et la faille de rang D s'ouvre à toi.",
+		done = function(profile)
+			return profile.level >= 8
+		end,
+	},
+	{
+		id = "faille_d",
+		title = "Nettoie une faille de rang D ou mieux",
+		detail = "Les récompenses grimpent vite : yens, fragments et XP. Pense à répartir tes points avant d'entrer.",
+		done = function(profile)
+			local order = { E = 1, D = 2, C = 3, B = 4, S = 5 }
+			return (order[profile.bestRiftRank] or 0) >= 2
+		end,
+	},
+}
+
+Guide.Steps = STEPS
+
+--- Prochaine étape non terminée, ou nil si le joueur a tout fait.
+function Guide.next(profile: any): Step?
+	if not profile then
+		return nil
+	end
+	for _, step in ipairs(STEPS) do
+		local ok, done = pcall(step.done, profile)
+		if ok and not done then
+			return step
+		end
+	end
+	return nil
+end
+
+--- Position dans la progression, pour l'affichage « étape 3 / 8 ».
+function Guide.progress(profile: any): (number, number)
+	local completed = 0
+	for _, step in ipairs(STEPS) do
+		local ok, done = pcall(step.done, profile)
+		if ok and done then
+			completed += 1
+		end
+	end
+	return completed, #STEPS
+end
+
+return Guide
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="5">
         <Properties>
           <string name="Name">MobCatalog</string>
           <string name="Source"><![CDATA[--!strict
@@ -273,7 +408,123 @@ return MobCatalog
 ]]></string>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="5">
+      <Item class="ModuleScript" referent="6">
+        <Properties>
+          <string name="Name">NpcCatalog</string>
+          <string name="Source"><![CDATA[--!strict
+--[[
+	NpcCatalog
+	Les PNJ de la zone sûre. Le serveur construit les silhouettes et déclenche
+	les dialogues, le client affiche les répliques listées ici.
+
+	`action` indique ce que propose le bouton du dialogue :
+	  guide    → rappelle l'objectif en cours
+	  stats    → ouvre la fenêtre de statistiques
+	  shop     → ouvre la boutique
+	  dungeons → ouvre la liste des donjons
+]]
+
+export type Npc = {
+	id: string,
+	name: string,
+	role: string,
+	color: Color3,
+	glow: Color3,
+	position: Vector3,
+	facing: number, -- degrés, pour orienter le PNJ vers le centre
+	action: string,
+	actionLabel: string,
+	lines: { string },
+}
+
+local NpcCatalog = {}
+
+local LIST: { Npc } = {
+	{
+		id = "renzo",
+		name = "Maître Renzo",
+		role = "Guide des jeunes sorciers",
+		color = Color3.fromRGB(48, 42, 78),
+		glow = Color3.fromRGB(150, 110, 255),
+		position = Vector3.new(-24, 2, 20),
+		facing = 140,
+		action = "guide",
+		actionLabel = "Quelle est ma prochaine étape ?",
+		lines = {
+			"Te voilà enfin. Cette énergie autour de toi... tu ne la contrôles pas encore, mais elle est réelle.",
+			"Ici, dans le hall, aucun esprit ne peut t'atteindre. C'est une zone sûre : reprends ton souffle, parle aux autres, prépare-toi.",
+			"Dehors, c'est différent. Le pont au nord mène au terrain d'entraînement, et les portails autour de nous mènent aux failles.",
+			"Je te dirai toujours quoi faire ensuite. Reviens me voir dès que tu es perdu.",
+		},
+	},
+	{
+		id = "hana",
+		name = "Instructrice Hana",
+		role = "Maîtrise des statistiques",
+		color = Color3.fromRGB(30, 56, 48),
+		glow = Color3.fromRGB(120, 255, 170),
+		position = Vector3.new(24, 2, 20),
+		facing = -140,
+		action = "stats",
+		actionLabel = "Répartir mes points",
+		lines = {
+			"Chaque niveau te donne trois points. Ce que tu en fais décide du sorcier que tu deviendras.",
+			"La MAGIE nourrit tes techniques : plus de dégâts sur la Lame de Vide, l'Éclat d'Âme, le Domaine. Et une réserve d'énergie plus grande.",
+			"La FORCE ne touche que tes coups à mains nues, mais elle ne coûte aucune énergie. Un bon filet de sécurité.",
+			"La VIE te garde debout, l'AGILITÉ te fait courir plus vite et réduit tes temps de recharge.",
+			"Mon conseil : Magie et Vie en priorité, un peu d'Agilité ensuite. Mais c'est ton chemin, pas le mien.",
+		},
+	},
+	{
+		id = "osamu",
+		name = "Osamu",
+		role = "Marchand d'armes",
+		color = Color3.fromRGB(62, 48, 30),
+		glow = Color3.fromRGB(255, 205, 90),
+		position = Vector3.new(-36, 2, -12),
+		facing = 70,
+		action = "shop",
+		actionLabel = "Voir la marchandise",
+		lines = {
+			"Des yens ? Alors on peut discuter.",
+			"Les esprits que tu abats en laissent tomber. Les failles en rapportent bien plus, et parfois des fragments — ceux-là, j'en veux toujours.",
+			"Une arme, ça n'est pas de la décoration : elle ajoute des dégâts en permanence. Commence par le Katana d'École, il fera l'affaire.",
+		},
+	},
+	{
+		id = "yuna",
+		name = "Archiviste Yuna",
+		role = "Registre des failles",
+		color = Color3.fromRGB(28, 44, 70),
+		glow = Color3.fromRGB(96, 200, 255),
+		position = Vector3.new(36, 2, -12),
+		facing = -70,
+		action = "dungeons",
+		actionLabel = "Consulter le registre",
+		lines = {
+			"Cinq failles recensées, du rang E au rang S. Chacune se referme sur celui qui n'est pas prêt.",
+			"Trois vagues par faille. La dernière est toujours la pire — au rang S, le Roi des Ombres Maudites t'y attend.",
+			"Tu peux y entrer d'ici, ou franchir un portail dans le hall. Vérifie ton niveau avant, je ne ramasse pas les morceaux.",
+		},
+	},
+}
+
+NpcCatalog.List = LIST
+
+local byId: { [string]: Npc } = {}
+for _, npc in ipairs(LIST) do
+	byId[npc.id] = npc
+end
+
+function NpcCatalog.get(id: string): Npc?
+	return byId[id]
+end
+
+return NpcCatalog
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="7">
         <Properties>
           <string name="Name">QuestCatalog</string>
           <string name="Source"><![CDATA[--!strict
@@ -336,7 +587,7 @@ return QuestCatalog
 ]]></string>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="6">
+      <Item class="ModuleScript" referent="8">
         <Properties>
           <string name="Name">Remotes</string>
           <string name="Source"><![CDATA[--!strict
@@ -358,8 +609,11 @@ local EVENTS = {
 	"SystemMessage", -- notification style "Système"
 	"CombatFeedback", -- dégâts infligés / reçus, pour les chiffres flottants
 	"RiftStateChanged", -- progression de la faille en cours
+	"NpcDialogue", -- ouverture d'un dialogue de PNJ
+	"ZoneChanged", -- hall / faille / hub AFK
 	-- Client -> serveur
 	"UseSkill",
+	"Teleport", -- "hall" ou "afk"
 	"SpendStatPoint",
 	"EnterRift",
 	"LeaveRift",
@@ -419,7 +673,7 @@ return Remotes
 ]]></string>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="7">
+      <Item class="ModuleScript" referent="9">
         <Properties>
           <string name="Name">RiftCatalog</string>
           <string name="Source"><![CDATA[--!strict
@@ -534,7 +788,7 @@ return RiftCatalog
 ]]></string>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="8">
+      <Item class="ModuleScript" referent="10">
         <Properties>
           <string name="Name">ShopCatalog</string>
           <string name="Source"><![CDATA[--!strict
@@ -650,7 +904,7 @@ return ShopCatalog
 ]]></string>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="9">
+      <Item class="ModuleScript" referent="11">
         <Properties>
           <string name="Name">Signal</string>
           <string name="Source"><![CDATA[--!strict
@@ -700,7 +954,7 @@ return Signal
 ]]></string>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="10">
+      <Item class="ModuleScript" referent="12">
         <Properties>
           <string name="Name">SkillCatalog</string>
           <string name="Source"><![CDATA[--!strict
@@ -826,7 +1080,7 @@ return SkillCatalog
 ]]></string>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="11">
+      <Item class="ModuleScript" referent="13">
         <Properties>
           <string name="Name">Util</string>
           <string name="Source"><![CDATA[--!strict
@@ -897,11 +1151,11 @@ return Util
       </Item>
     </Item>
   </Item>
-  <Item class="ServerScriptService" referent="12">
+  <Item class="ServerScriptService" referent="14">
     <Properties>
       <string name="Name">ServerScriptService</string>
     </Properties>
-    <Item class="Script" referent="13">
+    <Item class="Script" referent="15">
       <Properties>
         <string name="Name">Server</string>
         <token name="RunContext">0</token>
@@ -929,6 +1183,8 @@ local ORDER = {
 	"CombatService",
 	"ShopService",
 	"RiftService",
+	"ZoneService",
+	"NpcService",
 	"TrainingService",
 }
 
@@ -951,11 +1207,11 @@ end
 print(("[%s] serveur prêt (v%s)"):format(GameConfig.GameName, GameConfig.Version))
 ]]></string>
       </Properties>
-      <Item class="Folder" referent="14">
+      <Item class="Folder" referent="16">
         <Properties>
           <string name="Name">Services</string>
         </Properties>
-        <Item class="ModuleScript" referent="15">
+        <Item class="ModuleScript" referent="17">
           <Properties>
             <string name="Name">CombatService</string>
             <string name="Source"><![CDATA[--!strict
@@ -1134,11 +1390,15 @@ local function useSkill(player: Player, skillId: string)
 		return
 	end
 
+	-- Les techniques (celles qui coûtent de l'énergie) tapent avec la Magie,
+	-- l'attaque de base avec la Force.
+	local power = if skill.cost > 0 then derived.magicDamage else derived.damage
+
 	local totalDealt = 0
 	for _, target in ipairs(targets) do
 		local isCrit = random:NextNumber() < CRIT_CHANCE
 		local variance = random:NextNumber(0.95, 1.08)
-		local amount = derived.damage * skill.damageMultiplier * variance
+		local amount = power * skill.damageMultiplier * variance
 		if isCrit then
 			amount *= CRIT_MULTIPLIER
 		end
@@ -1183,7 +1443,7 @@ return CombatService
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="16">
+        <Item class="ModuleScript" referent="18">
           <Properties>
             <string name="Name">DataService</string>
             <string name="Source"><![CDATA[--!strict
@@ -1230,12 +1490,13 @@ local TEMPLATE = {
 	level = 1,
 	xp = 0,
 	statPoints = 0,
-	stats = { force = 0, agilite = 0, vitalite = 0, energie = 0 },
+	stats = { magie = 0, force = 0, vie = 0, agilite = 0 },
 	currencies = { yens = 0, fragments = 0 },
 	owned = {},
 	equipped = { arme = "", aura = "" },
 	quests = { day = 0, progress = { kills = 0, damage = 0, riftsCleared = 0 }, claimed = {} },
 	totals = { kills = 0, riftsCleared = 0, deaths = 0 },
+	flags = {},
 	bestRiftRank = "-",
 	playtime = 0,
 }
@@ -1244,6 +1505,21 @@ DataService.Template = TEMPLATE
 
 local profiles: { [Player]: any } = {}
 local loading: { [Player]: boolean } = {}
+
+--- Adapte les vieux profils au format courant.
+local function migrate(data: any)
+	if typeof(data.stats) ~= "table" then
+		return
+	end
+	-- « Vitalité » et « Énergie » sont devenues « Vie » et « Magie ».
+	local renames = { vitalite = "vie", energie = "magie" }
+	for old, new in pairs(renames) do
+		if data.stats[old] ~= nil then
+			data.stats[new] = (data.stats[new] or 0) + data.stats[old]
+			data.stats[old] = nil
+		end
+	end
+end
 
 local function key(player: Player): string
 	return ("player_%d"):format(player.UserId)
@@ -1335,6 +1611,7 @@ local function load(player: Player)
 	if typeof(data) ~= "table" then
 		data = Util.deepCopy(TEMPLATE)
 	else
+		migrate(data)
 		Util.reconcile(data, TEMPLATE)
 	end
 
@@ -1428,7 +1705,7 @@ return DataService
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="17">
+        <Item class="ModuleScript" referent="19">
           <Properties>
             <string name="Name">MobService</string>
             <string name="Source"><![CDATA[--!strict
@@ -1690,6 +1967,11 @@ local function nearestTarget(record: Record): (Model?, Humanoid?, number)
 	local origin = record.root.Position
 
 	for _, player in ipairs(Players:GetPlayers()) do
+		-- Les joueurs de la zone sûre (hall, hub AFK) sont intouchables.
+		if player:GetAttribute("ZoneSure") == true then
+			continue
+		end
+
 		local character = player.Character
 		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 		local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
@@ -1784,7 +2066,76 @@ return MobService
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="18">
+        <Item class="ModuleScript" referent="20">
+          <Properties>
+            <string name="Name">NpcService</string>
+            <string name="Source"><![CDATA[--!strict
+--[[
+	NpcService
+	Construit les PNJ de la zone sûre et déclenche leurs dialogues. Le premier
+	échange avec le guide offre une mise de départ.
+]]
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local NpcCatalog = require(Shared.NpcCatalog)
+local Remotes = require(Shared.Remotes)
+
+local DataService = require(script.Parent.DataService)
+local ProgressionService = require(script.Parent.ProgressionService)
+local WorldBuilder = require(script.Parent.WorldBuilder)
+
+local STARTER_YENS = 300
+
+local NpcService = {}
+
+local function grantStarterGift(player: Player)
+	local profile = DataService.get(player)
+	if not profile or profile.flags.starterGift then
+		return
+	end
+
+	profile.flags.starterGift = true
+	ProgressionService.grantCurrency(player, "yens", STARTER_YENS)
+	ProgressionService.notify(
+		player,
+		"CADEAU DE BIENVENUE",
+		("Maître Renzo te remet %d yens pour tes débuts."):format(STARTER_YENS),
+		"success"
+	)
+end
+
+function NpcService.init()
+	local hall = WorldBuilder.buildLobby()
+
+	local folder = Instance.new("Folder")
+	folder.Name = "PNJ"
+	folder.Parent = hall
+
+	for _, npc in ipairs(NpcCatalog.List) do
+		local model, prompt = WorldBuilder.buildNpc(npc, folder)
+
+		-- Orientation vers le centre du hall.
+		local primary = model.PrimaryPart
+		if primary then
+			model:PivotTo(CFrame.new(primary.Position) * CFrame.Angles(0, math.rad(npc.facing), 0))
+		end
+
+		prompt.Triggered:Connect(function(player)
+			if npc.action == "guide" then
+				grantStarterGift(player)
+			end
+			Remotes.event("NpcDialogue"):FireClient(player, npc.id)
+		end)
+	end
+end
+
+return NpcService
+]]></string>
+          </Properties>
+        </Item>
+        <Item class="ModuleScript" referent="21">
           <Properties>
             <string name="Name">ProgressionService</string>
             <string name="Source"><![CDATA[--!strict
@@ -1916,7 +2267,7 @@ return ProgressionService
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="19">
+        <Item class="ModuleScript" referent="22">
           <Properties>
             <string name="Name">QuestService</string>
             <string name="Source"><![CDATA[--!strict
@@ -2027,7 +2378,7 @@ return QuestService
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="20">
+        <Item class="ModuleScript" referent="23">
           <Properties>
             <string name="Name">RewardService</string>
             <string name="Source"><![CDATA[--!strict
@@ -2072,7 +2423,7 @@ return RewardService
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="21">
+        <Item class="ModuleScript" referent="24">
           <Properties>
             <string name="Name">RiftService</string>
             <string name="Source"><![CDATA[--!strict
@@ -2413,7 +2764,7 @@ return RiftService
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="22">
+        <Item class="ModuleScript" referent="25">
           <Properties>
             <string name="Name">ShopService</string>
             <string name="Source"><![CDATA[--!strict
@@ -2570,7 +2921,7 @@ return ShopService
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="23">
+        <Item class="ModuleScript" referent="26">
           <Properties>
             <string name="Name">StatsService</string>
             <string name="Source"><![CDATA[--!strict
@@ -2595,7 +2946,8 @@ local DataService = require(script.Parent.DataService)
 export type Derived = {
 	maxHealth: number,
 	maxEnergy: number,
-	damage: number,
+	damage: number, -- attaques physiques (Force)
+	magicDamage: number, -- techniques maudites (Magie)
 	walkSpeed: number,
 	cooldownMultiplier: number,
 }
@@ -2639,9 +2991,13 @@ function StatsService.derive(profile: any): Derived
 		math.min(stats.agilite * GameConfig.CooldownReductionPerAgility, GameConfig.MaxCooldownReduction)
 
 	return {
-		maxHealth = GameConfig.BaseHealth + level * 6 + stats.vitalite * GameConfig.HealthPerVitality + bonus.health,
-		maxEnergy = GameConfig.BaseEnergy + stats.energie * GameConfig.EnergyPerEnergyStat + bonus.energy,
+		maxHealth = GameConfig.BaseHealth + level * 6 + stats.vie * GameConfig.HealthPerVie + bonus.health,
+		maxEnergy = GameConfig.BaseEnergy + stats.magie * GameConfig.EnergyPerMagie + bonus.energy,
 		damage = GameConfig.BaseDamage + level * 1.5 + stats.force * GameConfig.DamagePerStrength + bonus.damage,
+		magicDamage = GameConfig.BaseMagicDamage
+			+ level * 2
+			+ stats.magie * GameConfig.MagicDamagePerMagie
+			+ bonus.damage,
 		walkSpeed = GameConfig.BaseWalkSpeed + stats.agilite * GameConfig.SpeedPerAgility + bonus.speed,
 		cooldownMultiplier = 1 - cooldownReduction,
 	}
@@ -2671,6 +3027,7 @@ local function publish(player: Player)
 	player:SetAttribute("Energie", math.floor(energy[player] or 0))
 	player:SetAttribute("EnergieMax", math.floor(derived.maxEnergy))
 	player:SetAttribute("Degats", math.floor(derived.damage))
+	player:SetAttribute("DegatsMagie", math.floor(derived.magicDamage))
 	player:SetAttribute("Vitesse", derived.walkSpeed)
 	player:SetAttribute("ReductionCooldown", 1 - derived.cooldownMultiplier)
 end
@@ -2838,64 +3195,33 @@ return StatsService
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="24">
+        <Item class="ModuleScript" referent="27">
           <Properties>
             <string name="Name">TrainingService</string>
             <string name="Source"><![CDATA[--!strict
 --[[
 	TrainingService
-	Zone d'entraînement du hall : des esprits de bas rang y réapparaissent en
-	continu pour que le joueur ait toujours de quoi farmer sans faille.
+	Terrain d'entraînement, au nord du hall et hors de la zone sûre : des
+	esprits de bas rang y réapparaissent en continu pour que le joueur ait
+	toujours de quoi progresser sans entrer en faille.
 ]]
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
-local Shared = ReplicatedStorage:WaitForChild("Shared")
-local GameConfig = require(Shared.GameConfig)
-
 local MobService = require(script.Parent.MobService)
+local WorldBuilder = require(script.Parent.WorldBuilder)
 
-local ZONE_CENTER = Vector3.new(0, 3, 80)
-local ZONE_RADIUS = 34
-local MAX_MOBS = 8
-local RESPAWN_INTERVAL = 4
+local FIELD_CENTER = Vector3.new(0, 0, 230)
+local FIELD_SIZE = 150
+local ZONE_CENTER = FIELD_CENTER + Vector3.new(0, 3, 0)
+local ZONE_RADIUS = 58
+local MAX_MOBS = 10
+local RESPAWN_INTERVAL = 3.5
 
 local TrainingService = {}
 
 local zoneFolder: Folder
 
 local function buildZone()
-	zoneFolder = Instance.new("Folder")
-	zoneFolder.Name = "Entrainement"
-	zoneFolder.Parent = workspace
-
-	local pad = Instance.new("Part")
-	pad.Name = "Terrain"
-	pad.Anchored = true
-	pad.CanCollide = false
-	pad.Size = Vector3.new(ZONE_RADIUS * 2, 0.4, ZONE_RADIUS * 2)
-	pad.Position = ZONE_CENTER - Vector3.new(0, 0.8, 0)
-	pad.Material = Enum.Material.Neon
-	pad.Color = GameConfig.Palette.accentSoft
-	pad.Transparency = 0.85
-	pad.Parent = zoneFolder
-
-	local gui = Instance.new("BillboardGui")
-	gui.Size = UDim2.fromScale(16, 3)
-	gui.StudsOffsetWorldSpace = Vector3.new(0, 12, 0)
-	gui.MaxDistance = 200
-	gui.Adornee = pad
-	gui.Parent = pad
-
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.fromScale(1, 1)
-	label.BackgroundTransparency = 1
-	label.Font = Enum.Font.GothamBold
-	label.TextScaled = true
-	label.TextColor3 = GameConfig.Palette.accentSoft
-	label.TextStrokeTransparency = 0.35
-	label.Text = "ZONE D'ENTRAÎNEMENT"
-	label.Parent = gui
+	zoneFolder = WorldBuilder.buildTrainingField(FIELD_CENTER, FIELD_SIZE)
 end
 
 local function randomPosition(): Vector3
@@ -2923,7 +3249,7 @@ return TrainingService
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="25">
+        <Item class="ModuleScript" referent="28">
           <Properties>
             <string name="Name">WorldBuilder</string>
             <string name="Source"><![CDATA[--!strict
@@ -3024,8 +3350,23 @@ function WorldBuilder.buildLobby(): Folder
 		light.Parent = crown
 	end
 
-	-- Barrières invisibles pour ne pas tomber du hall.
-	for _, offset in ipairs({ Vector3.new(112, 0, 0), Vector3.new(-112, 0, 0), Vector3.new(0, 0, 112), Vector3.new(0, 0, -112) }) do
+	-- Anneau de zone sûre : repère visuel de la limite protégée.
+	local ring = part({
+		Name = "AnneauZoneSure",
+		Size = Vector3.new(GameConfig.SafeZoneRadius * 2, 0.2, GameConfig.SafeZoneRadius * 2),
+		Position = Vector3.new(0, 2.05, 0),
+		Color = GameConfig.Palette.success,
+		Material = Enum.Material.Neon,
+		Shape = Enum.PartType.Cylinder,
+		Transparency = 0.92,
+		CanCollide = false,
+	})
+	ring.CFrame = CFrame.new(0, 2.05, 0) * CFrame.Angles(0, 0, math.rad(90))
+	ring.Parent = folder
+
+	-- Barrières invisibles pour ne pas tomber du hall, avec une ouverture au
+	-- nord (+Z) vers le pont du terrain d'entraînement.
+	for _, offset in ipairs({ Vector3.new(112, 0, 0), Vector3.new(-112, 0, 0), Vector3.new(0, 0, -112) }) do
 		local isX = math.abs(offset.X) > 0
 		local wall = part({
 			Name = "Barrière",
@@ -3037,7 +3378,285 @@ function WorldBuilder.buildLobby(): Folder
 		wall.Parent = folder
 	end
 
+	for _, side in ipairs({ 1, -1 }) do
+		local wall = part({
+			Name = "Barrière",
+			Size = Vector3.new(99, 60, 4),
+			Position = Vector3.new(side * 62.5, 30, 112),
+			Transparency = 1,
+			CanCollide = true,
+		})
+		wall.Parent = folder
+	end
+
+	-- Pont vers le terrain d'entraînement.
+	local bridge = part({
+		Name = "Pont",
+		Size = Vector3.new(26, 4, 60),
+		Position = Vector3.new(0, 0, 140),
+		Color = Color3.fromRGB(22, 22, 34),
+		Material = Enum.Material.Slate,
+	})
+	bridge.Parent = folder
+
+	for _, side in ipairs({ 1, -1 }) do
+		local rail = part({
+			Name = "Rambarde",
+			Size = Vector3.new(1, 5, 60),
+			Position = Vector3.new(side * 13, 4, 140),
+			Color = GameConfig.Palette.accentSoft,
+			Material = Enum.Material.Neon,
+			Transparency = 0.5,
+		})
+		rail.Parent = folder
+	end
+
 	return folder
+end
+
+--- Terrain d'entraînement, hors de la zone sûre, relié au hall par le pont.
+function WorldBuilder.buildTrainingField(center: Vector3, size: number): Folder
+	local folder = Instance.new("Folder")
+	folder.Name = "TerrainEntrainement"
+	folder.Parent = workspace
+
+	local floor = part({
+		Name = "Sol",
+		Size = Vector3.new(size, 4, size),
+		Position = center,
+		Color = Color3.fromRGB(20, 20, 30),
+		Material = Enum.Material.Slate,
+	})
+	floor.Parent = folder
+
+	local glow = part({
+		Name = "Runes",
+		Size = Vector3.new(size * 0.8, 0.3, size * 0.8),
+		Position = center + Vector3.new(0, 2.2, 0),
+		Color = GameConfig.Palette.danger,
+		Material = Enum.Material.Neon,
+		Transparency = 0.88,
+		CanCollide = false,
+	})
+	glow.Parent = folder
+
+	-- Murs sur trois côtés : l'accès se fait par le pont, au sud.
+	local half = size / 2
+	local sides = {
+		{ offset = Vector3.new(half, 0, 0), size = Vector3.new(4, 60, size) },
+		{ offset = Vector3.new(-half, 0, 0), size = Vector3.new(4, 60, size) },
+		{ offset = Vector3.new(0, 0, half), size = Vector3.new(size, 60, 4) },
+	}
+	for _, side in ipairs(sides) do
+		local wall = part({
+			Name = "Barrière",
+			Size = side.size,
+			Position = center + side.offset + Vector3.new(0, 30, 0),
+			Transparency = 1,
+			CanCollide = true,
+		})
+		wall.Parent = folder
+	end
+
+	-- Côté sud : deux segments, en laissant passer le pont.
+	for _, side in ipairs({ 1, -1 }) do
+		local segment = (size - 26) / 2
+		local wall = part({
+			Name = "Barrière",
+			Size = Vector3.new(segment, 60, 4),
+			Position = center + Vector3.new(side * (13 + segment / 2), 30, -half),
+			Transparency = 1,
+			CanCollide = true,
+		})
+		wall.Parent = folder
+	end
+
+	local sign = part({
+		Name = "Panneau",
+		Size = Vector3.new(20, 1, 1),
+		Position = center + Vector3.new(0, 14, -half + 2),
+		Color = GameConfig.Palette.danger,
+		Material = Enum.Material.Neon,
+		CanCollide = false,
+	})
+	sign.Parent = folder
+
+	local gui = Instance.new("BillboardGui")
+	gui.Size = UDim2.fromScale(22, 5)
+	gui.StudsOffsetWorldSpace = Vector3.new(0, 5, 0)
+	gui.MaxDistance = 260
+	gui.Adornee = sign
+	gui.Parent = sign
+
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.fromScale(1, 0.6)
+	label.BackgroundTransparency = 1
+	label.Font = Enum.Font.GothamBlack
+	label.TextScaled = true
+	label.TextColor3 = GameConfig.Palette.danger
+	label.TextStrokeTransparency = 0.3
+	label.Text = "TERRAIN D'ENTRAÎNEMENT"
+	label.Parent = gui
+
+	local warning = Instance.new("TextLabel")
+	warning.Size = UDim2.fromScale(1, 0.4)
+	warning.Position = UDim2.fromScale(0, 0.6)
+	warning.BackgroundTransparency = 1
+	warning.Font = Enum.Font.Gotham
+	warning.TextScaled = true
+	warning.TextColor3 = GameConfig.Palette.textDim
+	warning.Text = "Tu quittes la zone sûre — les esprits attaquent ici"
+	warning.Parent = gui
+
+	return folder
+end
+
+--- Île flottante du hub AFK.
+function WorldBuilder.buildAfkHub(center: Vector3): (Folder, CFrame)
+	local folder = Instance.new("Folder")
+	folder.Name = "HubAFK"
+	folder.Parent = workspace
+
+	local floor = part({
+		Name = "Sol",
+		Size = Vector3.new(90, 4, 90),
+		Position = center,
+		Color = Color3.fromRGB(24, 22, 40),
+		Material = Enum.Material.Slate,
+	})
+	floor.Parent = folder
+
+	local glow = part({
+		Name = "Halo",
+		Size = Vector3.new(70, 0.4, 70),
+		Position = center + Vector3.new(0, 2.2, 0),
+		Color = GameConfig.Palette.accent,
+		Material = Enum.Material.Neon,
+		Transparency = 0.6,
+		CanCollide = false,
+	})
+	glow.Parent = folder
+
+	local light = Instance.new("PointLight")
+	light.Color = GameConfig.Palette.accent
+	light.Range = 60
+	light.Brightness = 3
+	light.Parent = glow
+
+	for _, offset in ipairs({
+		Vector3.new(45, 0, 0),
+		Vector3.new(-45, 0, 0),
+		Vector3.new(0, 0, 45),
+		Vector3.new(0, 0, -45),
+	}) do
+		local isX = math.abs(offset.X) > 0
+		local wall = part({
+			Name = "Barrière",
+			Size = if isX then Vector3.new(2, 40, 90) else Vector3.new(90, 40, 2),
+			Position = center + offset + Vector3.new(0, 20, 0),
+			Color = GameConfig.Palette.accent,
+			Material = Enum.Material.ForceField,
+			Transparency = 0.75,
+		})
+		wall.Parent = folder
+	end
+
+	for index = 0, 3 do
+		local angle = (index / 4) * math.pi * 2 + math.pi / 4
+		local pillar = part({
+			Name = "Pilier",
+			Size = Vector3.new(5, 26, 5),
+			Position = center + Vector3.new(math.cos(angle) * 32, 15, math.sin(angle) * 32),
+			Color = Color3.fromRGB(16, 16, 26),
+			Material = Enum.Material.Concrete,
+		})
+		pillar.Parent = folder
+	end
+
+	return folder, CFrame.new(center + Vector3.new(0, 6, 0))
+end
+
+--- Personnage non joueur : une silhouette ancrée avec son dialogue.
+function WorldBuilder.buildNpc(def: any, parent: Instance): (Model, ProximityPrompt)
+	local model = Instance.new("Model")
+	model.Name = "PNJ_" .. def.id
+
+	local body = part({
+		Name = "Corps",
+		Size = Vector3.new(2.6, 4.4, 2.6),
+		Position = def.position + Vector3.new(0, 2.2, 0),
+		Color = def.color,
+		Material = Enum.Material.Fabric,
+	})
+	body.Parent = model
+	model.PrimaryPart = body
+
+	local head = part({
+		Name = "Tête",
+		Size = Vector3.new(1.8, 1.8, 1.8),
+		Position = def.position + Vector3.new(0, 5.4, 0),
+		Color = def.glow,
+		Material = Enum.Material.Neon,
+		CanCollide = false,
+	})
+	head.Parent = model
+
+	local halo = part({
+		Name = "Halo",
+		Size = Vector3.new(3.2, 0.25, 3.2),
+		Position = def.position + Vector3.new(0, 7, 0),
+		Color = def.glow,
+		Material = Enum.Material.Neon,
+		Shape = Enum.PartType.Cylinder,
+		Transparency = 0.35,
+		CanCollide = false,
+	})
+	halo.CFrame = CFrame.new(halo.Position) * CFrame.Angles(0, 0, math.rad(90))
+	halo.Parent = model
+
+	local light = Instance.new("PointLight")
+	light.Color = def.glow
+	light.Range = 20
+	light.Brightness = 2
+	light.Parent = head
+
+	local gui = Instance.new("BillboardGui")
+	gui.Size = UDim2.fromScale(11, 3.4)
+	gui.StudsOffsetWorldSpace = Vector3.new(0, 9, 0)
+	gui.MaxDistance = 160
+	gui.Adornee = head
+	gui.Parent = head
+
+	local name = Instance.new("TextLabel")
+	name.Size = UDim2.fromScale(1, 0.55)
+	name.BackgroundTransparency = 1
+	name.Font = Enum.Font.GothamBold
+	name.TextScaled = true
+	name.TextColor3 = def.glow
+	name.TextStrokeTransparency = 0.35
+	name.Text = def.name
+	name.Parent = gui
+
+	local role = Instance.new("TextLabel")
+	role.Size = UDim2.fromScale(1, 0.45)
+	role.Position = UDim2.fromScale(0, 0.55)
+	role.BackgroundTransparency = 1
+	role.Font = Enum.Font.Gotham
+	role.TextScaled = true
+	role.TextColor3 = GameConfig.Palette.textDim
+	role.Text = def.role
+	role.Parent = gui
+
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.ActionText = "Parler"
+	prompt.ObjectText = def.name
+	prompt.HoldDuration = 0
+	prompt.MaxActivationDistance = 12
+	prompt.RequiresLineOfSight = false
+	prompt.Parent = body
+
+	model.Parent = parent
+	return model, prompt
 end
 
 --- Construit une arène de faille à la position donnée.
@@ -3168,24 +3787,204 @@ return WorldBuilder
 ]]></string>
           </Properties>
         </Item>
+        <Item class="ModuleScript" referent="29">
+          <Properties>
+            <string name="Name">ZoneService</string>
+            <string name="Source"><![CDATA[--!strict
+--[[
+	ZoneService
+	Gère les trois lieux du jeu : le hall (zone sûre), le terrain de chasse et
+	le hub AFK. Marque les joueurs protégés, déplace les personnages et
+	distribue les gains passifs du hub.
+]]
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local GameConfig = require(Shared.GameConfig)
+local Remotes = require(Shared.Remotes)
+
+local DataService = require(script.Parent.DataService)
+local ProgressionService = require(script.Parent.ProgressionService)
+local RiftService = require(script.Parent.RiftService)
+local WorldBuilder = require(script.Parent.WorldBuilder)
+
+local SAFE_ATTRIBUTE = "ZoneSure"
+local ZONE_ATTRIBUTE = "Zone"
+
+local ZoneService = {}
+
+local afkPlayers: { [Player]: number } = {} -- joueur -> horodatage d'entrée
+local afkSpawn: CFrame = CFrame.new(GameConfig.AfkCenter + Vector3.new(0, 6, 0))
+
+local function hallSpawnCFrame(): CFrame
+	local hall = workspace:FindFirstChild("Hall")
+	local spawnPart = hall and hall:FindFirstChild("Départ")
+	if spawnPart and spawnPart:IsA("BasePart") then
+		return spawnPart.CFrame + Vector3.new(0, 5, 0)
+	end
+	return CFrame.new(0, 8, 0)
+end
+
+ZoneService.hallSpawnCFrame = hallSpawnCFrame
+
+local function setZone(player: Player, zone: string)
+	player:SetAttribute(ZONE_ATTRIBUTE, zone)
+	Remotes.event("ZoneChanged"):FireClient(player, zone)
+end
+
+--- Déplace le personnage, en quittant d'abord une éventuelle faille.
+function ZoneService.teleport(player: Player, destination: string)
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	if not character or not humanoid or humanoid.Health <= 0 then
+		return
+	end
+
+	if RiftService.isInRift(player) then
+		RiftService.leave(player)
+		task.wait(0.3)
+		character = player.Character
+		if not character then
+			return
+		end
+	end
+
+	if destination == "afk" then
+		afkPlayers[player] = os.clock()
+		character:PivotTo(afkSpawn)
+		setZone(player, "afk")
+		ProgressionService.notify(
+			player,
+			"HUB AFK",
+			("Gains passifs actifs : de l'XP et des yens toutes les %d secondes, même sans rien faire.")
+				:format(GameConfig.AfkRewardInterval),
+			"info"
+		)
+	else
+		afkPlayers[player] = nil
+		character:PivotTo(hallSpawnCFrame())
+		setZone(player, "hall")
+	end
+end
+
+function ZoneService.isAfk(player: Player): boolean
+	return afkPlayers[player] ~= nil
+end
+
+function ZoneService.init()
+	WorldBuilder.buildLobby()
+	WorldBuilder.buildAfkHub(GameConfig.AfkCenter)
+
+	Remotes.event("Teleport").OnServerEvent:Connect(function(player, destination)
+		if typeof(destination) ~= "string" then
+			return
+		end
+		if destination ~= "hall" and destination ~= "afk" then
+			return
+		end
+		local ok, err = pcall(ZoneService.teleport, player, destination)
+		if not ok then
+			warn("[ZoneService] " .. tostring(err))
+		end
+	end)
+
+	Players.PlayerRemoving:Connect(function(player)
+		afkPlayers[player] = nil
+	end)
+
+	Players.PlayerAdded:Connect(function(player)
+		player.CharacterAdded:Connect(function()
+			-- On réapparaît toujours dans la zone sûre.
+			afkPlayers[player] = nil
+			setZone(player, "hall")
+		end)
+	end)
+
+	-- Marquage de la zone sûre : les esprits ignorent les joueurs protégés.
+	task.spawn(function()
+		while true do
+			task.wait(0.4)
+			for _, player in ipairs(Players:GetPlayers()) do
+				local character = player.Character
+				local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
+				if not root then
+					continue
+				end
+
+				local inAfk = afkPlayers[player] ~= nil
+				local flat = Vector3.new(root.Position.X, 0, root.Position.Z)
+				local inHall = not inAfk
+					and flat.Magnitude <= GameConfig.SafeZoneRadius
+					and math.abs(root.Position.Y) < 200
+
+				local safe = inHall or inAfk
+				if player:GetAttribute(SAFE_ATTRIBUTE) ~= safe then
+					player:SetAttribute(SAFE_ATTRIBUTE, safe)
+				end
+
+				local zone = if inAfk then "afk" elseif inHall then "hall" else "chasse"
+				if RiftService.isInRift(player) then
+					zone = "faille"
+				end
+				if player:GetAttribute(ZONE_ATTRIBUTE) ~= zone then
+					setZone(player, zone)
+				end
+			end
+		end
+	end)
+
+	-- Gains passifs du hub AFK.
+	task.spawn(function()
+		while true do
+			task.wait(GameConfig.AfkRewardInterval)
+			for player, _ in pairs(afkPlayers) do
+				local profile = DataService.get(player)
+				if not player.Parent or not profile then
+					afkPlayers[player] = nil
+					continue
+				end
+
+				local character = player.Character
+				local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
+				if not root or (root.Position - GameConfig.AfkCenter).Magnitude > 120 then
+					-- Le joueur a quitté l'île : plus de gains.
+					afkPlayers[player] = nil
+					continue
+				end
+
+				ProgressionService.grantRewards(player, {
+					xp = 10 + profile.level * 3,
+					yens = 6 + profile.level * 2,
+				})
+			end
+		end
+	end)
+end
+
+return ZoneService
+]]></string>
+          </Properties>
+        </Item>
       </Item>
     </Item>
   </Item>
-  <Item class="SoundService" referent="26">
+  <Item class="SoundService" referent="30">
     <Properties>
       <string name="Name">SoundService</string>
       <bool name="RespectFilteringEnabled">true</bool>
     </Properties>
   </Item>
-  <Item class="StarterPlayer" referent="27">
+  <Item class="StarterPlayer" referent="31">
     <Properties>
       <string name="Name">StarterPlayer</string>
     </Properties>
-    <Item class="StarterPlayerScripts" referent="28">
+    <Item class="StarterPlayerScripts" referent="32">
       <Properties>
         <string name="Name">StarterPlayerScripts</string>
       </Properties>
-      <Item class="LocalScript" referent="29">
+      <Item class="LocalScript" referent="33">
         <Properties>
           <string name="Name">Client</string>
           <string name="Source"><![CDATA[--!strict
@@ -3197,7 +3996,11 @@ return WorldBuilder
 
 local ContextActionService = game:GetService("ContextActionService")
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
+
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Remotes = require(Shared.Remotes)
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -3208,6 +4011,8 @@ local State = require(script.State)
 local UI = script.UI
 local Credits = require(UI.Credits)
 local DamageNumbers = require(UI.DamageNumbers)
+local Dialogue = require(UI.Dialogue)
+local DungeonList = require(UI.DungeonList)
 local HUD = require(UI.HUD)
 local MainMenu = require(UI.MainMenu)
 local Notifications = require(UI.Notifications)
@@ -3224,6 +4029,9 @@ screenGui.Parent = playerGui
 
 State.init()
 
+local menu
+local inGame = false
+
 local hud = HUD.new(screenGui)
 local shop = Shop.new(screenGui)
 local credits = Credits.new(screenGui)
@@ -3231,12 +4039,14 @@ local statsPanel = StatsPanel.new(screenGui)
 local questPanel = QuestPanel.new(screenGui)
 local notifications = Notifications.new(screenGui)
 
+local enterGame -- défini plus bas, utilisé par la liste des donjons
+local dungeonList = DungeonList.new(screenGui, function()
+	enterGame()
+end)
+
 DamageNumbers.init(function()
 	hud:flashDamage()
 end)
-
-local menu
-local inGame = false
 
 -- Contrôles du joueur (module Roblox standard) : désactivés dans le menu.
 local controls
@@ -3266,9 +4076,10 @@ local function closeAllWindows()
 	credits:setVisible(false)
 	statsPanel:setVisible(false)
 	questPanel:setVisible(false)
+	dungeonList:setVisible(false)
 end
 
-local function enterGame()
+function enterGame()
 	inGame = true
 	menu:hide()
 	closeAllWindows()
@@ -3279,7 +4090,7 @@ local function enterGame()
 	end
 end
 
-local function openMenu()
+local function openMenu(page: string?)
 	inGame = false
 	closeAllWindows()
 	hud:setVisible(false)
@@ -3287,11 +4098,35 @@ local function openMenu()
 	if controls then
 		controls:Disable()
 	end
-	menu:show()
+	menu:show(page)
 end
 
+-- Les dialogues des PNJ ouvrent les fenêtres correspondantes.
+local dialogue = Dialogue.new(screenGui, {
+	stats = function()
+		statsPanel:setVisible(true)
+	end,
+	shop = function()
+		shop:setVisible(true)
+	end,
+	dungeons = function()
+		dungeonList:setVisible(true)
+	end,
+	guide = function() end,
+})
+
 menu = MainMenu.new(screenGui, {
-	onPlay = enterGame,
+	onInGame = function()
+		enterGame()
+		Remotes.event("Teleport"):FireServer("hall")
+	end,
+	onDungeons = function()
+		dungeonList:setVisible(true)
+	end,
+	onAfk = function()
+		enterGame()
+		Remotes.event("Teleport"):FireServer("afk")
+	end,
 	onShop = function()
 		shop:setVisible(true)
 	end,
@@ -3306,10 +4141,15 @@ end)
 hud.buttons.quests.Activated:Connect(function()
 	questPanel:toggle()
 end)
+hud.buttons.dungeons.Activated:Connect(function()
+	dungeonList:toggle()
+end)
 hud.buttons.shop.Activated:Connect(function()
 	shop:toggle()
 end)
-hud.buttons.menu.Activated:Connect(openMenu)
+hud.buttons.menu.Activated:Connect(function()
+	openMenu("main")
+end)
 
 CombatController.init()
 
@@ -3325,6 +4165,11 @@ local SHORTCUTS = {
 			questPanel:toggle()
 		end
 	end,
+	[Enum.KeyCode.J] = function()
+		if inGame then
+			dungeonList:toggle()
+		end
+	end,
 	[Enum.KeyCode.B] = function()
 		if inGame then
 			shop:toggle()
@@ -3332,7 +4177,7 @@ local SHORTCUTS = {
 	end,
 	[Enum.KeyCode.M] = function()
 		if inGame then
-			openMenu()
+			openMenu("main")
 		else
 			enterGame()
 		end
@@ -3343,24 +4188,31 @@ ContextActionService:BindAction("Raccourcis", function(_, state, input)
 	if state ~= Enum.UserInputState.Begin or UserInputService:GetFocusedTextBox() then
 		return Enum.ContextActionResult.Pass
 	end
+
+	-- Entrée ou Espace font défiler un dialogue ouvert.
+	if dialogue:isOpen() and (input.KeyCode == Enum.KeyCode.Return or input.KeyCode == Enum.KeyCode.Space) then
+		dialogue:advance()
+		return Enum.ContextActionResult.Pass
+	end
+
 	local action = SHORTCUTS[input.KeyCode]
 	if action then
 		action()
 	end
 	return Enum.ContextActionResult.Pass
-end, false, Enum.KeyCode.C, Enum.KeyCode.Q, Enum.KeyCode.B, Enum.KeyCode.M)
+end, false, Enum.KeyCode.C, Enum.KeyCode.Q, Enum.KeyCode.J, Enum.KeyCode.B, Enum.KeyCode.M, Enum.KeyCode.Return)
 
 -- On démarre sur le menu, comme sur la maquette.
-openMenu()
+openMenu("main")
 
 notifications:push(
 	"SYSTÈME",
-	"Les failles s'ouvrent. Appuie sur JOUER pour rejoindre le hall des sorciers.",
+	"Les failles s'ouvrent. Appuie sur JOUER, puis choisis ta destination.",
 	"info"
 )
 ]]></string>
         </Properties>
-        <Item class="ModuleScript" referent="30">
+        <Item class="ModuleScript" referent="34">
           <Properties>
             <string name="Name">CombatController</string>
             <string name="Source"><![CDATA[--!strict
@@ -3476,7 +4328,7 @@ return CombatController
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="31">
+        <Item class="ModuleScript" referent="35">
           <Properties>
             <string name="Name">State</string>
             <string name="Source"><![CDATA[--!strict
@@ -3526,11 +4378,11 @@ return State
 ]]></string>
           </Properties>
         </Item>
-        <Item class="Folder" referent="32">
+        <Item class="Folder" referent="36">
           <Properties>
             <string name="Name">UI</string>
           </Properties>
-          <Item class="ModuleScript" referent="33">
+          <Item class="ModuleScript" referent="37">
             <Properties>
               <string name="Name">Credits</string>
               <string name="Source"><![CDATA[--!strict
@@ -3555,11 +4407,11 @@ local SECTIONS = {
 	},
 	{
 		title = "COMMANDES",
-		body = "Clic gauche — Poing Maudit\nE — Lame de Vide\nR — Éclat d'Âme\nF — Chaînes Funestes\nG — Domaine Restreint\nC — Statistiques   •   Q — Quêtes   •   B — Boutique   •   M — Menu",
+		body = "Clic gauche — Poing Maudit\nE — Lame de Vide\nR — Éclat d'Âme\nF — Chaînes Funestes\nG — Domaine Restreint\nC — Statistiques   •   Q — Quêtes   •   J — Donjons   •   B — Boutique   •   M — Menu",
 	},
 	{
 		title = "COMMENT PROGRESSER",
-		body = "Élimine les esprits de la zone d'entraînement pour tes premiers niveaux, puis franchis les portails de failles autour du hall. Chaque niveau octroie 3 points à répartir : Force, Agilité, Vitalité, Énergie.",
+		body = "Le hall est une zone sûre : quatre PNJ t'y attendent, dont Maître Renzo qui t'indique toujours ta prochaine étape. Traverse le pont au nord pour t'entraîner sur les esprits de bas rang, puis lance-toi dans les failles.\n\nChaque niveau octroie 3 points à répartir : MAGIE (dégâts des techniques et réserve d'énergie), FORCE (coups à mains nues), VIE (points de vie), AGILITÉ (vitesse et recharge).",
 	},
 }
 
@@ -3695,7 +4547,7 @@ return Credits
 ]]></string>
             </Properties>
           </Item>
-          <Item class="ModuleScript" referent="34">
+          <Item class="ModuleScript" referent="38">
             <Properties>
               <string name="Name">DamageNumbers</string>
               <string name="Source"><![CDATA[--!strict
@@ -3778,7 +4630,426 @@ return DamageNumbers
 ]]></string>
             </Properties>
           </Item>
-          <Item class="ModuleScript" referent="35">
+          <Item class="ModuleScript" referent="39">
+            <Properties>
+              <string name="Name">Dialogue</string>
+              <string name="Source"><![CDATA[--!strict
+--[[
+	Dialogue
+	Boîte de dialogue des PNJ de la zone sûre : les répliques défilent, puis un
+	bouton d'action ouvre la fenêtre correspondante (stats, boutique, donjons).
+]]
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local GameConfig = require(Shared.GameConfig)
+local Guide = require(Shared.Guide)
+local NpcCatalog = require(Shared.NpcCatalog)
+local Remotes = require(Shared.Remotes)
+
+local State = require(script.Parent.Parent.State)
+local Theme = require(script.Parent.Theme)
+
+local Dialogue = {}
+Dialogue.__index = Dialogue
+
+--- `actions` associe l'action d'un PNJ à la fenêtre à ouvrir.
+function Dialogue.new(parent: ScreenGui, actions: { [string]: () -> () })
+	local self = setmetatable({}, Dialogue)
+
+	self.actions = actions
+	self.lines = {} :: { string }
+	self.index = 1
+	self.npc = nil :: any
+
+	local root = Theme.create("Frame", {
+		Name = "Dialogue",
+		AnchorPoint = Vector2.new(0.5, 1),
+		Position = UDim2.new(0.5, 0, 1, -18),
+		Size = UDim2.fromOffset(760, 210),
+		BackgroundTransparency = 1,
+		Visible = false,
+		ZIndex = 35,
+		Parent = parent,
+	})
+	self.root = root
+
+	local box = Theme.panel({
+		Size = UDim2.fromScale(1, 1),
+		BackgroundTransparency = 0.05,
+		ZIndex = 35,
+		Parent = root,
+	})
+	Theme.padding(18).Parent = box
+	self.box = box
+
+	self.nameLabel = Theme.create("TextLabel", {
+		Size = UDim2.new(1, 0, 0, 24),
+		BackgroundTransparency = 1,
+		Font = Theme.TitleFont,
+		Text = "",
+		TextSize = 20,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextColor3 = GameConfig.Palette.accent,
+		ZIndex = 36,
+		Parent = box,
+	})
+
+	self.roleLabel = Theme.create("TextLabel", {
+		Position = UDim2.fromOffset(0, 24),
+		Size = UDim2.new(1, 0, 0, 18),
+		BackgroundTransparency = 1,
+		Font = Theme.BodyFont,
+		Text = "",
+		TextSize = 13,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextColor3 = GameConfig.Palette.textDim,
+		ZIndex = 36,
+		Parent = box,
+	})
+
+	self.textLabel = Theme.create("TextLabel", {
+		Position = UDim2.fromOffset(0, 50),
+		Size = UDim2.new(1, 0, 0, 78),
+		BackgroundTransparency = 1,
+		Font = Theme.BodyFont,
+		Text = "",
+		TextSize = 16,
+		TextWrapped = true,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextYAlignment = Enum.TextYAlignment.Top,
+		TextColor3 = GameConfig.Palette.text,
+		ZIndex = 36,
+		Parent = box,
+	})
+
+	local buttons = Theme.create("Frame", {
+		AnchorPoint = Vector2.new(1, 1),
+		Position = UDim2.new(1, 0, 1, 0),
+		Size = UDim2.new(1, 0, 0, 38),
+		BackgroundTransparency = 1,
+		ZIndex = 36,
+		Parent = box,
+	}, {
+		Theme.create("UIListLayout", {
+			FillDirection = Enum.FillDirection.Horizontal,
+			HorizontalAlignment = Enum.HorizontalAlignment.Right,
+			VerticalAlignment = Enum.VerticalAlignment.Center,
+			Padding = UDim.new(0, 10),
+			SortOrder = Enum.SortOrder.LayoutOrder,
+		}),
+	})
+
+	local function makeButton(text: string, color: Color3, order: number): TextButton
+		return Theme.create("TextButton", {
+			Size = UDim2.fromOffset(240, 34),
+			BackgroundColor3 = color,
+			BackgroundTransparency = 0.15,
+			AutoButtonColor = true,
+			Font = Theme.HeadingFont,
+			Text = text,
+			TextSize = 14,
+			TextColor3 = GameConfig.Palette.text,
+			LayoutOrder = order,
+			ZIndex = 37,
+			Parent = buttons,
+		}, { Theme.corner(6) })
+	end
+
+	self.closeButton = makeButton("Fermer", GameConfig.Palette.panelLight, 1)
+	self.actionButton = makeButton("", GameConfig.Palette.accent, 2)
+	self.nextButton = makeButton("Suivant ▸", GameConfig.Palette.accentSoft, 3)
+
+	self.closeButton.Activated:Connect(function()
+		self:close()
+	end)
+
+	self.nextButton.Activated:Connect(function()
+		self:advance()
+	end)
+
+	self.actionButton.Activated:Connect(function()
+		local npc = self.npc
+		self:close()
+		if npc then
+			local action = self.actions[npc.action]
+			if action then
+				action()
+			end
+		end
+	end)
+
+	Remotes.event("NpcDialogue").OnClientEvent:Connect(function(npcId)
+		if typeof(npcId) == "string" then
+			self:open(npcId)
+		end
+	end)
+
+	return self
+end
+
+--- Répliques du PNJ, complétées par l'objectif en cours pour le guide.
+local function buildLines(npc: any): { string }
+	local lines = table.clone(npc.lines)
+
+	if npc.action == "guide" then
+		local profile = State.profile
+		local step = Guide.next(profile)
+		if step then
+			local done, total = Guide.progress(profile)
+			table.insert(
+				lines,
+				("OBJECTIF (%d/%d) — %s\n%s"):format(done + 1, total, step.title, step.detail)
+			)
+		else
+			table.insert(lines, "Tu as suivi tout mon enseignement. La suite ne dépend plus que de toi : les failles de rang S n'attendent personne.")
+		end
+	end
+
+	return lines
+end
+
+function Dialogue:open(npcId: string)
+	local npc = NpcCatalog.get(npcId)
+	if not npc then
+		return
+	end
+
+	self.npc = npc
+	self.lines = buildLines(npc)
+	self.index = 1
+
+	self.nameLabel.Text = npc.name
+	self.nameLabel.TextColor3 = npc.glow
+	self.roleLabel.Text = npc.role
+	self.actionButton.Text = npc.actionLabel
+
+	local stroke = self.box:FindFirstChildOfClass("UIStroke")
+	if stroke then
+		stroke.Color = npc.glow
+	end
+
+	self:render()
+
+	self.root.Visible = true
+	self.root.Position = UDim2.new(0.5, 0, 1, 40)
+	TweenService:Create(self.root, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Position = UDim2.new(0.5, 0, 1, -18),
+	}):Play()
+end
+
+function Dialogue:render()
+	self.textLabel.Text = self.lines[self.index] or ""
+	local isLast = self.index >= #self.lines
+	self.nextButton.Visible = not isLast
+	self.actionButton.Visible = isLast
+end
+
+function Dialogue:advance()
+	if self.index < #self.lines then
+		self.index += 1
+		self:render()
+	end
+end
+
+function Dialogue:close()
+	self.root.Visible = false
+	self.npc = nil
+end
+
+function Dialogue:isOpen(): boolean
+	return self.root.Visible
+end
+
+return Dialogue
+]]></string>
+            </Properties>
+          </Item>
+          <Item class="ModuleScript" referent="40">
+            <Properties>
+              <string name="Name">DungeonList</string>
+              <string name="Source"><![CDATA[--!strict
+--[[
+	DungeonList
+	Registre des failles : accessible depuis le menu JOUER → DONJONS et depuis
+	l'archiviste du hall. Entrer ferme le menu et téléporte le joueur.
+]]
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local GameConfig = require(Shared.GameConfig)
+local Remotes = require(Shared.Remotes)
+local RiftCatalog = require(Shared.RiftCatalog)
+local Util = require(Shared.Util)
+
+local State = require(script.Parent.Parent.State)
+local Theme = require(script.Parent.Theme)
+
+local DungeonList = {}
+DungeonList.__index = DungeonList
+
+--- `onEnter` est appelé juste avant l'entrée, pour refermer le menu.
+function DungeonList.new(parent: ScreenGui, onEnter: (() -> ())?)
+	local self = setmetatable({}, DungeonList)
+
+	local root, content = Theme.window(parent, "DONJONS", UDim2.fromOffset(720, 560))
+	self.root = root
+
+	Theme.create("TextLabel", {
+		Size = UDim2.new(1, 0, 0, 24),
+		BackgroundTransparency = 1,
+		Font = Theme.BodyFont,
+		Text = "Trois vagues par faille. Tu peux abandonner à tout moment, mais sans récompense.",
+		TextSize = 13,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextColor3 = GameConfig.Palette.textDim,
+		ZIndex = 32,
+		Parent = content,
+	})
+
+	local scroll = Theme.create("ScrollingFrame", {
+		Position = UDim2.fromOffset(0, 32),
+		Size = UDim2.new(1, 0, 1, -32),
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		CanvasSize = UDim2.new(),
+		AutomaticCanvasSize = Enum.AutomaticSize.Y,
+		ScrollBarThickness = 6,
+		ScrollBarImageColor3 = GameConfig.Palette.accent,
+		ZIndex = 32,
+		Parent = content,
+	}, {
+		Theme.create("UIListLayout", { Padding = UDim.new(0, 12), SortOrder = Enum.SortOrder.LayoutOrder }),
+		Theme.create("UIPadding", { PaddingRight = UDim.new(0, 10) }),
+	})
+
+	self.rows = {}
+	for index, rift in ipairs(RiftCatalog.List) do
+		local card = Theme.panel({
+			Size = UDim2.new(1, 0, 0, 108),
+			BackgroundTransparency = 0.2,
+			LayoutOrder = index,
+			ZIndex = 33,
+			Parent = scroll,
+		})
+		Theme.padding(14).Parent = card
+
+		local stroke = card:FindFirstChildOfClass("UIStroke")
+		if stroke then
+			stroke.Color = rift.color
+		end
+
+		Theme.create("TextLabel", {
+			Size = UDim2.fromOffset(70, 44),
+			BackgroundColor3 = rift.color,
+			BackgroundTransparency = 0.75,
+			Font = Theme.TitleFont,
+			Text = rift.rank,
+			TextSize = 28,
+			TextColor3 = rift.color,
+			ZIndex = 34,
+			Parent = card,
+		}, { Theme.corner(8) })
+
+		Theme.create("TextLabel", {
+			Position = UDim2.fromOffset(84, 0),
+			Size = UDim2.new(0.6, 0, 0, 24),
+			BackgroundTransparency = 1,
+			Font = Theme.HeadingFont,
+			Text = rift.name,
+			TextSize = 18,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			TextColor3 = rift.color,
+			ZIndex = 34,
+			Parent = card,
+		})
+
+		Theme.create("TextLabel", {
+			Position = UDim2.fromOffset(84, 24),
+			Size = UDim2.new(0.6, 0, 0, 20),
+			BackgroundTransparency = 1,
+			Font = Theme.BodyFont,
+			Text = ("Niveau %d requis — %d vagues"):format(rift.minLevel, #rift.waves),
+			TextSize = 13,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			TextColor3 = GameConfig.Palette.textDim,
+			ZIndex = 34,
+			Parent = card,
+		})
+
+		Theme.create("TextLabel", {
+			Position = UDim2.fromOffset(0, 56),
+			Size = UDim2.new(0.62, 0, 0, 20),
+			BackgroundTransparency = 1,
+			Font = Theme.BodyFont,
+			Text = ("Récompenses : %s yens • %d fragments • %s XP")
+				:format(Util.formatNumber(rift.rewards.yens), rift.rewards.fragments, Util.formatNumber(rift.rewards.xp)),
+			TextSize = 13,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			TextColor3 = GameConfig.Currencies.yens.color,
+			ZIndex = 34,
+			Parent = card,
+		})
+
+		local enter = Theme.create("TextButton", {
+			AnchorPoint = Vector2.new(1, 1),
+			Position = UDim2.new(1, 0, 1, 0),
+			Size = UDim2.fromOffset(190, 38),
+			BackgroundColor3 = rift.color,
+			BackgroundTransparency = 0.2,
+			AutoButtonColor = true,
+			Font = Theme.HeadingFont,
+			Text = "Entrer",
+			TextSize = 15,
+			TextColor3 = Color3.fromRGB(10, 10, 16),
+			ZIndex = 34,
+			Parent = card,
+		}, { Theme.corner(6) })
+
+		enter.Activated:Connect(function()
+			local profile = State.profile
+			if profile and profile.level < rift.minLevel then
+				return
+			end
+			self.root.Visible = false
+			if onEnter then
+				onEnter()
+			end
+			task.wait(0.2)
+			Remotes.event("EnterRift"):FireServer(rift.id)
+		end)
+
+		self.rows[rift.id] = { rift = rift, enter = enter }
+	end
+
+	State.observe(function(profile)
+		for _, row in pairs(self.rows) do
+			local locked = profile.level < row.rift.minLevel
+			row.enter.Text = if locked then ("Niveau %d requis"):format(row.rift.minLevel) else "Entrer"
+			row.enter.BackgroundColor3 = if locked then GameConfig.Palette.panelLight else row.rift.color
+			row.enter.Active = not locked
+		end
+	end)
+
+	return self
+end
+
+function DungeonList:toggle()
+	self.root.Visible = not self.root.Visible
+end
+
+function DungeonList:setVisible(value: boolean)
+	self.root.Visible = value
+end
+
+return DungeonList
+]]></string>
+            </Properties>
+          </Item>
+          <Item class="ModuleScript" referent="41">
             <Properties>
               <string name="Name">HUD</string>
               <string name="Source"><![CDATA[--!strict
@@ -3795,6 +5066,7 @@ local TweenService = game:GetService("TweenService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local GameConfig = require(Shared.GameConfig)
+local Guide = require(Shared.Guide)
 local Remotes = require(Shared.Remotes)
 local SkillCatalog = require(Shared.SkillCatalog)
 local Util = require(Shared.Util)
@@ -4103,7 +5375,7 @@ function HUD.new(parent: ScreenGui)
 		Name = "Actions",
 		AnchorPoint = Vector2.new(1, 0.5),
 		Position = UDim2.new(1, -18, 0.5, 0),
-		Size = UDim2.new(0, 140, 0, 170),
+		Size = UDim2.new(0, 140, 0, 210),
 		BackgroundTransparency = 1,
 		Parent = root,
 	}, {
@@ -4119,6 +5391,7 @@ function HUD.new(parent: ScreenGui)
 	local sideDefinitions = {
 		{ id = "stats", text = "STATISTIQUES (C)" },
 		{ id = "quests", text = "QUÊTES (Q)" },
+		{ id = "dungeons", text = "DONJONS (J)" },
 		{ id = "shop", text = "BOUTIQUE (B)" },
 		{ id = "menu", text = "MENU (M)" },
 	}
@@ -4155,6 +5428,114 @@ function HUD.new(parent: ScreenGui)
 		Parent = self.buttons.stats,
 	})
 
+	------------------------------------------------------------------
+	-- Objectif en cours (haut gauche) et zone actuelle
+	------------------------------------------------------------------
+	local objective = Theme.panel({
+		Name = "Objectif",
+		Position = UDim2.new(0, 18, 0, 18),
+		Size = UDim2.new(0, 330, 0, 74),
+		BackgroundTransparency = 0.15,
+		Parent = root,
+	})
+	Theme.padding(12).Parent = objective
+	self.objectivePanel = objective
+
+	self.objectiveTitle = Theme.create("TextLabel", {
+		Size = UDim2.new(1, 0, 0, 20),
+		BackgroundTransparency = 1,
+		Font = Theme.HeadingFont,
+		Text = "",
+		TextSize = 14,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextColor3 = GameConfig.Palette.success,
+		Parent = objective,
+	})
+
+	self.objectiveDetail = Theme.create("TextLabel", {
+		Position = UDim2.fromOffset(0, 22),
+		Size = UDim2.new(1, 0, 0, 30),
+		BackgroundTransparency = 1,
+		Font = Theme.BodyFont,
+		Text = "",
+		TextSize = 12,
+		TextWrapped = true,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextYAlignment = Enum.TextYAlignment.Top,
+		TextColor3 = GameConfig.Palette.textDim,
+		Parent = objective,
+	})
+
+	self.zoneBadge = Theme.create("TextLabel", {
+		Name = "Zone",
+		Position = UDim2.new(0, 18, 0, 98),
+		Size = UDim2.fromOffset(180, 26),
+		BackgroundColor3 = GameConfig.Palette.success,
+		BackgroundTransparency = 0.25,
+		Font = Theme.HeadingFont,
+		Text = "ZONE SÛRE",
+		TextSize = 13,
+		TextColor3 = Color3.fromRGB(10, 18, 12),
+		Parent = root,
+	}, { Theme.corner(6) })
+
+	------------------------------------------------------------------
+	-- Panneau du hub AFK
+	------------------------------------------------------------------
+	local afkPanel = Theme.panel({
+		Name = "HubAFK",
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.new(0.5, 0, 0, 18),
+		Size = UDim2.new(0, 340, 0, 96),
+		BackgroundTransparency = 0.1,
+		Visible = false,
+		Parent = root,
+	})
+	Theme.padding(12).Parent = afkPanel
+	self.afkPanel = afkPanel
+
+	Theme.create("TextLabel", {
+		Size = UDim2.new(1, 0, 0, 22),
+		BackgroundTransparency = 1,
+		Font = Theme.TitleFont,
+		Text = "HUB AFK",
+		TextSize = 17,
+		TextColor3 = GameConfig.Palette.accent,
+		Parent = afkPanel,
+	})
+
+	Theme.create("TextLabel", {
+		Position = UDim2.fromOffset(0, 24),
+		Size = UDim2.new(1, 0, 0, 30),
+		BackgroundTransparency = 1,
+		Font = Theme.BodyFont,
+		Text = ("Gains passifs toutes les %d secondes.\nAucun esprit ne peut t'atteindre ici."):format(
+			GameConfig.AfkRewardInterval
+		),
+		TextSize = 13,
+		TextWrapped = true,
+		TextColor3 = GameConfig.Palette.textDim,
+		Parent = afkPanel,
+	})
+
+	local returnButton = Theme.create("TextButton", {
+		AnchorPoint = Vector2.new(0.5, 1),
+		Position = UDim2.new(0.5, 0, 1, 0),
+		Size = UDim2.new(0, 190, 0, 26),
+		BackgroundColor3 = GameConfig.Palette.accentSoft,
+		BackgroundTransparency = 0.2,
+		AutoButtonColor = true,
+		Font = Theme.HeadingFont,
+		Text = "Retour au hall",
+		TextSize = 13,
+		TextColor3 = Color3.fromRGB(10, 16, 22),
+		Parent = afkPanel,
+	}, { Theme.corner(6) })
+
+	returnButton.Activated:Connect(function()
+		Remotes.event("Teleport"):FireServer("hall")
+	end)
+
 	self:_bind()
 	return self
 end
@@ -4176,6 +5557,16 @@ function HUD:_bind()
 		self.fragmentsLabel.Text = ("%s fragments"):format(Util.formatNumber(profile.currencies.fragments))
 
 		self.statAlert.Text = if profile.statPoints > 0 then ("+%d"):format(profile.statPoints) else ""
+
+		local step = Guide.next(profile)
+		if step then
+			local done, total = Guide.progress(profile)
+			self.objectiveTitle.Text = ("OBJECTIF %d/%d — %s"):format(done + 1, total, step.title)
+			self.objectiveDetail.Text = step.detail
+		else
+			self.objectiveTitle.Text = "TOUS LES OBJECTIFS TERMINÉS"
+			self.objectiveDetail.Text = "Les failles de rang S t'attendent. Parle à Maître Renzo si tu veux relire ses conseils."
+		end
 
 		for _, slot in ipairs(self.skillSlots) do
 			local locked = profile.level < slot.skill.unlockLevel
@@ -4221,6 +5612,25 @@ function HUD:_bind()
 	player:GetAttributeChangedSignal("Energie"):Connect(updateEnergy)
 	player:GetAttributeChangedSignal("EnergieMax"):Connect(updateEnergy)
 	updateEnergy()
+
+	-- Zone courante : hall (sûre), terrain de chasse, faille ou hub AFK.
+	local ZONE_LABELS = {
+		hall = { text = "ZONE SÛRE — HALL", color = GameConfig.Palette.success },
+		afk = { text = "HUB AFK — SÛR", color = GameConfig.Palette.accent },
+		chasse = { text = "TERRAIN DE CHASSE", color = GameConfig.Palette.danger },
+		faille = { text = "FAILLE", color = GameConfig.Palette.danger },
+	}
+
+	local function updateZone(zone: string?)
+		local info = ZONE_LABELS[zone or "hall"] or ZONE_LABELS.hall
+		self.zoneBadge.Text = info.text
+		self.zoneBadge.BackgroundColor3 = info.color
+		self.afkPanel.Visible = zone == "afk"
+		self.objectivePanel.Visible = zone ~= "faille"
+	end
+
+	Remotes.event("ZoneChanged").OnClientEvent:Connect(updateZone)
+	updateZone(player:GetAttribute("Zone"))
 
 	-- Faille en cours.
 	Remotes.event("RiftStateChanged").OnClientEvent:Connect(function(state)
@@ -4271,14 +5681,15 @@ return HUD
 ]]></string>
             </Properties>
           </Item>
-          <Item class="ModuleScript" referent="36">
+          <Item class="ModuleScript" referent="42">
             <Properties>
               <string name="Name">MainMenu</string>
               <string name="Source"><![CDATA[--!strict
 --[[
 	MainMenu
-	Reprend la maquette : un grand cadre, le nom du jeu en haut, puis les
-	boutons JOUER / BOUTIQUE / CRÉDIT empilés au centre.
+	Deux pages, dans le même grand cadre :
+	  1. le nom du jeu, puis JOUER / BOUTIQUE / CRÉDIT
+	  2. « JOUER », puis IN THE GAME / DONJONS / HUB AFK
 	Le fond est une vue caméra qui tourne lentement autour du hall.
 ]]
 
@@ -4297,15 +5708,61 @@ local ORBIT_CENTER = Vector3.new(0, 14, 0)
 local ORBIT_RADIUS = 105
 local ORBIT_SPEED = 0.06
 
+local PAGES = {
+	main = {
+		title = GameConfig.GameName,
+		subtitle = "Deviens le sorcier le plus fort — une faille à la fois.",
+		buttons = {
+			{ text = "JOUER", handler = "onPlayPage" },
+			{ text = "BOUTIQUE", handler = "onShop" },
+			{ text = "CRÉDIT", handler = "onCredits" },
+		},
+	},
+	play = {
+		title = "JOUER",
+		subtitle = "Où veux-tu aller ?",
+		buttons = {
+			{ text = "IN THE GAME", handler = "onInGame", hint = "Le hall des sorciers, zone sûre" },
+			{ text = "DONJONS", handler = "onDungeons", hint = "Choisir une faille à nettoyer" },
+			{ text = "HUB AFK", handler = "onAfk", hint = "Gains passifs, sans danger" },
+		},
+	},
+}
+
 local MainMenu = {}
 MainMenu.__index = MainMenu
 
 local player = Players.LocalPlayer
 
+local function styleHover(button: TextButton)
+	local stroke = button:FindFirstChildOfClass("UIStroke")
+
+	button.MouseEnter:Connect(function()
+		TweenService:Create(button, TweenInfo.new(0.15), {
+			BackgroundColor3 = GameConfig.Palette.accent,
+			BackgroundTransparency = 0.35,
+		}):Play()
+		if stroke then
+			TweenService:Create(stroke, TweenInfo.new(0.15), { Color = GameConfig.Palette.accent }):Play()
+		end
+	end)
+
+	button.MouseLeave:Connect(function()
+		TweenService:Create(button, TweenInfo.new(0.15), {
+			BackgroundColor3 = GameConfig.Palette.panel,
+			BackgroundTransparency = 0.15,
+		}):Play()
+		if stroke then
+			TweenService:Create(stroke, TweenInfo.new(0.15), { Color = GameConfig.Palette.text }):Play()
+		end
+	end)
+end
+
 function MainMenu.new(parent: ScreenGui, handlers: { [string]: () -> () })
 	local self = setmetatable({}, MainMenu)
 
 	self.visible = false
+	self.page = "main"
 	self._orbitConnection = nil :: any
 
 	local root = Theme.create("Frame", {
@@ -4349,7 +5806,7 @@ function MainMenu.new(parent: ScreenGui, handlers: { [string]: () -> () })
 		Theme.create("UIAspectRatioConstraint", { AspectRatio = 1.55, DominantAxis = Enum.DominantAxis.Width }),
 	})
 
-	local title = Theme.create("TextLabel", {
+	self.title = Theme.create("TextLabel", {
 		Name = "Titre",
 		AnchorPoint = Vector2.new(0.5, 0),
 		Position = UDim2.fromScale(0.5, 0.06),
@@ -4368,84 +5825,114 @@ function MainMenu.new(parent: ScreenGui, handlers: { [string]: () -> () })
 			Rotation = 90,
 		}),
 	})
-	self.title = title
 
-	local subtitle = Theme.create("TextLabel", {
+	self.subtitle = Theme.create("TextLabel", {
 		Name = "SousTitre",
 		AnchorPoint = Vector2.new(0.5, 0),
 		Position = UDim2.fromScale(0.5, 0.225),
 		Size = UDim2.fromScale(0.8, 0.05),
 		BackgroundTransparency = 1,
 		Font = Theme.BodyFont,
-		Text = "Deviens le sorcier le plus fort — une faille à la fois.",
+		Text = PAGES.main.subtitle,
 		TextScaled = true,
 		TextColor3 = GameConfig.Palette.textDim,
 		ZIndex = 22,
 		Parent = board,
 	})
-	self.subtitle = subtitle
 
-	-- Colonne de boutons, comme sur la maquette.
-	local buttons = Theme.create("Frame", {
-		Name = "Boutons",
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.58),
-		Size = UDim2.fromScale(0.44, 0.42),
-		BackgroundTransparency = 1,
-		ZIndex = 22,
-		Parent = board,
-	}, {
-		Theme.create("UIListLayout", {
-			FillDirection = Enum.FillDirection.Vertical,
-			HorizontalAlignment = Enum.HorizontalAlignment.Center,
-			VerticalAlignment = Enum.VerticalAlignment.Center,
-			Padding = UDim.new(0, 18),
-			SortOrder = Enum.SortOrder.LayoutOrder,
-		}),
-	})
+	-- Une colonne de boutons par page, superposées et affichées tour à tour.
+	self.pages = {}
+	for pageName, page in pairs(PAGES) do
+		local column = Theme.create("Frame", {
+			Name = "Page_" .. pageName,
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.fromScale(0.5, 0.58),
+			Size = UDim2.fromScale(0.46, 0.44),
+			BackgroundTransparency = 1,
+			Visible = pageName == "main",
+			ZIndex = 22,
+			Parent = board,
+		}, {
+			Theme.create("UIListLayout", {
+				FillDirection = Enum.FillDirection.Vertical,
+				HorizontalAlignment = Enum.HorizontalAlignment.Center,
+				VerticalAlignment = Enum.VerticalAlignment.Center,
+				Padding = UDim.new(0, 16),
+				SortOrder = Enum.SortOrder.LayoutOrder,
+			}),
+		})
 
-	local definitions = {
-		{ text = "JOUER", handler = "onPlay" },
-		{ text = "BOUTIQUE", handler = "onShop" },
-		{ text = "CRÉDIT", handler = "onCredits" },
-	}
+		for index, definition in ipairs(page.buttons) do
+			local button = Theme.menuButton(definition.text, index)
+			button.ZIndex = 23
+			button.Parent = column
+			styleHover(button)
 
-	for index, definition in ipairs(definitions) do
-		local button = Theme.menuButton(definition.text, index)
-		button.ZIndex = 23
-		button.Parent = buttons
-
-		local stroke = button:FindFirstChildOfClass("UIStroke")
-
-		button.MouseEnter:Connect(function()
-			TweenService:Create(button, TweenInfo.new(0.15), {
-				BackgroundColor3 = GameConfig.Palette.accent,
-				BackgroundTransparency = 0.35,
-			}):Play()
-			if stroke then
-				TweenService:Create(stroke, TweenInfo.new(0.15), { Color = GameConfig.Palette.accent }):Play()
+			-- Une ligne d'explication sous le libellé, quand il y en a une.
+			if definition.hint then
+				button.Text = ""
+				Theme.create("TextLabel", {
+					Position = UDim2.fromScale(0, 0.12),
+					Size = UDim2.fromScale(1, 0.48),
+					BackgroundTransparency = 1,
+					Font = Theme.HeadingFont,
+					Text = definition.text,
+					TextScaled = true,
+					TextColor3 = GameConfig.Palette.text,
+					ZIndex = 24,
+					Parent = button,
+				})
+				Theme.create("TextLabel", {
+					Position = UDim2.fromScale(0, 0.6),
+					Size = UDim2.fromScale(1, 0.3),
+					BackgroundTransparency = 1,
+					Font = Theme.BodyFont,
+					Text = definition.hint,
+					TextScaled = true,
+					TextColor3 = GameConfig.Palette.textDim,
+					ZIndex = 24,
+					Parent = button,
+				})
 			end
-		end)
 
-		button.MouseLeave:Connect(function()
-			TweenService:Create(button, TweenInfo.new(0.15), {
-				BackgroundColor3 = GameConfig.Palette.panel,
-				BackgroundTransparency = 0.15,
-			}):Play()
-			if stroke then
-				TweenService:Create(stroke, TweenInfo.new(0.15), { Color = GameConfig.Palette.text }):Play()
-			end
-		end)
+			button.Activated:Connect(function()
+				if definition.handler == "onPlayPage" then
+					self:setPage("play")
+					return
+				end
+				local handler = handlers[definition.handler]
+				if handler then
+					handler()
+				end
+			end)
+		end
 
-		button.Activated:Connect(function()
-			local handler = handlers[definition.handler]
-			if handler then
-				handler()
-			end
-		end)
+		self.pages[pageName] = column
 	end
 
-	local version = Theme.create("TextLabel", {
+	-- Retour vers la première page.
+	self.backButton = Theme.create("TextButton", {
+		Name = "Retour",
+		AnchorPoint = Vector2.new(0, 1),
+		Position = UDim2.fromScale(0.06, 0.94),
+		Size = UDim2.fromScale(0.18, 0.07),
+		BackgroundColor3 = GameConfig.Palette.panel,
+		BackgroundTransparency = 0.2,
+		AutoButtonColor = true,
+		Font = Theme.HeadingFont,
+		Text = "← RETOUR",
+		TextScaled = true,
+		TextColor3 = GameConfig.Palette.textDim,
+		Visible = false,
+		ZIndex = 23,
+		Parent = board,
+	}, { Theme.corner(6), Theme.stroke(GameConfig.Palette.stroke, 2, 0.4) })
+
+	self.backButton.Activated:Connect(function()
+		self:setPage("main")
+	end)
+
+	Theme.create("TextLabel", {
 		Name = "Version",
 		AnchorPoint = Vector2.new(0.5, 1),
 		Position = UDim2.fromScale(0.5, 0.97),
@@ -4459,11 +5946,26 @@ function MainMenu.new(parent: ScreenGui, handlers: { [string]: () -> () })
 		ZIndex = 22,
 		Parent = board,
 	})
-	self.version = version
 
 	self.blur = Theme.create("BlurEffect", { Name = "MenuBlur", Size = 0, Parent = Lighting })
 
 	return self
+end
+
+function MainMenu:setPage(pageName: string)
+	local page = PAGES[pageName]
+	if not page then
+		return
+	end
+
+	self.page = pageName
+	self.title.Text = page.title
+	self.subtitle.Text = page.subtitle
+	self.backButton.Visible = pageName ~= "main"
+
+	for name, column in pairs(self.pages) do
+		column.Visible = name == pageName
+	end
 end
 
 local function startOrbit(self)
@@ -4496,7 +5998,9 @@ local function stopOrbit(self)
 	end
 end
 
-function MainMenu:show()
+function MainMenu:show(pageName: string?)
+	self:setPage(pageName or "main")
+
 	if self.visible then
 		return
 	end
@@ -4526,7 +6030,7 @@ return MainMenu
 ]]></string>
             </Properties>
           </Item>
-          <Item class="ModuleScript" referent="37">
+          <Item class="ModuleScript" referent="43">
             <Properties>
               <string name="Name">Notifications</string>
               <string name="Source"><![CDATA[--!strict
@@ -4673,7 +6177,7 @@ return Notifications
 ]]></string>
             </Properties>
           </Item>
-          <Item class="ModuleScript" referent="38">
+          <Item class="ModuleScript" referent="44">
             <Properties>
               <string name="Name">QuestPanel</string>
               <string name="Source"><![CDATA[--!strict
@@ -4864,7 +6368,7 @@ return QuestPanel
 ]]></string>
             </Properties>
           </Item>
-          <Item class="ModuleScript" referent="39">
+          <Item class="ModuleScript" referent="45">
             <Properties>
               <string name="Name">Shop</string>
               <string name="Source"><![CDATA[--!strict
@@ -5095,7 +6599,7 @@ return Shop
 ]]></string>
             </Properties>
           </Item>
-          <Item class="ModuleScript" referent="40">
+          <Item class="ModuleScript" referent="46">
             <Properties>
               <string name="Name">StatsPanel</string>
               <string name="Source"><![CDATA[--!strict
@@ -5248,10 +6752,11 @@ function StatsPanel.new(parent: ScreenGui)
 		end
 
 		local rank = GameConfig.rankForLevel(profile.level)
-		self.summary.Text = ("Rang : %s   •   Dégâts : %d   •   Énergie max : %d   •   Vitesse : %.1f\nRéduction de recharge : %d%%   •   Éliminations : %s   •   Failles nettoyées : %d (meilleur rang %s)")
+		self.summary.Text = ("Rang : %s   •   Dégâts physiques : %d   •   Dégâts de technique : %d   •   Énergie max : %d   •   Vitesse : %.1f\nRéduction de recharge : %d%%   •   Éliminations : %s   •   Failles nettoyées : %d (meilleur rang %s)")
 			:format(
 				rank.name,
 				player:GetAttribute("Degats") or 0,
+				player:GetAttribute("DegatsMagie") or 0,
 				player:GetAttribute("EnergieMax") or 0,
 				player:GetAttribute("Vitesse") or GameConfig.BaseWalkSpeed,
 				math.floor((player:GetAttribute("ReductionCooldown") or 0) * 100),
@@ -5262,7 +6767,7 @@ function StatsPanel.new(parent: ScreenGui)
 	end
 
 	State.observe(refresh)
-	for _, attribute in ipairs({ "Degats", "EnergieMax", "Vitesse", "ReductionCooldown" }) do
+	for _, attribute in ipairs({ "Degats", "DegatsMagie", "EnergieMax", "Vitesse", "ReductionCooldown" }) do
 		player:GetAttributeChangedSignal(attribute):Connect(refresh)
 	end
 
@@ -5281,7 +6786,7 @@ return StatsPanel
 ]]></string>
             </Properties>
           </Item>
-          <Item class="ModuleScript" referent="41">
+          <Item class="ModuleScript" referent="47">
             <Properties>
               <string name="Name">Theme</string>
               <string name="Source"><![CDATA[--!strict
@@ -5802,7 +7307,7 @@ return Theme
       </Item>
     </Item>
   </Item>
-  <Item class="Workspace" referent="42">
+  <Item class="Workspace" referent="48">
     <Properties>
       <string name="Name">Workspace</string>
       <bool name="FilteringEnabled">true</bool>

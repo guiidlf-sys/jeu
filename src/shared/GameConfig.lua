@@ -40,21 +40,24 @@ function GameConfig.rankForLevel(level: number)
 end
 
 -- Statistiques ----------------------------------------------------------
--- Les 4 stats investissables. `apply` décrit l'effet d'un point.
+-- Les 4 stats investissables.
+-- La Force porte les coups physiques, la Magie porte les techniques.
 GameConfig.Stats = {
-	{ id = "force", name = "Force", description = "+2 dégâts par point" },
-	{ id = "agilite", name = "Agilité", description = "+0.4 vitesse, -0.5% cooldown" },
-	{ id = "vitalite", name = "Vitalité", description = "+8 points de vie" },
-	{ id = "energie", name = "Énergie", description = "+6 énergie maudite" },
+	{ id = "magie", name = "Magie", description = "+3 dégâts de technique, +6 énergie" },
+	{ id = "force", name = "Force", description = "+2 dégâts d'attaque physique" },
+	{ id = "vie", name = "Vie", description = "+8 points de vie" },
+	{ id = "agilite", name = "Agilité", description = "+0.4 vitesse, -0.5 % de recharge" },
 }
 
 GameConfig.BaseHealth = 100
 GameConfig.BaseEnergy = 100
 GameConfig.BaseDamage = 10
+GameConfig.BaseMagicDamage = 12
 GameConfig.BaseWalkSpeed = 16
 
-GameConfig.HealthPerVitality = 8
-GameConfig.EnergyPerEnergyStat = 6
+GameConfig.HealthPerVie = 8
+GameConfig.EnergyPerMagie = 6
+GameConfig.MagicDamagePerMagie = 3
 GameConfig.DamagePerStrength = 2
 GameConfig.SpeedPerAgility = 0.4
 GameConfig.CooldownReductionPerAgility = 0.005 -- 0.5 %, plafonné plus bas
@@ -69,6 +72,11 @@ GameConfig.Currencies = {
 	yens = { name = "Yens", color = Color3.fromRGB(255, 205, 90) },
 	fragments = { name = "Fragments", color = Color3.fromRGB(190, 110, 255) },
 }
+
+-- Zone sûre & hub AFK ---------------------------------------------------
+GameConfig.SafeZoneRadius = 105 -- rayon du hall, aucun esprit n'y entre
+GameConfig.AfkRewardInterval = 15
+GameConfig.AfkCenter = Vector3.new(0, 3000, 0)
 
 -- Combat ----------------------------------------------------------------
 GameConfig.RespawnTime = 5

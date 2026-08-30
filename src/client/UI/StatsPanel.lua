@@ -148,10 +148,11 @@ function StatsPanel.new(parent: ScreenGui)
 		end
 
 		local rank = GameConfig.rankForLevel(profile.level)
-		self.summary.Text = ("Rang : %s   •   Dégâts : %d   •   Énergie max : %d   •   Vitesse : %.1f\nRéduction de recharge : %d%%   •   Éliminations : %s   •   Failles nettoyées : %d (meilleur rang %s)")
+		self.summary.Text = ("Rang : %s   •   Dégâts physiques : %d   •   Dégâts de technique : %d   •   Énergie max : %d   •   Vitesse : %.1f\nRéduction de recharge : %d%%   •   Éliminations : %s   •   Failles nettoyées : %d (meilleur rang %s)")
 			:format(
 				rank.name,
 				player:GetAttribute("Degats") or 0,
+				player:GetAttribute("DegatsMagie") or 0,
 				player:GetAttribute("EnergieMax") or 0,
 				player:GetAttribute("Vitesse") or GameConfig.BaseWalkSpeed,
 				math.floor((player:GetAttribute("ReductionCooldown") or 0) * 100),
@@ -162,7 +163,7 @@ function StatsPanel.new(parent: ScreenGui)
 	end
 
 	State.observe(refresh)
-	for _, attribute in ipairs({ "Degats", "EnergieMax", "Vitesse", "ReductionCooldown" }) do
+	for _, attribute in ipairs({ "Degats", "DegatsMagie", "EnergieMax", "Vitesse", "ReductionCooldown" }) do
 		player:GetAttributeChangedSignal(attribute):Connect(refresh)
 	end
 

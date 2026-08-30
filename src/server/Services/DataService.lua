@@ -42,12 +42,13 @@ local TEMPLATE = {
 	level = 1,
 	xp = 0,
 	statPoints = 0,
-	stats = { force = 0, agilite = 0, vitalite = 0, energie = 0 },
+	stats = { magie = 0, force = 0, vie = 0, agilite = 0 },
 	currencies = { yens = 0, fragments = 0 },
 	owned = {},
 	equipped = { arme = "", aura = "" },
 	quests = { day = 0, progress = { kills = 0, damage = 0, riftsCleared = 0 }, claimed = {} },
 	totals = { kills = 0, riftsCleared = 0, deaths = 0 },
+	flags = {},
 	bestRiftRank = "-",
 	playtime = 0,
 }
@@ -56,6 +57,21 @@ DataService.Template = TEMPLATE
 
 local profiles: { [Player]: any } = {}
 local loading: { [Player]: boolean } = {}
+
+--- Adapte les vieux profils au format courant.
+local function migrate(data: any)
+	if typeof(data.stats) ~= "table" then
+		return
+	end
+	-- « Vitalité » et « Énergie » sont devenues « Vie » et « Magie ».
+	local renames = { vitalite = "vie", energie = "magie" }
+	for old, new in pairs(renames) do
+		if data.stats[old] ~= nil then
+			data.stats[new] = (data.stats[new] or 0) + data.stats[old]
+			data.stats[old] = nil
+		end
+	end
+end
 
 local function key(player: Player): string
 	return ("player_%d"):format(player.UserId)
@@ -147,6 +163,7 @@ local function load(player: Player)
 	if typeof(data) ~= "table" then
 		data = Util.deepCopy(TEMPLATE)
 	else
+		migrate(data)
 		Util.reconcile(data, TEMPLATE)
 	end
 

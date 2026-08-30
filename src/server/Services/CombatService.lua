@@ -174,11 +174,15 @@ local function useSkill(player: Player, skillId: string)
 		return
 	end
 
+	-- Les techniques (celles qui coûtent de l'énergie) tapent avec la Magie,
+	-- l'attaque de base avec la Force.
+	local power = if skill.cost > 0 then derived.magicDamage else derived.damage
+
 	local totalDealt = 0
 	for _, target in ipairs(targets) do
 		local isCrit = random:NextNumber() < CRIT_CHANCE
 		local variance = random:NextNumber(0.95, 1.08)
-		local amount = derived.damage * skill.damageMultiplier * variance
+		local amount = power * skill.damageMultiplier * variance
 		if isCrit then
 			amount *= CRIT_MULTIPLIER
 		end

@@ -1,58 +1,27 @@
 --!strict
 --[[
 	TrainingService
-	Zone d'entraînement du hall : des esprits de bas rang y réapparaissent en
-	continu pour que le joueur ait toujours de quoi farmer sans faille.
+	Terrain d'entraînement, au nord du hall et hors de la zone sûre : des
+	esprits de bas rang y réapparaissent en continu pour que le joueur ait
+	toujours de quoi progresser sans entrer en faille.
 ]]
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
-local Shared = ReplicatedStorage:WaitForChild("Shared")
-local GameConfig = require(Shared.GameConfig)
-
 local MobService = require(script.Parent.MobService)
+local WorldBuilder = require(script.Parent.WorldBuilder)
 
-local ZONE_CENTER = Vector3.new(0, 3, 80)
-local ZONE_RADIUS = 34
-local MAX_MOBS = 8
-local RESPAWN_INTERVAL = 4
+local FIELD_CENTER = Vector3.new(0, 0, 230)
+local FIELD_SIZE = 150
+local ZONE_CENTER = FIELD_CENTER + Vector3.new(0, 3, 0)
+local ZONE_RADIUS = 58
+local MAX_MOBS = 10
+local RESPAWN_INTERVAL = 3.5
 
 local TrainingService = {}
 
 local zoneFolder: Folder
 
 local function buildZone()
-	zoneFolder = Instance.new("Folder")
-	zoneFolder.Name = "Entrainement"
-	zoneFolder.Parent = workspace
-
-	local pad = Instance.new("Part")
-	pad.Name = "Terrain"
-	pad.Anchored = true
-	pad.CanCollide = false
-	pad.Size = Vector3.new(ZONE_RADIUS * 2, 0.4, ZONE_RADIUS * 2)
-	pad.Position = ZONE_CENTER - Vector3.new(0, 0.8, 0)
-	pad.Material = Enum.Material.Neon
-	pad.Color = GameConfig.Palette.accentSoft
-	pad.Transparency = 0.85
-	pad.Parent = zoneFolder
-
-	local gui = Instance.new("BillboardGui")
-	gui.Size = UDim2.fromScale(16, 3)
-	gui.StudsOffsetWorldSpace = Vector3.new(0, 12, 0)
-	gui.MaxDistance = 200
-	gui.Adornee = pad
-	gui.Parent = pad
-
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.fromScale(1, 1)
-	label.BackgroundTransparency = 1
-	label.Font = Enum.Font.GothamBold
-	label.TextScaled = true
-	label.TextColor3 = GameConfig.Palette.accentSoft
-	label.TextStrokeTransparency = 0.35
-	label.Text = "ZONE D'ENTRAÎNEMENT"
-	label.Parent = gui
+	zoneFolder = WorldBuilder.buildTrainingField(FIELD_CENTER, FIELD_SIZE)
 end
 
 local function randomPosition(): Vector3

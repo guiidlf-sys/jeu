@@ -12,6 +12,7 @@ local TweenService = game:GetService("TweenService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local GameConfig = require(Shared.GameConfig)
+local Guide = require(Shared.Guide)
 local Remotes = require(Shared.Remotes)
 local SkillCatalog = require(Shared.SkillCatalog)
 local Util = require(Shared.Util)
@@ -320,7 +321,7 @@ function HUD.new(parent: ScreenGui)
 		Name = "Actions",
 		AnchorPoint = Vector2.new(1, 0.5),
 		Position = UDim2.new(1, -18, 0.5, 0),
-		Size = UDim2.new(0, 140, 0, 170),
+		Size = UDim2.new(0, 140, 0, 210),
 		BackgroundTransparency = 1,
 		Parent = root,
 	}, {
@@ -336,6 +337,7 @@ function HUD.new(parent: ScreenGui)
 	local sideDefinitions = {
 		{ id = "stats", text = "STATISTIQUES (C)" },
 		{ id = "quests", text = "QUÊTES (Q)" },
+		{ id = "dungeons", text = "DONJONS (J)" },
 		{ id = "shop", text = "BOUTIQUE (B)" },
 		{ id = "menu", text = "MENU (M)" },
 	}
@@ -372,6 +374,114 @@ function HUD.new(parent: ScreenGui)
 		Parent = self.buttons.stats,
 	})
 
+	------------------------------------------------------------------
+	-- Objectif en cours (haut gauche) et zone actuelle
+	------------------------------------------------------------------
+	local objective = Theme.panel({
+		Name = "Objectif",
+		Position = UDim2.new(0, 18, 0, 18),
+		Size = UDim2.new(0, 330, 0, 74),
+		BackgroundTransparency = 0.15,
+		Parent = root,
+	})
+	Theme.padding(12).Parent = objective
+	self.objectivePanel = objective
+
+	self.objectiveTitle = Theme.create("TextLabel", {
+		Size = UDim2.new(1, 0, 0, 20),
+		BackgroundTransparency = 1,
+		Font = Theme.HeadingFont,
+		Text = "",
+		TextSize = 14,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextColor3 = GameConfig.Palette.success,
+		Parent = objective,
+	})
+
+	self.objectiveDetail = Theme.create("TextLabel", {
+		Position = UDim2.fromOffset(0, 22),
+		Size = UDim2.new(1, 0, 0, 30),
+		BackgroundTransparency = 1,
+		Font = Theme.BodyFont,
+		Text = "",
+		TextSize = 12,
+		TextWrapped = true,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextYAlignment = Enum.TextYAlignment.Top,
+		TextColor3 = GameConfig.Palette.textDim,
+		Parent = objective,
+	})
+
+	self.zoneBadge = Theme.create("TextLabel", {
+		Name = "Zone",
+		Position = UDim2.new(0, 18, 0, 98),
+		Size = UDim2.fromOffset(180, 26),
+		BackgroundColor3 = GameConfig.Palette.success,
+		BackgroundTransparency = 0.25,
+		Font = Theme.HeadingFont,
+		Text = "ZONE SÛRE",
+		TextSize = 13,
+		TextColor3 = Color3.fromRGB(10, 18, 12),
+		Parent = root,
+	}, { Theme.corner(6) })
+
+	------------------------------------------------------------------
+	-- Panneau du hub AFK
+	------------------------------------------------------------------
+	local afkPanel = Theme.panel({
+		Name = "HubAFK",
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.new(0.5, 0, 0, 18),
+		Size = UDim2.new(0, 340, 0, 96),
+		BackgroundTransparency = 0.1,
+		Visible = false,
+		Parent = root,
+	})
+	Theme.padding(12).Parent = afkPanel
+	self.afkPanel = afkPanel
+
+	Theme.create("TextLabel", {
+		Size = UDim2.new(1, 0, 0, 22),
+		BackgroundTransparency = 1,
+		Font = Theme.TitleFont,
+		Text = "HUB AFK",
+		TextSize = 17,
+		TextColor3 = GameConfig.Palette.accent,
+		Parent = afkPanel,
+	})
+
+	Theme.create("TextLabel", {
+		Position = UDim2.fromOffset(0, 24),
+		Size = UDim2.new(1, 0, 0, 30),
+		BackgroundTransparency = 1,
+		Font = Theme.BodyFont,
+		Text = ("Gains passifs toutes les %d secondes.\nAucun esprit ne peut t'atteindre ici."):format(
+			GameConfig.AfkRewardInterval
+		),
+		TextSize = 13,
+		TextWrapped = true,
+		TextColor3 = GameConfig.Palette.textDim,
+		Parent = afkPanel,
+	})
+
+	local returnButton = Theme.create("TextButton", {
+		AnchorPoint = Vector2.new(0.5, 1),
+		Position = UDim2.new(0.5, 0, 1, 0),
+		Size = UDim2.new(0, 190, 0, 26),
+		BackgroundColor3 = GameConfig.Palette.accentSoft,
+		BackgroundTransparency = 0.2,
+		AutoButtonColor = true,
+		Font = Theme.HeadingFont,
+		Text = "Retour au hall",
+		TextSize = 13,
+		TextColor3 = Color3.fromRGB(10, 16, 22),
+		Parent = afkPanel,
+	}, { Theme.corner(6) })
+
+	returnButton.Activated:Connect(function()
+		Remotes.event("Teleport"):FireServer("hall")
+	end)
+
 	self:_bind()
 	return self
 end
@@ -393,6 +503,16 @@ function HUD:_bind()
 		self.fragmentsLabel.Text = ("%s fragments"):format(Util.formatNumber(profile.currencies.fragments))
 
 		self.statAlert.Text = if profile.statPoints > 0 then ("+%d"):format(profile.statPoints) else ""
+
+		local step = Guide.next(profile)
+		if step then
+			local done, total = Guide.progress(profile)
+			self.objectiveTitle.Text = ("OBJECTIF %d/%d — %s"):format(done + 1, total, step.title)
+			self.objectiveDetail.Text = step.detail
+		else
+			self.objectiveTitle.Text = "TOUS LES OBJECTIFS TERMINÉS"
+			self.objectiveDetail.Text = "Les failles de rang S t'attendent. Parle à Maître Renzo si tu veux relire ses conseils."
+		end
 
 		for _, slot in ipairs(self.skillSlots) do
 			local locked = profile.level < slot.skill.unlockLevel
@@ -438,6 +558,25 @@ function HUD:_bind()
 	player:GetAttributeChangedSignal("Energie"):Connect(updateEnergy)
 	player:GetAttributeChangedSignal("EnergieMax"):Connect(updateEnergy)
 	updateEnergy()
+
+	-- Zone courante : hall (sûre), terrain de chasse, faille ou hub AFK.
+	local ZONE_LABELS = {
+		hall = { text = "ZONE SÛRE — HALL", color = GameConfig.Palette.success },
+		afk = { text = "HUB AFK — SÛR", color = GameConfig.Palette.accent },
+		chasse = { text = "TERRAIN DE CHASSE", color = GameConfig.Palette.danger },
+		faille = { text = "FAILLE", color = GameConfig.Palette.danger },
+	}
+
+	local function updateZone(zone: string?)
+		local info = ZONE_LABELS[zone or "hall"] or ZONE_LABELS.hall
+		self.zoneBadge.Text = info.text
+		self.zoneBadge.BackgroundColor3 = info.color
+		self.afkPanel.Visible = zone == "afk"
+		self.objectivePanel.Visible = zone ~= "faille"
+	end
+
+	Remotes.event("ZoneChanged").OnClientEvent:Connect(updateZone)
+	updateZone(player:GetAttribute("Zone"))
 
 	-- Faille en cours.
 	Remotes.event("RiftStateChanged").OnClientEvent:Connect(function(state)

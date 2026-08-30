@@ -257,6 +257,11 @@ local function nearestTarget(record: Record): (Model?, Humanoid?, number)
 	local origin = record.root.Position
 
 	for _, player in ipairs(Players:GetPlayers()) do
+		-- Les joueurs de la zone sûre (hall, hub AFK) sont intouchables.
+		if player:GetAttribute("ZoneSure") == true then
+			continue
+		end
+
 		local character = player.Character
 		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 		local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
