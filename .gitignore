@@ -1,6 +1,8 @@
 # Rojo / Roblox
 *.rbxl
 *.rbxlx
+# Exception : la place prête à ouvrir dans Studio est fournie dans le dépôt.
+!MaledictionEveil.rbxlx
 *.rbxl.lock
 *.rbxlx.lock
 sourcemap.json

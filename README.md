@@ -16,8 +16,27 @@ Le menu principal reprend la maquette : le nom du jeu en haut, puis
 
 ## Lancer le jeu
 
+### Le plus simple : ouvrir la place déjà construite
+
+Le fichier **`MaledictionEveil.rbxlx`** à la racine du dépôt est le jeu déjà
+assemblé. Aucun outil à installer :
+
+1. Télécharge `MaledictionEveil.rbxlx` (sur GitHub : clique sur le fichier,
+   puis sur le bouton de téléchargement).
+2. Double-clique dessus, ou dans Roblox Studio : **File → Open from File**.
+3. Appuie sur **Play**.
+
+Pour le publier : **File → Publish to Roblox As...**
+
+> Ce fichier est régénéré avec `rojo build -o MaledictionEveil.rbxlx` après
+> toute modification du code source.
+
+### Pour développer : la synchronisation en direct
+
 Le projet utilise [Rojo](https://rojo.space) pour synchroniser les fichiers
-avec Roblox Studio.
+avec Roblox Studio. Les commandes ci-dessous se tapent dans le **terminal de
+ton ordinateur** (PowerShell sur Windows, Terminal sur macOS), à la racine du
+dépôt — pas dans Roblox Studio.
 
 ```bash
 # 1. Installer les outils (rokit, ou aftman/foreman si tu préfères)
