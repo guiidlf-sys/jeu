@@ -25,6 +25,7 @@ DataService.ProfileLoaded = Signal.new()
 DataService.ProfileChanged = Signal.new()
 
 local store: DataStore? = nil
+local storeUsable = true
 do
 	local ok, result = pcall(function()
 		return DataStoreService:GetDataStore(DATASTORE_NAME)
@@ -32,6 +33,7 @@ do
 	if ok then
 		store = result
 	else
+		storeUsable = false
 		warn("[DataService] DataStore indisponible, sauvegarde en mémoire uniquement.")
 	end
 end
@@ -59,6 +61,15 @@ local function key(player: Player): string
 	return ("player_%d"):format(player.UserId)
 end
 
+--- Certaines erreurs ne valent pas la peine d'être réessayées : quand les
+--- DataStores sont coupés (Studio sans accès aux API), réessayer ne fait que
+--- retarder l'arrivée du profil de plusieurs secondes.
+local function isPermanentFailure(message: string): boolean
+	return string.find(message, "Studio access to APIs", 1, true) ~= nil
+		or string.find(message, "403", 1, true) ~= nil
+		or string.find(message, "not allowed", 1, true) ~= nil
+end
+
 local function retry<T>(operation: () -> T): (boolean, T?)
 	local delaySeconds = 1
 	for attempt = 1, MAX_RETRIES do
@@ -66,7 +77,19 @@ local function retry<T>(operation: () -> T): (boolean, T?)
 		if ok then
 			return true, result
 		end
-		warn(("[DataService] tentative %d échouée : %s"):format(attempt, tostring(result)))
+
+		local message = tostring(result)
+		if isPermanentFailure(message) then
+			if storeUsable then
+				storeUsable = false
+				warn("[DataService] DataStores inaccessibles (" .. message .. ")."
+					.. " La progression ne sera pas sauvegardée : active"
+					.. " Game Settings → Security → Enable Studio Access to API Services.")
+			end
+			return false, nil
+		end
+
+		warn(("[DataService] tentative %d échouée : %s"):format(attempt, message))
 		if attempt < MAX_RETRIES then
 			task.wait(delaySeconds)
 			delaySeconds *= 2
@@ -109,7 +132,7 @@ local function load(player: Player)
 	loading[player] = true
 
 	local data
-	if store then
+	if store and storeUsable then
 		local dataStore = store :: DataStore
 		local ok, result = retry(function()
 			return dataStore:GetAsync(key(player))
@@ -139,7 +162,7 @@ end
 
 local function save(player: Player, release: boolean?)
 	local profile = profiles[player]
-	if not profile or not store then
+	if not profile or not store or not storeUsable then
 		if release then
 			profiles[player] = nil
 		end
