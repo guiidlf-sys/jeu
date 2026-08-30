@@ -48,6 +48,7 @@ local TEMPLATE = {
 	equipped = { arme = "", aura = "" },
 	quests = { day = 0, progress = { kills = 0, damage = 0, riftsCleared = 0 }, claimed = {} },
 	hunts = { active = {}, completed = {} },
+	purchases = {}, -- reçus Robux déjà honorés
 	totals = { kills = 0, riftsCleared = 0, deaths = 0 },
 	flags = {},
 	bestRiftRank = "-",

@@ -103,7 +103,9 @@ dans Studio.
   joueur dans une arène créée à la volée, avec récompenses à la clé.
 - **Terrain d'entraînement** au nord du hall, hors de la zone sûre, où des
   esprits de bas rang réapparaissent en continu.
-- **Boutique** : armes (bonus permanents), auras (cosmétiques) et reliques.
+- **Boutique** en grille paginée : 18 articles répartis sur 3 pages de 6 —
+  8 armes, 4 packs, 3 auras et 3 reliques — avec un sélecteur pour payer en
+  monnaie du jeu **ou en Robux**.
 - **Esprits passifs par défaut** : hors des failles, un esprit ne t'attaque
   que si tu l'as frappé le premier, ou si tu as accepté un contrat de chasse
   sur son espèce. Chaque esprit affiche son état (« passif » / « hostile »).
@@ -113,6 +115,56 @@ dans Studio.
 - **Quêtes quotidiennes** qui récompensent en points de statistique.
 - **Sauvegarde DataStore** avec réessais, autosave et sauvegarde à la
   déconnexion.
+
+---
+
+## Boutique : monnaie du jeu et Robux
+
+Chaque article a deux prix. Le sélecteur en haut de la boutique bascule entre
+les deux, la grille reste la même.
+
+**Monnaie du jeu** — fonctionne immédiatement, rien à configurer.
+
+**Robux** — il faut d'abord créer les produits sur le tableau de bord :
+
+1. Publie le jeu (**File → Publish to Roblox As...**).
+2. Va sur [create.roblox.com](https://create.roblox.com) → ton jeu →
+   **Associated Items** → **Developer Products** → **Create Developer
+   Product**. Un produit par article que tu veux vendre, avec son prix en
+   Robux.
+3. Copie l'identifiant de chaque produit dans le champ `productId` de
+   l'article correspondant, dans `src/shared/ShopCatalog.lua`.
+
+Tant qu'un `productId` vaut `0`, l'article affiche « Bientôt en Robux » et
+l'achat est refusé — le prix en monnaie du jeu, lui, marche depuis le début.
+Côté serveur, `ShopService` implémente `ProcessReceipt` : le reçu est
+enregistré dans le profil avant d'être validé, pour qu'un article ne soit
+jamais délivré deux fois ni perdu en cas de coupure.
+
+### Équilibrage des prix
+
+Les prix supposent qu'on joue pour les payer, et chaque article a un palier
+de niveau qui empêche d'acheter tout le catalogue trop tôt.
+
+| Article | Prix | Niveau |
+| --- | --- | --- |
+| Katana d'École | 500 yens | 1 |
+| Pack Novice | 1 600 yens | 1 |
+| Lame Scellée | 4 200 yens | 15 |
+| Pack Chasseur | 15 500 yens | 22 |
+| Sabre de Cendres | 12 000 yens | 22 |
+| Éventail des Brumes | 26 000 yens | 30 |
+| Lance du Vide | 45 fragments | 35 |
+| Faux d'Ombre | 120 fragments | 40 |
+| Griffes Jumelles | 60 000 yens | 48 |
+| Pack Sorcier Confirmé | 68 000 yens | 48 |
+| Katana des Neuf Sceaux | 200 fragments | 60 |
+| Pack Grade Spécial | 330 fragments | 60 |
+
+Pour situer les revenus : un esprit de bas rang rapporte ~12 yens, une faille
+de rang E 120, une de rang C 850, une de rang S 7 500 ; les contrats de chasse
+vont de 250 à 16 000. Les packs coûtent environ 20 % de moins que leur contenu
+acheté séparément.
 
 ---
 
@@ -187,7 +239,8 @@ décidé côté client.
   HUD, les recharges et le serveur la prennent en compte automatiquement.
 - **Ajouter un esprit ou une faille** : `MobCatalog.lua` / `RiftCatalog.lua`.
   Un portail est créé automatiquement dans le hall pour chaque faille.
-- **Ajouter un article** : `ShopCatalog.lua`, avec son bonus et son prix.
+- **Ajouter un article** : `ShopCatalog.lua` — prix en monnaie du jeu, prix
+  en Robux, niveau requis, bonus, et `contents` pour un pack.
 - **Ajouter un PNJ ou changer ses répliques** : `NpcCatalog.lua` (position,
   couleur, dialogue, action du bouton).
 - **Ajouter un contrat de chasse** : `HuntCatalog.lua` — `targets` liste les

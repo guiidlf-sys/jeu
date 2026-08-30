@@ -49,10 +49,11 @@ function StatsService.derive(profile: any): Derived
 		end
 	end
 
-	-- Les consommables permanents comptent dès qu'ils sont possédés.
+	-- Les reliques sont des bonus permanents : elles comptent dès qu'on les
+	-- possède, sans avoir à les équiper.
 	for itemId, owned in pairs(profile.owned) do
 		local item = ShopCatalog.get(itemId)
-		if owned and item and item.category == "consommable" and item.bonus then
+		if owned and item and item.category == "relique" and item.bonus then
 			bonus.damage += item.bonus.damage or 0
 			bonus.health += item.bonus.health or 0
 			bonus.energy += item.bonus.energy or 0

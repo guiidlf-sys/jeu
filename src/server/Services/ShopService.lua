@@ -1,10 +1,12 @@
 --!strict
 --[[
 	ShopService
-	Achats et équipement. Le prix et le niveau requis sont revérifiés côté
-	serveur, le client ne fait qu'afficher le catalogue.
+	Achats en monnaie du jeu, achats en Robux (produits développeur) et
+	équipement. Le prix, le niveau requis et le contenu des packs sont
+	revérifiés côté serveur — le client ne fait qu'afficher le catalogue.
 ]]
 
+local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -55,6 +57,26 @@ end
 
 ShopService.applyAura = applyAura
 
+--- Ajoute un article au profil, en équipant ce qui peut l'être.
+--- Un pack délivre tout son contenu.
+local function grant(profile: any, item: any)
+	profile.owned[item.id] = true
+
+	if item.category == "arme" then
+		profile.equipped.arme = item.id
+	elseif item.category == "aura" then
+		profile.equipped.aura = item.id
+	elseif item.category == "pack" and item.contents then
+		for _, contentId in ipairs(item.contents) do
+			local content = ShopCatalog.get(contentId)
+			if content then
+				grant(profile, content)
+			end
+		end
+	end
+end
+
+--- Achat en monnaie du jeu.
 local function purchase(player: Player, itemId: string)
 	local item = ShopCatalog.get(itemId)
 	local profile = DataService.get(player)
@@ -65,7 +87,6 @@ local function purchase(player: Player, itemId: string)
 	if profile.owned[item.id] then
 		return { ok = false, reason = "Tu possèdes déjà cet article." }
 	end
-
 	if profile.level < item.requiredLevel then
 		return { ok = false, reason = ("Niveau %d requis."):format(item.requiredLevel) }
 	end
@@ -76,14 +97,7 @@ local function purchase(player: Player, itemId: string)
 	end
 
 	profile.currencies[item.currency] = balance - item.price
-	profile.owned[item.id] = true
-
-	-- Équipement automatique de la catégorie concernée.
-	if item.category == "arme" then
-		profile.equipped.arme = item.id
-	elseif item.category == "aura" then
-		profile.equipped.aura = item.id
-	end
+	grant(profile, item)
 
 	StatsService.apply(player)
 	applyAura(player)
@@ -93,13 +107,30 @@ local function purchase(player: Player, itemId: string)
 	return { ok = true, reason = "" }
 end
 
-local function equip(player: Player, itemId: string)
+--- Délivre un article payé en Robux (appelé depuis ProcessReceipt).
+local function grantRobuxPurchase(player: Player, item: any): boolean
 	local profile = DataService.get(player)
 	if not profile then
-		return
+		return false
 	end
 
-	if itemId == "" then
+	grant(profile, item)
+	StatsService.apply(player)
+	applyAura(player)
+	DataService.push(player)
+
+	ProgressionService.notify(
+		player,
+		"ACHAT ROBUX",
+		("« %s » a été ajouté à ton inventaire. Merci du soutien."):format(item.name),
+		"success"
+	)
+	return true
+end
+
+local function equip(player: Player, itemId: string)
+	local profile = DataService.get(player)
+	if not profile or itemId == "" then
 		return
 	end
 
@@ -146,6 +177,42 @@ function ShopService.init()
 			applyAura(player)
 		end)
 	end)
+
+	-- Achats en Robux. Roblox rappelle ce gestionnaire tant qu'on n'a pas
+	-- renvoyé PurchaseGranted : on sauvegarde donc avant de valider.
+	MarketplaceService.ProcessReceipt = function(receiptInfo)
+		local player = Players:GetPlayerByUserId(receiptInfo.PlayerId)
+		if not player then
+			return Enum.ProductPurchaseDecision.NotProcessedYet
+		end
+
+		local profile = DataService.get(player)
+		if not profile then
+			return Enum.ProductPurchaseDecision.NotProcessedYet
+		end
+
+		local receiptKey = tostring(receiptInfo.PurchaseId)
+		if profile.purchases[receiptKey] then
+			return Enum.ProductPurchaseDecision.PurchaseGranted
+		end
+
+		local item = ShopCatalog.getByProductId(receiptInfo.ProductId)
+		if not item then
+			warn(("[ShopService] produit développeur inconnu : %d"):format(receiptInfo.ProductId))
+			return Enum.ProductPurchaseDecision.NotProcessedYet
+		end
+
+		local ok, granted = pcall(grantRobuxPurchase, player, item)
+		if not ok or not granted then
+			warn("[ShopService] achat Robux non délivré : " .. tostring(granted))
+			return Enum.ProductPurchaseDecision.NotProcessedYet
+		end
+
+		profile.purchases[receiptKey] = true
+		DataService.save(player, false)
+
+		return Enum.ProductPurchaseDecision.PurchaseGranted
+	end
 end
 
 return ShopService
