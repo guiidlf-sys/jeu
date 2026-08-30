@@ -45,10 +45,11 @@ function NpcService.init()
 	for _, npc in ipairs(NpcCatalog.List) do
 		local model, prompt = WorldBuilder.buildNpc(npc, folder)
 
-		-- Orientation vers le centre du hall.
+		-- Chaque PNJ regarde le centre du hall.
 		local primary = model.PrimaryPart
 		if primary then
-			model:PivotTo(CFrame.new(primary.Position) * CFrame.Angles(0, math.rad(npc.facing), 0))
+			local position = primary.Position
+			model:PivotTo(CFrame.lookAt(position, Vector3.new(0, position.Y, 0)))
 		end
 
 		prompt.Triggered:Connect(function(player)

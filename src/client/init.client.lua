@@ -123,6 +123,9 @@ local dialogue = Dialogue.new(screenGui, {
 	dungeons = function()
 		dungeonList:setVisible(true)
 	end,
+	quests = function()
+		questPanel:setVisible(true)
+	end,
 	guide = function() end,
 })
 

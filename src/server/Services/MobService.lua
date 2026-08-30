@@ -16,8 +16,12 @@ local MobCatalog = require(Shared.MobCatalog)
 local Remotes = require(Shared.Remotes)
 local Signal = require(Shared.Signal)
 
+local HuntService = require(script.Parent.HuntService)
+
 local AI_INTERVAL = 0.2
 local LEASH_DISTANCE = 160
+local WANDER_RADIUS = 14
+local WANDER_INTERVAL = 5
 
 local MobService = {}
 
@@ -33,6 +37,12 @@ export type Record = {
 	lastAttack: number,
 	lastDamager: Player?,
 	dead: boolean,
+	-- Hostilité : un esprit ne poursuit que ceux qui l'ont provoqué, ceux qui
+	-- ont un contrat de chasse sur son espèce, ou tout le monde en faille.
+	alwaysHostile: boolean,
+	hostileTo: { [Player]: boolean },
+	nextWander: number,
+	stateLabel: TextLabel?,
 }
 
 local records: { [Model]: Record } = {}
@@ -45,7 +55,7 @@ if not mobsFolder then
 	mobsFolder = folder
 end
 
-local function createHealthBar(model: Model, def: any, humanoid: Humanoid, root: BasePart)
+local function createHealthBar(model: Model, def: any, humanoid: Humanoid, root: BasePart): TextLabel
 	local gui = Instance.new("BillboardGui")
 	gui.Name = "Barre"
 	gui.Size = UDim2.fromScale(6, 1.1)
@@ -78,13 +88,27 @@ local function createHealthBar(model: Model, def: any, humanoid: Humanoid, root:
 	fill.BorderSizePixel = 0
 	fill.Parent = barBack
 
+	local state = Instance.new("TextLabel")
+	state.Name = "Etat"
+	state.Size = UDim2.new(1, 0, 0.3, 0)
+	state.Position = UDim2.new(0, 0, 0.88, 0)
+	state.BackgroundTransparency = 1
+	state.Font = Enum.Font.GothamBold
+	state.TextScaled = true
+	state.TextColor3 = Color3.fromRGB(150, 150, 170)
+	state.TextStrokeTransparency = 0.5
+	state.Text = "passif"
+	state.Parent = gui
+
 	humanoid.HealthChanged:Connect(function(health)
 		local ratio = if humanoid.MaxHealth > 0 then health / humanoid.MaxHealth else 0
 		fill.Size = UDim2.fromScale(math.clamp(ratio, 0, 1), 1)
 	end)
+
+	return state
 end
 
-local function buildRig(def: any): (Model, Humanoid, BasePart)
+local function buildRig(def: any): (Model, Humanoid, BasePart, TextLabel)
 	local model = Instance.new("Model")
 	model.Name = def.name
 
@@ -135,20 +159,29 @@ local function buildRig(def: any): (Model, Humanoid, BasePart)
 	humanoid.Parent = model
 
 	model.PrimaryPart = root
-	createHealthBar(model, def, humanoid, root)
+	local stateLabel = createHealthBar(model, def, humanoid, root)
+	stateLabel:SetAttribute("Rig", true)
 
-	return model, humanoid, root
+	return model, humanoid, root, stateLabel
 end
 
 --- Fait apparaître un esprit. `owner` reçoit les récompenses par défaut.
-function MobService.spawn(mobId: string, position: Vector3, parent: Instance?, owner: Player?): Model?
+--- `options.hostile` rend l'esprit agressif envers tout le monde (failles).
+function MobService.spawn(
+	mobId: string,
+	position: Vector3,
+	parent: Instance?,
+	owner: Player?,
+	options: { hostile: boolean? }?
+): Model?
 	local def = MobCatalog.get(mobId)
 	if not def then
 		warn("[MobService] esprit inconnu : " .. tostring(mobId))
 		return nil
 	end
 
-	local model, humanoid, root = buildRig(def)
+	local model, humanoid, root, stateLabel = buildRig(def)
+	local alwaysHostile = options ~= nil and options.hostile == true
 	model:SetAttribute("MobId", def.id)
 	if owner then
 		model:SetAttribute("OwnerUserId", owner.UserId)
@@ -169,7 +202,16 @@ function MobService.spawn(mobId: string, position: Vector3, parent: Instance?, o
 		lastAttack = 0,
 		lastDamager = nil,
 		dead = false,
+		alwaysHostile = alwaysHostile,
+		hostileTo = {},
+		nextWander = 0,
+		stateLabel = stateLabel,
 	}
+
+	if alwaysHostile then
+		stateLabel.Text = "hostile"
+		stateLabel.TextColor3 = def.glow
+	end
 
 	humanoid.Died:Connect(function()
 		MobService.handleDeath(model)
@@ -205,6 +247,11 @@ function MobService.damage(model: Model, amount: number, source: Player?): numbe
 
 	local dealt = math.min(amount, record.humanoid.Health)
 	record.lastDamager = source or record.lastDamager
+
+	-- Frapper un esprit le rend définitivement hostile envers l'agresseur.
+	if source then
+		record.hostileTo[source] = true
+	end
 	record.humanoid:TakeDamage(amount)
 	return dealt
 end
@@ -252,6 +299,18 @@ function MobService.countIn(parent: Instance): number
 	return count
 end
 
+--- Un esprit ne s'en prend qu'à trois catégories de joueurs : ceux qui l'ont
+--- frappé, ceux qui ont un contrat de chasse sur son espèce, et — en faille —
+--- tout le monde.
+local function isHostileTo(record: Record, player: Player): boolean
+	if record.alwaysHostile or record.hostileTo[player] then
+		return true
+	end
+	return HuntService.isHunting(player, record.def.id)
+end
+
+MobService.isHostileTo = isHostileTo
+
 local function nearestTarget(record: Record): (Model?, Humanoid?, number)
 	local bestModel, bestHumanoid, bestDistance = nil, nil, math.huge
 	local origin = record.root.Position
@@ -259,6 +318,10 @@ local function nearestTarget(record: Record): (Model?, Humanoid?, number)
 	for _, player in ipairs(Players:GetPlayers()) do
 		-- Les joueurs de la zone sûre (hall, hub AFK) sont intouchables.
 		if player:GetAttribute("ZoneSure") == true then
+			continue
+		end
+
+		if not isHostileTo(record, player) then
 			continue
 		end
 
@@ -284,9 +347,28 @@ local function updateRecord(record: Record, now: number)
 	end
 
 	local targetModel, targetHumanoid, distance = nearestTarget(record)
+
+	-- Personne d'hostile en vue : l'esprit flâne autour de son territoire.
 	if not targetModel or not targetHumanoid then
-		record.humanoid:MoveTo(record.origin)
+		local label = record.stateLabel
+		if label and not record.alwaysHostile and label.Text ~= "passif" then
+			label.Text = "passif"
+			label.TextColor3 = Color3.fromRGB(150, 150, 170)
+		end
+
+		if now >= record.nextWander then
+			record.nextWander = now + WANDER_INTERVAL + math.random() * 3
+			local angle = math.random() * math.pi * 2
+			local radius = math.random() * WANDER_RADIUS
+			record.humanoid:MoveTo(record.origin + Vector3.new(math.cos(angle) * radius, 0, math.sin(angle) * radius))
+		end
 		return
+	end
+
+	local label = record.stateLabel
+	if label and label.Text ~= "hostile" then
+		label.Text = "hostile"
+		label.TextColor3 = record.def.glow
 	end
 
 	local targetRoot = targetModel:FindFirstChild("HumanoidRootPart") :: BasePart?

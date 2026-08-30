@@ -6,6 +6,7 @@
 ]]
 
 local DataService = require(script.Parent.DataService)
+local HuntService = require(script.Parent.HuntService)
 local MobService = require(script.Parent.MobService)
 local ProgressionService = require(script.Parent.ProgressionService)
 local QuestService = require(script.Parent.QuestService)
@@ -33,6 +34,7 @@ function RewardService.init()
 		end
 		ProgressionService.grantXp(killer, def.xp)
 		QuestService.addProgress(killer, "kills", 1)
+		HuntService.addKill(killer, def.id)
 	end)
 end
 

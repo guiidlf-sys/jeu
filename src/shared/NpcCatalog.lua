@@ -9,6 +9,7 @@
 	  stats    → ouvre la fenêtre de statistiques
 	  shop     → ouvre la boutique
 	  dungeons → ouvre la liste des donjons
+	  quests   → ouvre les quêtes et contrats de chasse
 ]]
 
 export type Npc = {
@@ -18,7 +19,6 @@ export type Npc = {
 	color: Color3,
 	glow: Color3,
 	position: Vector3,
-	facing: number, -- degrés, pour orienter le PNJ vers le centre
 	action: string,
 	actionLabel: string,
 	lines: { string },
@@ -34,13 +34,13 @@ local LIST: { Npc } = {
 		color = Color3.fromRGB(48, 42, 78),
 		glow = Color3.fromRGB(150, 110, 255),
 		position = Vector3.new(-24, 2, 20),
-		facing = 140,
 		action = "guide",
 		actionLabel = "Quelle est ma prochaine étape ?",
 		lines = {
 			"Te voilà enfin. Cette énergie autour de toi... tu ne la contrôles pas encore, mais elle est réelle.",
 			"Ici, dans le hall, aucun esprit ne peut t'atteindre. C'est une zone sûre : reprends ton souffle, parle aux autres, prépare-toi.",
 			"Dehors, c'est différent. Le pont au nord mène au terrain d'entraînement, et les portails autour de nous mènent aux failles.",
+			"Un conseil qui t'évitera bien des ennuis : les esprits ne t'attaquent pas d'eux-mêmes. Ils ne réagissent que si tu les frappes — ou si tu as signé un contrat sur leur espèce.",
 			"Je te dirai toujours quoi faire ensuite. Reviens me voir dès que tu es perdu.",
 		},
 	},
@@ -51,7 +51,6 @@ local LIST: { Npc } = {
 		color = Color3.fromRGB(30, 56, 48),
 		glow = Color3.fromRGB(120, 255, 170),
 		position = Vector3.new(24, 2, 20),
-		facing = -140,
 		action = "stats",
 		actionLabel = "Répartir mes points",
 		lines = {
@@ -69,7 +68,6 @@ local LIST: { Npc } = {
 		color = Color3.fromRGB(62, 48, 30),
 		glow = Color3.fromRGB(255, 205, 90),
 		position = Vector3.new(-36, 2, -12),
-		facing = 70,
 		action = "shop",
 		actionLabel = "Voir la marchandise",
 		lines = {
@@ -85,13 +83,28 @@ local LIST: { Npc } = {
 		color = Color3.fromRGB(28, 44, 70),
 		glow = Color3.fromRGB(96, 200, 255),
 		position = Vector3.new(36, 2, -12),
-		facing = -70,
 		action = "dungeons",
 		actionLabel = "Consulter le registre",
 		lines = {
 			"Cinq failles recensées, du rang E au rang S. Chacune se referme sur celui qui n'est pas prêt.",
 			"Trois vagues par faille. La dernière est toujours la pire — au rang S, le Roi des Ombres Maudites t'y attend.",
 			"Tu peux y entrer d'ici, ou franchir un portail dans le hall. Vérifie ton niveau avant, je ne ramasse pas les morceaux.",
+		},
+	},
+	{
+		id = "kade",
+		name = "Chasseur Kade",
+		role = "Contrats de chasse",
+		color = Color3.fromRGB(58, 30, 34),
+		glow = Color3.fromRGB(235, 80, 90),
+		position = Vector3.new(0, 2, -44),
+		action = "quests",
+		actionLabel = "Voir les contrats",
+		lines = {
+			"Tu as remarqué ? Les esprits ne bougent pas quand tu passes. Ils dorment, ils rôdent, mais ils ne voient pas en toi une proie.",
+			"Ça change à deux conditions. Si tu lèves la main sur l'un d'eux, il ne l'oubliera jamais. Et si tu signes un contrat sur une espèce, toute l'espèce le sent.",
+			"C'est le prix de la prime : tu deviens la cible autant qu'eux. Trois contrats en cours au maximum, et tu peux les rompre à tout moment.",
+			"En faille, n'espère rien de tout ça : là-bas, tout ce qui bouge te veut mort.",
 		},
 	},
 }

@@ -32,6 +32,7 @@ local FUNCTIONS = {
 	"GetProfile",
 	"PurchaseItem",
 	"ClaimQuest",
+	"HuntRequest", -- accepter / abandonner / réclamer un contrat de chasse
 }
 
 local Remotes = {}

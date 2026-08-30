@@ -104,6 +104,12 @@ dans Studio.
 - **Terrain d'entraînement** au nord du hall, hors de la zone sûre, où des
   esprits de bas rang réapparaissent en continu.
 - **Boutique** : armes (bonus permanents), auras (cosmétiques) et reliques.
+- **Esprits passifs par défaut** : hors des failles, un esprit ne t'attaque
+  que si tu l'as frappé le premier, ou si tu as accepté un contrat de chasse
+  sur son espèce. Chaque esprit affiche son état (« passif » / « hostile »).
+- **Contrats de chasse** : six contrats répétables à accepter (trois en cours
+  au maximum). Ils rapportent gros, mais l'espèce visée t'attaque à vue tant
+  que le contrat est actif — on peut le rompre à tout moment.
 - **Quêtes quotidiennes** qui récompensent en points de statistique.
 - **Sauvegarde DataStore** avec réessais, autosave et sauvegarde à la
   déconnexion.
@@ -123,6 +129,7 @@ src/
 │   ├── RiftCatalog.lua      failles et leurs vagues
 │   ├── ShopCatalog.lua      articles de la boutique
 │   ├── QuestCatalog.lua     quêtes quotidiennes
+│   ├── HuntCatalog.lua      contrats de chasse
 │   ├── NpcCatalog.lua       PNJ de la zone sûre et leurs dialogues
 │   ├── Guide.lua            fil conducteur : la prochaine étape du joueur
 │   └── Util.lua             utilitaires partagés
@@ -134,6 +141,7 @@ src/
 │       ├── StatsService.lua       caractéristiques dérivées, énergie, régén
 │       ├── ProgressionService.lua XP, niveaux, monnaies
 │       ├── QuestService.lua       quêtes quotidiennes
+│       ├── HuntService.lua        contrats de chasse et hostilité des esprits
 │       ├── MobService.lua         rigs, IA et mort des esprits
 │       ├── RewardService.lua      butin à la mort d'un esprit
 │       ├── CombatService.lua      résolution des techniques
@@ -152,12 +160,12 @@ src/
         ├── Theme.lua        helpers d'interface
         ├── MainMenu.lua     menu de la maquette (2 pages)
         ├── DungeonList.lua  registre des failles
+        ├── QuestPanel.lua   contrats de chasse et quêtes quotidiennes
         ├── Dialogue.lua     boîte de dialogue des PNJ
         ├── HUD.lua          jauges, techniques, objectif, suivi de faille
         ├── Shop.lua         boutique
         ├── Credits.lua      fenêtre CRÉDIT
         ├── StatsPanel.lua   répartition des points
-        ├── QuestPanel.lua   quêtes
         ├── Notifications.lua fenêtres « Système »
         └── DamageNumbers.lua chiffres de dégâts flottants
 ```
@@ -182,6 +190,10 @@ décidé côté client.
 - **Ajouter un article** : `ShopCatalog.lua`, avec son bonus et son prix.
 - **Ajouter un PNJ ou changer ses répliques** : `NpcCatalog.lua` (position,
   couleur, dialogue, action du bouton).
+- **Ajouter un contrat de chasse** : `HuntCatalog.lua` — `targets` liste les
+  espèces qui deviennent hostiles pendant le contrat.
+- **Rendre les esprits agressifs d'office** : passer `{ hostile = true }` à
+  `MobService.spawn` (c'est ce que fait `RiftService` pour les failles).
 - **Changer le fil conducteur** : `Guide.lua` — chaque étape a un titre, un
   détail et une condition d'accomplissement.
 

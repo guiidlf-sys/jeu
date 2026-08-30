@@ -125,7 +125,14 @@ local function runRift(session: Session)
 				if not session.active then
 					return
 				end
-				MobService.spawn(entry.id, randomSpawnPosition(center, rift.arenaSize), session.folder, session.player)
+				-- En faille, tout est hostile d'office : c'est le principe.
+				MobService.spawn(
+					entry.id,
+					randomSpawnPosition(center, rift.arenaSize),
+					session.folder,
+					session.player,
+					{ hostile = true }
+				)
 				task.wait(0.15)
 			end
 		end

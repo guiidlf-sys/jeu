@@ -40,6 +40,14 @@ local STEPS: { Step } = {
 		end,
 	},
 	{
+		id = "premier_contrat",
+		title = "Signe un contrat de chasse",
+		detail = "Les esprits sont passifs tant que tu ne les provoques pas. Le chasseur Kade, au sud du hall, vend des contrats : ils rapportent gros, mais l'espèce visée t'attaque à vue. Touche Q.",
+		done = function(profile)
+			return next(profile.hunts.active) ~= nil or next(profile.hunts.completed) ~= nil
+		end,
+	},
+	{
 		id = "niveau_3",
 		title = "Atteins le niveau 3",
 		detail = "Au niveau 3 tu débloques la Lame de Vide (touche E), ta première vraie technique.",
