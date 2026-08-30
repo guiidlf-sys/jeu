@@ -33,16 +33,22 @@ local function sectionTitle(parent: Instance, text: string, subtitle: string, or
 	})
 
 	Theme.create("TextLabel", {
-		Size = UDim2.new(1, 0, 0, 24),
+		Size = UDim2.new(1, 0, 0, 22),
 		BackgroundTransparency = 1,
-		Font = Theme.TitleFont,
+		Font = Theme.DisplayFont,
 		Text = text,
-		TextSize = 17,
+		TextSize = 15,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextColor3 = GameConfig.Palette.accentSoft,
 		ZIndex = 34,
 		Parent = holder,
 	})
+
+	local rule = Theme.rule(GameConfig.Palette.accentSoft, 1)
+	rule.Position = UDim2.fromOffset(0, 22)
+	rule.Size = UDim2.new(1, 0, 0, 1)
+	rule.ZIndex = 34
+	rule.Parent = holder
 
 	Theme.create("TextLabel", {
 		Position = UDim2.fromOffset(0, 24),
@@ -80,7 +86,7 @@ function QuestPanel.new(parent: ScreenGui)
 		BorderSizePixel = 0,
 		CanvasSize = UDim2.new(),
 		AutomaticCanvasSize = Enum.AutomaticSize.Y,
-		ScrollBarThickness = 6,
+		ScrollBarThickness = 4,
 		ScrollBarImageColor3 = GameConfig.Palette.accent,
 		ZIndex = 32,
 		Parent = content,
@@ -107,25 +113,19 @@ function QuestPanel.new(parent: ScreenGui)
 	for _, hunt in ipairs(HuntCatalog.List) do
 		order += 1
 		local card = Theme.panel({
-			Size = UDim2.new(1, 0, 0, 116),
-			BackgroundTransparency = 0.2,
+			Size = UDim2.new(1, 0, 0, 118),
 			LayoutOrder = order,
 			ZIndex = 33,
 			Parent = scroll,
-		})
-		Theme.padding(14).Parent = card
-
-		local stroke = card:FindFirstChildOfClass("UIStroke")
-		if stroke then
-			stroke.Color = hunt.color
-		end
+		}, { accent = hunt.color, brackets = true })
+		Theme.padding(14, 16).Parent = card
 
 		Theme.create("TextLabel", {
 			Size = UDim2.new(0.62, 0, 0, 22),
 			BackgroundTransparency = 1,
-			Font = Theme.HeadingFont,
+			Font = Theme.DisplayFont,
 			Text = hunt.name,
-			TextSize = 17,
+			TextSize = 15,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			TextColor3 = hunt.color,
 			ZIndex = 34,
@@ -197,35 +197,25 @@ function QuestPanel.new(parent: ScreenGui)
 			Parent = card,
 		})
 
-		local action = Theme.create("TextButton", {
+		local action = Theme.button("ACCEPTER", hunt.color, {
 			AnchorPoint = Vector2.new(1, 1),
 			Position = UDim2.new(1, 0, 1, 0),
-			Size = UDim2.fromOffset(200, 34),
-			BackgroundColor3 = hunt.color,
-			BackgroundTransparency = 0.2,
-			AutoButtonColor = true,
-			Font = Theme.HeadingFont,
-			Text = "Accepter",
-			TextSize = 14,
-			TextColor3 = Color3.fromRGB(10, 10, 16),
+			Size = UDim2.fromOffset(200, 32),
+			TextSize = 13,
 			ZIndex = 34,
 			Parent = card,
-		}, { Theme.corner(6) })
+		})
 
-		local abandon = Theme.create("TextButton", {
+		local abandon = Theme.button("ABANDONNER", GameConfig.Palette.danger, {
 			AnchorPoint = Vector2.new(1, 1),
 			Position = UDim2.new(1, -208, 1, 0),
-			Size = UDim2.fromOffset(110, 34),
-			BackgroundColor3 = GameConfig.Palette.panelLight,
-			AutoButtonColor = true,
-			Font = Theme.BodyFont,
-			Text = "Abandonner",
-			TextSize = 12,
+			Size = UDim2.fromOffset(120, 32),
+			TextSize = 11,
 			TextColor3 = GameConfig.Palette.textDim,
 			Visible = false,
 			ZIndex = 34,
 			Parent = card,
-		}, { Theme.corner(6) })
+		})
 
 		-- En cas de succès, l'état du profil rafraîchit le libellé tout seul ;
 		-- en cas d'échec, on affiche la raison quelques secondes.
@@ -249,14 +239,14 @@ function QuestPanel.new(parent: ScreenGui)
 			end
 			local progress = profile.hunts.active[hunt.id]
 			if progress == nil then
-				request("accept", action, "Accepter")
+				request("accept", action, "ACCEPTER")
 			elseif progress >= hunt.goal then
-				request("claim", action, "Réclamer la prime")
+				request("claim", action, "RÉCLAMER LA PRIME")
 			end
 		end)
 
 		abandon.Activated:Connect(function()
-			request("abandon", abandon, "Abandonner")
+			request("abandon", abandon, "ABANDONNER")
 		end)
 
 		self.hunts[hunt.id] = {
@@ -283,13 +273,12 @@ function QuestPanel.new(parent: ScreenGui)
 	for _, quest in ipairs(QuestCatalog.List) do
 		order += 1
 		local row = Theme.panel({
-			Size = UDim2.new(1, 0, 0, 96),
-			BackgroundTransparency = 0.2,
+			Size = UDim2.new(1, 0, 0, 98),
 			LayoutOrder = order,
 			ZIndex = 33,
 			Parent = scroll,
-		})
-		Theme.padding(12).Parent = row
+		}, { accent = GameConfig.Palette.accent, brackets = false })
+		Theme.padding(14, 16).Parent = row
 
 		Theme.create("TextLabel", {
 			Size = UDim2.new(0.65, 0, 0, 20),
@@ -354,20 +343,14 @@ function QuestPanel.new(parent: ScreenGui)
 			Parent = row,
 		})
 
-		local claim = Theme.create("TextButton", {
+		local claim = Theme.button("RÉCLAMER", GameConfig.Palette.success, {
 			AnchorPoint = Vector2.new(1, 1),
 			Position = UDim2.new(1, 0, 1, 0),
-			Size = UDim2.fromOffset(160, 32),
-			BackgroundColor3 = GameConfig.Palette.success,
-			BackgroundTransparency = 0.2,
-			AutoButtonColor = true,
-			Font = Theme.HeadingFont,
-			Text = "Réclamer",
-			TextSize = 14,
-			TextColor3 = Color3.fromRGB(12, 20, 14),
+			Size = UDim2.fromOffset(170, 30),
+			TextSize = 12,
 			ZIndex = 34,
 			Parent = row,
-		}, { Theme.corner(6) })
+		})
 
 		claim.Activated:Connect(function()
 			claim.Text = "..."
@@ -403,12 +386,12 @@ function QuestPanel.new(parent: ScreenGui)
 
 			if progress == nil then
 				row.status.Text = ("Non accepté%s"):format(suffix)
-				row.action.Text = if locked then ("Niveau %d requis"):format(hunt.minLevel) else "Accepter"
+				row.action.Text = if locked then ("NIVEAU %d REQUIS"):format(hunt.minLevel) else "ACCEPTER"
 				row.action.BackgroundColor3 = if locked then GameConfig.Palette.panelLight else hunt.color
 				row.action.Active = not locked
 			elseif progress >= hunt.goal then
 				row.status.Text = ("Terminé : %d / %d%s"):format(progress, hunt.goal, suffix)
-				row.action.Text = "Réclamer la prime"
+				row.action.Text = "RÉCLAMER LA PRIME"
 				row.action.BackgroundColor3 = GameConfig.Palette.success
 				row.action.Active = true
 			else
@@ -428,15 +411,15 @@ function QuestPanel.new(parent: ScreenGui)
 			row.progress.Text = ("%s / %s"):format(Util.formatNumber(current), Util.formatNumber(quest.goal))
 
 			if profile.quests.claimed[questId] then
-				row.claim.Text = "Réclamée"
+				row.claim.Text = "RÉCLAMÉE"
 				row.claim.BackgroundColor3 = GameConfig.Palette.panelLight
 				row.claim.Active = false
 			elseif current >= quest.goal then
-				row.claim.Text = "Réclamer"
+				row.claim.Text = "RÉCLAMER"
 				row.claim.BackgroundColor3 = GameConfig.Palette.success
 				row.claim.Active = true
 			else
-				row.claim.Text = "En cours"
+				row.claim.Text = "EN COURS"
 				row.claim.BackgroundColor3 = GameConfig.Palette.panelLight
 				row.claim.Active = false
 			end

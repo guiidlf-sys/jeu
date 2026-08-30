@@ -118,6 +118,34 @@ dans Studio.
 
 ---
 
+## Direction artistique
+
+L'interface suit un système de design unique, centralisé dans
+`src/client/UI/Theme.lua` : c'est le seul fichier à toucher pour changer
+l'allure de tout le jeu.
+
+- **Cadres nets** plutôt que coins arrondis, avec des **équerres lumineuses**
+  aux quatre angles — la signature visuelle du jeu.
+- **Deux accents** : violet (énergie maudite) et cyan (énergie spirituelle),
+  plus l'or des récompenses, le rouge du danger et le vert du système.
+- **Halos** simulés par des cadres concentriques translucides, faute
+  d'ombres portées dans Roblox.
+- **Typographies** : une police d'affichage large pour les titres, une
+  police de texte lisible pour le corps, résolues avec repli sûr si le
+  client ne connaît pas la police demandée.
+- **Animations** : balayage lumineux sur les titres, entrées glissées des
+  fenêtres, éclat des techniques quand elles redeviennent prêtes, texte des
+  dialogues qui s'écrit lettre à lettre.
+- **Ambiance 3D** : brume atmosphérique, bloom et étalonnage des couleurs
+  configurés directement dans `default.project.json`.
+
+Helpers principaux : `Theme.panel`, `Theme.button`, `Theme.window`,
+`Theme.bar`, `Theme.chip`, `Theme.brackets`, `Theme.glow`, `Theme.shimmer`.
+`Theme.content` crée la zone de contenu d'un panneau — indispensable dès
+qu'on y met un layout, sinon les décorations occuperaient une place.
+
+---
+
 ## Boutique : monnaie du jeu et Robux
 
 Chaque article a deux prix. Le sélecteur en haut de la boutique bascule entre

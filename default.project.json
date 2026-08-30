@@ -2,21 +2,18 @@
   "name": "Malediction-Eveil",
   "tree": {
     "$className": "DataModel",
-
     "ReplicatedStorage": {
       "$className": "ReplicatedStorage",
       "Shared": {
         "$path": "src/shared"
       }
     },
-
     "ServerScriptService": {
       "$className": "ServerScriptService",
       "Server": {
         "$path": "src/server"
       }
     },
-
     "StarterPlayer": {
       "$className": "StarterPlayer",
       "StarterPlayerScripts": {
@@ -26,28 +23,79 @@
         }
       }
     },
-
     "Workspace": {
       "$className": "Workspace",
       "$properties": {
         "FilteringEnabled": true
       }
     },
-
     "Lighting": {
       "$className": "Lighting",
       "$properties": {
-        "Ambient": [0.16, 0.14, 0.22],
-        "OutdoorAmbient": [0.24, 0.22, 0.31],
-        "Brightness": 2,
+        "Ambient": [
+          0.13,
+          0.11,
+          0.19
+        ],
+        "OutdoorAmbient": [
+          0.2,
+          0.18,
+          0.28
+        ],
+        "Brightness": 2.2,
         "ClockTime": 20.5,
-        "FogEnd": 900,
-        "FogColor": [0.09, 0.08, 0.14],
+        "FogEnd": 1200,
+        "FogColor": [
+          0.09,
+          0.08,
+          0.14
+        ],
         "GlobalShadows": true,
-        "EnvironmentDiffuseScale": 0.4
+        "EnvironmentDiffuseScale": 0.4,
+        "ExposureCompensation": 0.15,
+        "FogStart": 120
+      },
+      "Atmosphere": {
+        "$className": "Atmosphere",
+        "$properties": {
+          "Density": 0.38,
+          "Offset": 0.2,
+          "Color": [
+            0.09,
+            0.08,
+            0.14
+          ],
+          "Decay": [
+            0.16,
+            0.12,
+            0.28
+          ],
+          "Glare": 0.2,
+          "Haze": 1.9
+        }
+      },
+      "Bloom": {
+        "$className": "BloomEffect",
+        "$properties": {
+          "Intensity": 0.95,
+          "Size": 26,
+          "Threshold": 1.05
+        }
+      },
+      "Etalonnage": {
+        "$className": "ColorCorrectionEffect",
+        "$properties": {
+          "Brightness": 0.015,
+          "Contrast": 0.2,
+          "Saturation": 0.14,
+          "TintColor": [
+            0.95,
+            0.93,
+            1.0
+          ]
+        }
       }
     },
-
     "SoundService": {
       "$className": "SoundService",
       "$properties": {

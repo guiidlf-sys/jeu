@@ -45,7 +45,7 @@ function DungeonList.new(parent: ScreenGui, onEnter: (() -> ())?)
 		BorderSizePixel = 0,
 		CanvasSize = UDim2.new(),
 		AutomaticCanvasSize = Enum.AutomaticSize.Y,
-		ScrollBarThickness = 6,
+		ScrollBarThickness = 4,
 		ScrollBarImageColor3 = GameConfig.Palette.accent,
 		ZIndex = 32,
 		Parent = content,
@@ -57,36 +57,32 @@ function DungeonList.new(parent: ScreenGui, onEnter: (() -> ())?)
 	self.rows = {}
 	for index, rift in ipairs(RiftCatalog.List) do
 		local card = Theme.panel({
-			Size = UDim2.new(1, 0, 0, 108),
-			BackgroundTransparency = 0.2,
+			Size = UDim2.new(1, 0, 0, 112),
 			LayoutOrder = index,
 			ZIndex = 33,
 			Parent = scroll,
-		})
-		Theme.padding(14).Parent = card
+		}, { accent = rift.color, brackets = true })
+		Theme.padding(14, 16).Parent = card
 
-		local stroke = card:FindFirstChildOfClass("UIStroke")
-		if stroke then
-			stroke.Color = rift.color
-		end
-
+		-- Écusson de rang.
 		Theme.create("TextLabel", {
-			Size = UDim2.fromOffset(70, 44),
+			Size = UDim2.fromOffset(62, 46),
 			BackgroundColor3 = rift.color,
-			BackgroundTransparency = 0.75,
-			Font = Theme.TitleFont,
+			BackgroundTransparency = 0.82,
+			Font = Theme.NumberFont,
 			Text = rift.rank,
-			TextSize = 28,
+			TextSize = 26,
 			TextColor3 = rift.color,
+			BorderSizePixel = 0,
 			ZIndex = 34,
 			Parent = card,
-		}, { Theme.corner(8) })
+		}, { Theme.corner(3), Theme.stroke(rift.color, 1, 0.4) })
 
 		Theme.create("TextLabel", {
-			Position = UDim2.fromOffset(84, 0),
+			Position = UDim2.fromOffset(76, 0),
 			Size = UDim2.new(0.6, 0, 0, 24),
 			BackgroundTransparency = 1,
-			Font = Theme.HeadingFont,
+			Font = Theme.DisplayFont,
 			Text = rift.name,
 			TextSize = 18,
 			TextXAlignment = Enum.TextXAlignment.Left,
@@ -96,7 +92,7 @@ function DungeonList.new(parent: ScreenGui, onEnter: (() -> ())?)
 		})
 
 		Theme.create("TextLabel", {
-			Position = UDim2.fromOffset(84, 24),
+			Position = UDim2.fromOffset(76, 26),
 			Size = UDim2.new(0.6, 0, 0, 20),
 			BackgroundTransparency = 1,
 			Font = Theme.BodyFont,
@@ -122,20 +118,14 @@ function DungeonList.new(parent: ScreenGui, onEnter: (() -> ())?)
 			Parent = card,
 		})
 
-		local enter = Theme.create("TextButton", {
+		local enter = Theme.button("ENTRER DANS LA FAILLE", rift.color, {
 			AnchorPoint = Vector2.new(1, 1),
 			Position = UDim2.new(1, 0, 1, 0),
-			Size = UDim2.fromOffset(190, 38),
-			BackgroundColor3 = rift.color,
-			BackgroundTransparency = 0.2,
-			AutoButtonColor = true,
-			Font = Theme.HeadingFont,
-			Text = "Entrer",
-			TextSize = 15,
-			TextColor3 = Color3.fromRGB(10, 10, 16),
+			Size = UDim2.fromOffset(230, 34),
+			TextSize = 13,
 			ZIndex = 34,
 			Parent = card,
-		}, { Theme.corner(6) })
+		})
 
 		enter.Activated:Connect(function()
 			local profile = State.profile
@@ -156,8 +146,12 @@ function DungeonList.new(parent: ScreenGui, onEnter: (() -> ())?)
 	State.observe(function(profile)
 		for _, row in pairs(self.rows) do
 			local locked = profile.level < row.rift.minLevel
-			row.enter.Text = if locked then ("Niveau %d requis"):format(row.rift.minLevel) else "Entrer"
+			row.enter.Text = if locked
+				then ("NIVEAU %d REQUIS"):format(row.rift.minLevel)
+				else "ENTRER DANS LA FAILLE"
 			row.enter.BackgroundColor3 = if locked then GameConfig.Palette.panelLight else row.rift.color
+			row.enter.BackgroundTransparency = if locked then 0.4 else 0.25
+			row.enter.TextColor3 = if locked then GameConfig.Palette.textDim else GameConfig.Palette.text
 			row.enter.Active = not locked
 		end
 	end)

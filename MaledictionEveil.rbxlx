@@ -3,36 +3,78 @@
     <Properties>
       <string name="Name">Lighting</string>
       <Color3 name="Ambient">
-        <R>0.16</R>
-        <G>0.14</G>
-        <B>0.22</B>
+        <R>0.13</R>
+        <G>0.11</G>
+        <B>0.19</B>
       </Color3>
-      <float name="Brightness">2</float>
+      <float name="Brightness">2.2</float>
       <float name="ClockTime">20.5</float>
       <float name="EnvironmentDiffuseScale">0.4</float>
+      <float name="ExposureCompensation">0.15</float>
       <Color3 name="FogColor">
         <R>0.09</R>
         <G>0.08</G>
         <B>0.14</B>
       </Color3>
-      <float name="FogEnd">900</float>
+      <float name="FogEnd">1200</float>
+      <float name="FogStart">120</float>
       <bool name="GlobalShadows">true</bool>
       <Color3 name="OutdoorAmbient">
-        <R>0.24</R>
-        <G>0.22</G>
-        <B>0.31</B>
+        <R>0.2</R>
+        <G>0.18</G>
+        <B>0.28</B>
       </Color3>
     </Properties>
+    <Item class="Atmosphere" referent="1">
+      <Properties>
+        <string name="Name">Atmosphere</string>
+        <Color3 name="Color">
+          <R>0.09</R>
+          <G>0.08</G>
+          <B>0.14</B>
+        </Color3>
+        <Color3 name="Decay">
+          <R>0.16</R>
+          <G>0.12</G>
+          <B>0.28</B>
+        </Color3>
+        <float name="Density">0.38</float>
+        <float name="Glare">0.2</float>
+        <float name="Haze">1.9</float>
+        <float name="Offset">0.2</float>
+      </Properties>
+    </Item>
+    <Item class="BloomEffect" referent="2">
+      <Properties>
+        <string name="Name">Bloom</string>
+        <float name="Intensity">0.95</float>
+        <float name="Size">26</float>
+        <float name="Threshold">1.05</float>
+      </Properties>
+    </Item>
+    <Item class="ColorCorrectionEffect" referent="3">
+      <Properties>
+        <string name="Name">Etalonnage</string>
+        <float name="Brightness">0.015</float>
+        <float name="Contrast">0.2</float>
+        <float name="Saturation">0.14</float>
+        <Color3 name="TintColor">
+          <R>0.95</R>
+          <G>0.93</G>
+          <B>1</B>
+        </Color3>
+      </Properties>
+    </Item>
   </Item>
-  <Item class="ReplicatedStorage" referent="1">
+  <Item class="ReplicatedStorage" referent="4">
     <Properties>
       <string name="Name">ReplicatedStorage</string>
     </Properties>
-    <Item class="Folder" referent="2">
+    <Item class="Folder" referent="5">
       <Properties>
         <string name="Name">Shared</string>
       </Properties>
-      <Item class="ModuleScript" referent="3">
+      <Item class="ModuleScript" referent="6">
         <Properties>
           <string name="Name">GameConfig</string>
           <string name="Source"><![CDATA[--!strict
@@ -121,24 +163,31 @@ GameConfig.PvpEnabled = false
 GameConfig.MaxHitsPerSwing = 8
 
 -- Palette UI ------------------------------------------------------------
+-- Fond très sombre, deux accents (violet maudit, cyan spirituel) et trois
+-- couleurs d'état. Tout le reste de l'interface s'y réfère.
 GameConfig.Palette = {
-	background = Color3.fromRGB(10, 10, 16),
-	panel = Color3.fromRGB(18, 18, 28),
-	panelLight = Color3.fromRGB(28, 28, 42),
-	stroke = Color3.fromRGB(120, 90, 220),
-	accent = Color3.fromRGB(150, 110, 255),
-	accentSoft = Color3.fromRGB(96, 200, 255),
-	text = Color3.fromRGB(238, 238, 248),
-	textDim = Color3.fromRGB(150, 150, 170),
-	danger = Color3.fromRGB(235, 80, 90),
-	success = Color3.fromRGB(110, 230, 150),
+	void = Color3.fromRGB(4, 4, 8), -- le noir absolu, derrière tout
+	background = Color3.fromRGB(9, 8, 14),
+	panel = Color3.fromRGB(16, 15, 24),
+	panelLight = Color3.fromRGB(26, 25, 38),
+	panelRaised = Color3.fromRGB(34, 32, 50),
+	stroke = Color3.fromRGB(78, 66, 128),
+	accent = Color3.fromRGB(168, 120, 255), -- violet : énergie maudite
+	accentDeep = Color3.fromRGB(96, 52, 190),
+	accentSoft = Color3.fromRGB(88, 214, 255), -- cyan : énergie spirituelle
+	gold = Color3.fromRGB(255, 205, 110),
+	text = Color3.fromRGB(242, 241, 250),
+	textDim = Color3.fromRGB(152, 148, 178),
+	textFaint = Color3.fromRGB(96, 92, 122),
+	danger = Color3.fromRGB(255, 74, 96),
+	success = Color3.fromRGB(96, 235, 162),
 }
 
 return GameConfig
 ]]></string>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="4">
+      <Item class="ModuleScript" referent="7">
         <Properties>
           <string name="Name">Guide</string>
           <string name="Source"><![CDATA[--!strict
@@ -273,7 +322,7 @@ return Guide
 ]]></string>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="5">
+      <Item class="ModuleScript" referent="8">
         <Properties>
           <string name="Name">HuntCatalog</string>
           <string name="Source"><![CDATA[--!strict
@@ -382,7 +431,7 @@ return HuntCatalog
 ]]></string>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="6">
+      <Item class="ModuleScript" referent="9">
         <Properties>
           <string name="Name">MobCatalog</string>
           <string name="Source"><![CDATA[--!strict
@@ -525,7 +574,7 @@ return MobCatalog
 ]]></string>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="7">
+      <Item class="ModuleScript" referent="10">
         <Properties>
           <string name="Name">NpcCatalog</string>
           <string name="Source"><![CDATA[--!strict
@@ -654,7 +703,7 @@ return NpcCatalog
 ]]></string>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="8">
+      <Item class="ModuleScript" referent="11">
         <Properties>
           <string name="Name">QuestCatalog</string>
           <string name="Source"><![CDATA[--!strict
@@ -717,7 +766,7 @@ return QuestCatalog
 ]]></string>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="9">
+      <Item class="ModuleScript" referent="12">
         <Properties>
           <string name="Name">Remotes</string>
           <string name="Source"><![CDATA[--!strict
@@ -804,7 +853,7 @@ return Remotes
 ]]></string>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="10">
+      <Item class="ModuleScript" referent="13">
         <Properties>
           <string name="Name">RiftCatalog</string>
           <string name="Source"><![CDATA[--!strict
@@ -919,7 +968,7 @@ return RiftCatalog
 ]]></string>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="11">
+      <Item class="ModuleScript" referent="14">
         <Properties>
           <string name="Name">ShopCatalog</string>
           <string name="Source"><![CDATA[--!strict
@@ -1244,7 +1293,7 @@ return ShopCatalog
 ]]></string>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="12">
+      <Item class="ModuleScript" referent="15">
         <Properties>
           <string name="Name">Signal</string>
           <string name="Source"><![CDATA[--!strict
@@ -1294,7 +1343,7 @@ return Signal
 ]]></string>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="13">
+      <Item class="ModuleScript" referent="16">
         <Properties>
           <string name="Name">SkillCatalog</string>
           <string name="Source"><![CDATA[--!strict
@@ -1420,7 +1469,7 @@ return SkillCatalog
 ]]></string>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="14">
+      <Item class="ModuleScript" referent="17">
         <Properties>
           <string name="Name">Util</string>
           <string name="Source"><![CDATA[--!strict
@@ -1491,11 +1540,11 @@ return Util
       </Item>
     </Item>
   </Item>
-  <Item class="ServerScriptService" referent="15">
+  <Item class="ServerScriptService" referent="18">
     <Properties>
       <string name="Name">ServerScriptService</string>
     </Properties>
-    <Item class="Script" referent="16">
+    <Item class="Script" referent="19">
       <Properties>
         <string name="Name">Server</string>
         <token name="RunContext">0</token>
@@ -1548,11 +1597,11 @@ end
 print(("[%s] serveur prêt (v%s)"):format(GameConfig.GameName, GameConfig.Version))
 ]]></string>
       </Properties>
-      <Item class="Folder" referent="17">
+      <Item class="Folder" referent="20">
         <Properties>
           <string name="Name">Services</string>
         </Properties>
-        <Item class="ModuleScript" referent="18">
+        <Item class="ModuleScript" referent="21">
           <Properties>
             <string name="Name">CombatService</string>
             <string name="Source"><![CDATA[--!strict
@@ -1784,7 +1833,7 @@ return CombatService
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="19">
+        <Item class="ModuleScript" referent="22">
           <Properties>
             <string name="Name">DataService</string>
             <string name="Source"><![CDATA[--!strict
@@ -2048,7 +2097,7 @@ return DataService
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="20">
+        <Item class="ModuleScript" referent="23">
           <Properties>
             <string name="Name">HuntService</string>
             <string name="Source"><![CDATA[--!strict
@@ -2279,7 +2328,7 @@ return HuntService
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="21">
+        <Item class="ModuleScript" referent="24">
           <Properties>
             <string name="Name">MobService</string>
             <string name="Source"><![CDATA[--!strict
@@ -2722,7 +2771,7 @@ return MobService
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="22">
+        <Item class="ModuleScript" referent="25">
           <Properties>
             <string name="Name">NpcService</string>
             <string name="Source"><![CDATA[--!strict
@@ -2792,7 +2841,7 @@ return NpcService
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="23">
+        <Item class="ModuleScript" referent="26">
           <Properties>
             <string name="Name">ProgressionService</string>
             <string name="Source"><![CDATA[--!strict
@@ -2924,7 +2973,7 @@ return ProgressionService
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="24">
+        <Item class="ModuleScript" referent="27">
           <Properties>
             <string name="Name">QuestService</string>
             <string name="Source"><![CDATA[--!strict
@@ -3035,7 +3084,7 @@ return QuestService
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="25">
+        <Item class="ModuleScript" referent="28">
           <Properties>
             <string name="Name">RewardService</string>
             <string name="Source"><![CDATA[--!strict
@@ -3082,7 +3131,7 @@ return RewardService
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="26">
+        <Item class="ModuleScript" referent="29">
           <Properties>
             <string name="Name">RiftService</string>
             <string name="Source"><![CDATA[--!strict
@@ -3430,7 +3479,7 @@ return RiftService
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="27">
+        <Item class="ModuleScript" referent="30">
           <Properties>
             <string name="Name">ShopService</string>
             <string name="Source"><![CDATA[--!strict
@@ -3654,7 +3703,7 @@ return ShopService
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="28">
+        <Item class="ModuleScript" referent="31">
           <Properties>
             <string name="Name">StatsService</string>
             <string name="Source"><![CDATA[--!strict
@@ -3929,7 +3978,7 @@ return StatsService
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="29">
+        <Item class="ModuleScript" referent="32">
           <Properties>
             <string name="Name">TrainingService</string>
             <string name="Source"><![CDATA[--!strict
@@ -3983,7 +4032,7 @@ return TrainingService
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="30">
+        <Item class="ModuleScript" referent="33">
           <Properties>
             <string name="Name">WorldBuilder</string>
             <string name="Source"><![CDATA[--!strict
@@ -4521,7 +4570,7 @@ return WorldBuilder
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="31">
+        <Item class="ModuleScript" referent="34">
           <Properties>
             <string name="Name">ZoneService</string>
             <string name="Source"><![CDATA[--!strict
@@ -4704,21 +4753,21 @@ return ZoneService
       </Item>
     </Item>
   </Item>
-  <Item class="SoundService" referent="32">
+  <Item class="SoundService" referent="35">
     <Properties>
       <string name="Name">SoundService</string>
       <bool name="RespectFilteringEnabled">true</bool>
     </Properties>
   </Item>
-  <Item class="StarterPlayer" referent="33">
+  <Item class="StarterPlayer" referent="36">
     <Properties>
       <string name="Name">StarterPlayer</string>
     </Properties>
-    <Item class="StarterPlayerScripts" referent="34">
+    <Item class="StarterPlayerScripts" referent="37">
       <Properties>
         <string name="Name">StarterPlayerScripts</string>
       </Properties>
-      <Item class="LocalScript" referent="35">
+      <Item class="LocalScript" referent="38">
         <Properties>
           <string name="Name">Client</string>
           <string name="Source"><![CDATA[--!strict
@@ -4949,7 +4998,7 @@ notifications:push(
 )
 ]]></string>
         </Properties>
-        <Item class="ModuleScript" referent="36">
+        <Item class="ModuleScript" referent="39">
           <Properties>
             <string name="Name">CombatController</string>
             <string name="Source"><![CDATA[--!strict
@@ -5065,7 +5114,7 @@ return CombatController
 ]]></string>
           </Properties>
         </Item>
-        <Item class="ModuleScript" referent="37">
+        <Item class="ModuleScript" referent="40">
           <Properties>
             <string name="Name">State</string>
             <string name="Source"><![CDATA[--!strict
@@ -5115,17 +5164,18 @@ return State
 ]]></string>
           </Properties>
         </Item>
-        <Item class="Folder" referent="38">
+        <Item class="Folder" referent="41">
           <Properties>
             <string name="Name">UI</string>
           </Properties>
-          <Item class="ModuleScript" referent="39">
+          <Item class="ModuleScript" referent="42">
             <Properties>
               <string name="Name">Credits</string>
               <string name="Source"><![CDATA[--!strict
 --[[
 	Credits
-	Fenêtre « CRÉDIT » du menu : équipe, commandes et statistiques du joueur.
+	Fenêtre « CRÉDIT » : l'équipe, les commandes, la façon de progresser, et
+	le parcours du joueur.
 ]]
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -5137,18 +5187,28 @@ local Util = require(Shared.Util)
 local State = require(script.Parent.Parent.State)
 local Theme = require(script.Parent.Theme)
 
+local Palette = GameConfig.Palette
+
 local SECTIONS = {
 	{
 		title = "L'ÉQUIPE",
+		accent = Palette.accent,
 		body = "Conception & développement : toi.\nMoteur : Roblox / Luau.\nUnivers original inspiré des récits de sorciers et d'esprits maudits.",
 	},
 	{
-		title = "COMMANDES",
-		body = "Clic gauche — Poing Maudit\nE — Lame de Vide\nR — Éclat d'Âme\nF — Chaînes Funestes\nG — Domaine Restreint\nC — Statistiques   •   Q — Quêtes   •   J — Donjons   •   B — Boutique   •   M — Menu",
+		title = "COMBAT",
+		accent = Palette.danger,
+		body = "Clic gauche — Poing Maudit (Force)\nE — Lame de Vide\nR — Éclat d'Âme\nF — Chaînes Funestes\nG — Domaine Restreint\n\nLes techniques puisent dans la Magie, l'attaque de base dans la Force.",
+	},
+	{
+		title = "INTERFACE",
+		accent = Palette.accentSoft,
+		body = "C — Statistiques\nQ — Quêtes & contrats\nJ — Donjons\nB — Boutique\nM — Menu principal\nE — Parler à un PNJ",
 	},
 	{
 		title = "COMMENT PROGRESSER",
-		body = "Le hall est une zone sûre : quatre PNJ t'y attendent, dont Maître Renzo qui t'indique toujours ta prochaine étape. Traverse le pont au nord pour t'entraîner sur les esprits de bas rang, puis lance-toi dans les failles.\n\nChaque niveau octroie 3 points à répartir : MAGIE (dégâts des techniques et réserve d'énergie), FORCE (coups à mains nues), VIE (points de vie), AGILITÉ (vitesse et recharge).",
+		accent = Palette.success,
+		body = "Le hall est une zone sûre : cinq PNJ t'y attendent, dont Maître Renzo qui t'indique toujours ta prochaine étape. Traverse le pont au nord pour t'entraîner, puis lance-toi dans les failles.\n\nLes esprits sont passifs : ils n'attaquent que si tu les frappes, ou si tu as signé un contrat sur leur espèce.\n\nChaque niveau octroie 3 points : MAGIE, FORCE, VIE, AGILITÉ.",
 	},
 }
 
@@ -5158,7 +5218,7 @@ Credits.__index = Credits
 function Credits.new(parent: ScreenGui)
 	local self = setmetatable({}, Credits)
 
-	local root, content = Theme.window(parent, "CRÉDIT", UDim2.fromOffset(620, 540))
+	local root, content = Theme.window(parent, "CRÉDIT", UDim2.fromOffset(660, 580))
 	self.root = root
 
 	local scroll = Theme.create("ScrollingFrame", {
@@ -5167,51 +5227,86 @@ function Credits.new(parent: ScreenGui)
 		BorderSizePixel = 0,
 		CanvasSize = UDim2.new(),
 		AutomaticCanvasSize = Enum.AutomaticSize.Y,
-		ScrollBarThickness = 6,
-		ScrollBarImageColor3 = GameConfig.Palette.accent,
+		ScrollBarThickness = 4,
+		ScrollBarImageColor3 = Palette.accent,
 		ZIndex = 32,
 		Parent = content,
 	}, {
-		Theme.create("UIListLayout", { Padding = UDim.new(0, 14), SortOrder = Enum.SortOrder.LayoutOrder }),
-		Theme.create("UIPadding", { PaddingRight = UDim.new(0, 10) }),
+		Theme.list(Enum.FillDirection.Vertical, 12),
+		Theme.create("UIPadding", { PaddingRight = UDim.new(0, 12) }),
 	})
 
-	Theme.create("TextLabel", {
-		Size = UDim2.new(1, 0, 0, 40),
+	local header = Theme.create("Frame", {
+		Size = UDim2.new(1, 0, 0, 54),
 		BackgroundTransparency = 1,
-		Font = Theme.TitleFont,
-		Text = ("%s — v%s"):format(GameConfig.GameName, GameConfig.Version),
-		TextSize = 22,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextColor3 = GameConfig.Palette.accent,
 		LayoutOrder = 0,
 		ZIndex = 33,
 		Parent = scroll,
+	})
+
+	Theme.create("TextLabel", {
+		Size = UDim2.new(1, 0, 0, 30),
+		BackgroundTransparency = 1,
+		Font = Theme.TitleFont,
+		Text = GameConfig.GameName,
+		TextSize = 24,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextColor3 = Palette.text,
+		ZIndex = 34,
+		Parent = header,
+	})
+
+	Theme.create("TextLabel", {
+		Position = UDim2.fromOffset(0, 30),
+		Size = UDim2.new(1, 0, 0, 18),
+		BackgroundTransparency = 1,
+		Font = Theme.BodyFont,
+		Text = ("version %s   •   un jeu de sorcellerie et de failles"):format(GameConfig.Version),
+		TextSize = 12,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextColor3 = Palette.textDim,
+		ZIndex = 34,
+		Parent = header,
 	})
 
 	for index, section in ipairs(SECTIONS) do
 		local card = Theme.panel({
 			Size = UDim2.new(1, 0, 0, 10),
 			AutomaticSize = Enum.AutomaticSize.Y,
-			BackgroundTransparency = 0.2,
 			LayoutOrder = index,
 			ZIndex = 33,
 			Parent = scroll,
-		})
-		Theme.padding(14).Parent = card
-		Theme.create("UIListLayout", { Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder, Parent = card })
+		}, { accent = section.accent, brackets = false })
 
-		Theme.create("TextLabel", {
-			Size = UDim2.new(1, 0, 0, 22),
-			BackgroundTransparency = 1,
-			Font = Theme.HeadingFont,
-			Text = section.title,
-			TextSize = 16,
-			TextXAlignment = Enum.TextXAlignment.Left,
-			TextColor3 = GameConfig.Palette.accentSoft,
-			LayoutOrder = 1,
+		Theme.create("Frame", {
+			Name = "Accent",
+			Size = UDim2.new(0, 2, 1, 0),
+			BackgroundColor3 = section.accent,
+			BorderSizePixel = 0,
 			ZIndex = 34,
 			Parent = card,
+		})
+
+		local cardContent = Theme.create("Frame", {
+			Name = "Contenu",
+			Size = UDim2.new(1, 0, 0, 10),
+			AutomaticSize = Enum.AutomaticSize.Y,
+			BackgroundTransparency = 1,
+			ZIndex = 34,
+			Parent = card,
+		}, { Theme.list(Enum.FillDirection.Vertical, 6), Theme.padding(14, 18) })
+
+		Theme.create("TextLabel", {
+			Size = UDim2.new(1, 0, 0, 20),
+			BackgroundTransparency = 1,
+			Font = Theme.DisplayFont,
+			Text = section.title,
+			TextSize = 14,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			TextColor3 = section.accent,
+			LayoutOrder = 1,
+			ZIndex = 35,
+			Parent = cardContent,
 		})
 
 		Theme.create("TextLabel", {
@@ -5220,26 +5315,46 @@ function Credits.new(parent: ScreenGui)
 			BackgroundTransparency = 1,
 			Font = Theme.BodyFont,
 			Text = section.body,
-			TextSize = 14,
+			TextSize = 13,
 			TextWrapped = true,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			TextYAlignment = Enum.TextYAlignment.Top,
-			TextColor3 = GameConfig.Palette.textDim,
+			TextColor3 = Palette.textDim,
 			LayoutOrder = 2,
-			ZIndex = 34,
-			Parent = card,
+			ZIndex = 35,
+			Parent = cardContent,
 		})
 	end
 
 	local statsCard = Theme.panel({
 		Size = UDim2.new(1, 0, 0, 10),
 		AutomaticSize = Enum.AutomaticSize.Y,
-		BackgroundTransparency = 0.2,
 		LayoutOrder = #SECTIONS + 1,
 		ZIndex = 33,
 		Parent = scroll,
+	}, { accent = Palette.gold, brackets = true })
+
+	local statsContent = Theme.create("Frame", {
+		Name = "Contenu",
+		Size = UDim2.new(1, 0, 0, 10),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundTransparency = 1,
+		ZIndex = 34,
+		Parent = statsCard,
+	}, { Theme.list(Enum.FillDirection.Vertical, 6), Theme.padding(14, 18) })
+
+	Theme.create("TextLabel", {
+		Size = UDim2.new(1, 0, 0, 20),
+		BackgroundTransparency = 1,
+		Font = Theme.DisplayFont,
+		Text = "TON PARCOURS",
+		TextSize = 14,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextColor3 = Palette.gold,
+		LayoutOrder = 1,
+		ZIndex = 35,
+		Parent = statsContent,
 	})
-	Theme.padding(14).Parent = statsCard
 
 	self.statsLabel = Theme.create("TextLabel", {
 		Size = UDim2.new(1, 0, 0, 0),
@@ -5247,18 +5362,19 @@ function Credits.new(parent: ScreenGui)
 		BackgroundTransparency = 1,
 		Font = Theme.BodyFont,
 		Text = "",
-		TextSize = 14,
+		TextSize = 13,
 		TextWrapped = true,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextYAlignment = Enum.TextYAlignment.Top,
-		TextColor3 = GameConfig.Palette.text,
-		ZIndex = 34,
-		Parent = statsCard,
+		TextColor3 = Palette.text,
+		LayoutOrder = 2,
+		ZIndex = 35,
+		Parent = statsContent,
 	})
 
 	State.observe(function(profile)
 		local rank = GameConfig.rankForLevel(profile.level)
-		self.statsLabel.Text = ("TON PARCOURS\nRang : %s (niveau %d)\nEsprits éliminés : %s\nFailles nettoyées : %d — meilleur rang : %s\nTemps de jeu : %d min")
+		self.statsLabel.Text = ("Rang : %s (niveau %d)\nEsprits éliminés : %s\nFailles nettoyées : %d — meilleur rang : %s\nTemps de jeu : %d minutes")
 			:format(
 				rank.name,
 				profile.level,
@@ -5284,13 +5400,14 @@ return Credits
 ]]></string>
             </Properties>
           </Item>
-          <Item class="ModuleScript" referent="40">
+          <Item class="ModuleScript" referent="43">
             <Properties>
               <string name="Name">DamageNumbers</string>
               <string name="Source"><![CDATA[--!strict
 --[[
 	DamageNumbers
-	Chiffres de dégâts flottants et retour visuel quand on encaisse un coup.
+	Chiffres de dégâts flottants. Les coups critiques sont plus gros, dorés,
+	et partent plus haut.
 ]]
 
 local Debris = game:GetService("Debris")
@@ -5304,9 +5421,10 @@ local Util = require(Shared.Util)
 
 local Theme = require(script.Parent.Theme)
 
+local Palette = GameConfig.Palette
+
 local DamageNumbers = {}
 
---- Affiche un chiffre de dégâts dans le monde, à la position touchée.
 local function spawnNumber(position: Vector3, amount: number, crit: boolean)
 	local anchor = Instance.new("Part")
 	anchor.Anchored = true
@@ -5315,38 +5433,71 @@ local function spawnNumber(position: Vector3, amount: number, crit: boolean)
 	anchor.CanTouch = false
 	anchor.Transparency = 1
 	anchor.Size = Vector3.one
-	anchor.Position = position + Vector3.new(math.random(-2, 2), 3, math.random(-2, 2))
+	anchor.Position = position + Vector3.new(math.random(-25, 25) / 10, 3, math.random(-25, 25) / 10)
 	anchor.Parent = workspace
 
 	local gui = Theme.create("BillboardGui", {
-		Size = UDim2.fromScale(4, 2),
+		Size = if crit then UDim2.fromScale(7, 3.4) else UDim2.fromScale(4.4, 2.2),
 		AlwaysOnTop = true,
-		MaxDistance = 200,
+		MaxDistance = 220,
 		Adornee = anchor,
 		Parent = anchor,
 	})
 
-	local label = Theme.create("TextLabel", {
+	Theme.create("TextLabel", {
 		Size = UDim2.fromScale(1, 1),
 		BackgroundTransparency = 1,
-		Font = if crit then Theme.TitleFont else Theme.HeadingFont,
-		Text = if crit then ("%s !"):format(Util.formatNumber(amount)) else Util.formatNumber(amount),
+		Font = Theme.NumberFont,
+		Text = Util.formatNumber(amount),
 		TextScaled = true,
-		TextColor3 = if crit then GameConfig.Palette.danger else GameConfig.Palette.text,
-		TextStrokeTransparency = 0.35,
+		TextColor3 = if crit then Palette.gold else Palette.text,
+		TextStrokeTransparency = 0.25,
 		Parent = gui,
 	})
 
-	local goal = anchor.Position + Vector3.new(0, 6, 0)
-	TweenService:Create(anchor, TweenInfo.new(0.9, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-		Position = goal,
-	}):Play()
-	TweenService:Create(label, TweenInfo.new(0.9), {
-		TextTransparency = 1,
-		TextStrokeTransparency = 1,
+	if crit then
+		Theme.create("TextLabel", {
+			AnchorPoint = Vector2.new(0.5, 0),
+			Position = UDim2.fromScale(0.5, 0.72),
+			Size = UDim2.fromScale(1, 0.28),
+			BackgroundTransparency = 1,
+			Font = Theme.DisplayFont,
+			Text = "CRITIQUE",
+			TextScaled = true,
+			TextColor3 = Palette.danger,
+			TextStrokeTransparency = 0.4,
+			Parent = gui,
+		})
+	end
+
+	-- Montée avec une légère dérive latérale.
+	local rise = if crit then 8 else 5.5
+	local drift = Vector3.new(math.random(-15, 15) / 10, rise, math.random(-15, 15) / 10)
+	local duration = if crit then 1.15 else 0.85
+
+	TweenService:Create(anchor, TweenInfo.new(duration, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+		Position = anchor.Position + drift,
 	}):Play()
 
-	Debris:AddItem(anchor, 1)
+	-- Petit sursaut d'échelle à l'apparition.
+	local target = gui.Size
+	gui.Size = UDim2.fromScale(target.X.Scale * 0.5, target.Y.Scale * 0.5)
+	TweenService:Create(gui, TweenInfo.new(0.16, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+		Size = target,
+	}):Play()
+
+	task.delay(duration * 0.4, function()
+		for _, child in ipairs(gui:GetChildren()) do
+			if child:IsA("TextLabel") then
+				TweenService:Create(child, TweenInfo.new(duration * 0.6), {
+					TextTransparency = 1,
+					TextStrokeTransparency = 1,
+				}):Play()
+			end
+		end
+	end)
+
+	Debris:AddItem(anchor, duration + 0.3)
 end
 
 function DamageNumbers.init(onDamageTaken: (() -> ())?)
@@ -5367,14 +5518,14 @@ return DamageNumbers
 ]]></string>
             </Properties>
           </Item>
-          <Item class="ModuleScript" referent="41">
+          <Item class="ModuleScript" referent="44">
             <Properties>
               <string name="Name">Dialogue</string>
               <string name="Source"><![CDATA[--!strict
 --[[
 	Dialogue
-	Boîte de dialogue des PNJ de la zone sûre : les répliques défilent, puis un
-	bouton d'action ouvre la fenêtre correspondante (stats, boutique, donjons).
+	Boîte de dialogue des PNJ : plaque de nom, texte qui s'écrit lettre à
+	lettre, et un bouton d'action qui ouvre la fenêtre concernée.
 ]]
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -5389,10 +5540,12 @@ local Remotes = require(Shared.Remotes)
 local State = require(script.Parent.Parent.State)
 local Theme = require(script.Parent.Theme)
 
+local Palette = GameConfig.Palette
+local TYPE_SPEED = 90 -- caractères par seconde
+
 local Dialogue = {}
 Dialogue.__index = Dialogue
 
---- `actions` associe l'action d'un PNJ à la fenêtre à ouvrir.
 function Dialogue.new(parent: ScreenGui, actions: { [string]: () -> () })
 	local self = setmetatable({}, Dialogue)
 
@@ -5400,12 +5553,13 @@ function Dialogue.new(parent: ScreenGui, actions: { [string]: () -> () })
 	self.lines = {} :: { string }
 	self.index = 1
 	self.npc = nil :: any
+	self.typing = false
 
 	local root = Theme.create("Frame", {
 		Name = "Dialogue",
 		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.new(0.5, 0, 1, -18),
-		Size = UDim2.fromOffset(760, 210),
+		Position = UDim2.new(0.5, 0, 1, -24),
+		Size = UDim2.fromOffset(820, 216),
 		BackgroundTransparency = 1,
 		Visible = false,
 		ZIndex = 35,
@@ -5414,90 +5568,117 @@ function Dialogue.new(parent: ScreenGui, actions: { [string]: () -> () })
 	self.root = root
 
 	local box = Theme.panel({
-		Size = UDim2.fromScale(1, 1),
-		BackgroundTransparency = 0.05,
+		AnchorPoint = Vector2.new(0.5, 1),
+		Position = UDim2.fromScale(0.5, 1),
+		Size = UDim2.new(1, 0, 0, 186),
+		BackgroundTransparency = 0.02,
 		ZIndex = 35,
 		Parent = root,
-	})
-	Theme.padding(18).Parent = box
+	}, { accent = Palette.accent, brackets = true, glow = true })
 	self.box = box
 
+	-- Plaque de nom, posée à cheval sur le haut du cadre.
+	local plate = Theme.panel({
+		Name = "Plaque",
+		Position = UDim2.fromOffset(24, 0),
+		Size = UDim2.fromOffset(300, 42),
+		BackgroundTransparency = 0.02,
+		ZIndex = 37,
+		Parent = root,
+	}, { accent = Palette.accent, brackets = false })
+	self.plate = plate
+
 	self.nameLabel = Theme.create("TextLabel", {
-		Size = UDim2.new(1, 0, 0, 24),
+		Position = UDim2.fromOffset(14, 4),
+		Size = UDim2.new(1, -28, 0, 20),
 		BackgroundTransparency = 1,
-		Font = Theme.TitleFont,
+		Font = Theme.DisplayFont,
 		Text = "",
-		TextSize = 20,
+		TextSize = 15,
 		TextXAlignment = Enum.TextXAlignment.Left,
-		TextColor3 = GameConfig.Palette.accent,
-		ZIndex = 36,
-		Parent = box,
+		TextColor3 = Palette.accent,
+		ZIndex = 38,
+		Parent = plate,
 	})
 
 	self.roleLabel = Theme.create("TextLabel", {
-		Position = UDim2.fromOffset(0, 24),
-		Size = UDim2.new(1, 0, 0, 18),
+		Position = UDim2.fromOffset(14, 23),
+		Size = UDim2.new(1, -28, 0, 14),
 		BackgroundTransparency = 1,
 		Font = Theme.BodyFont,
 		Text = "",
-		TextSize = 13,
+		TextSize = 11,
 		TextXAlignment = Enum.TextXAlignment.Left,
-		TextColor3 = GameConfig.Palette.textDim,
-		ZIndex = 36,
-		Parent = box,
+		TextColor3 = Palette.textDim,
+		ZIndex = 38,
+		Parent = plate,
 	})
 
+	local content = Theme.content(box, 22, 26)
+
 	self.textLabel = Theme.create("TextLabel", {
-		Position = UDim2.fromOffset(0, 50),
-		Size = UDim2.new(1, 0, 0, 78),
+		Position = UDim2.fromOffset(0, 16),
+		Size = UDim2.new(1, 0, 0, 92),
 		BackgroundTransparency = 1,
 		Font = Theme.BodyFont,
 		Text = "",
-		TextSize = 16,
+		TextSize = 17,
 		TextWrapped = true,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextYAlignment = Enum.TextYAlignment.Top,
-		TextColor3 = GameConfig.Palette.text,
-		ZIndex = 36,
-		Parent = box,
+		TextColor3 = Palette.text,
+		ZIndex = 37,
+		Parent = content,
 	})
 
 	local buttons = Theme.create("Frame", {
 		AnchorPoint = Vector2.new(1, 1),
 		Position = UDim2.new(1, 0, 1, 0),
-		Size = UDim2.new(1, 0, 0, 38),
+		Size = UDim2.new(1, 0, 0, 34),
 		BackgroundTransparency = 1,
-		ZIndex = 36,
-		Parent = box,
-	}, {
-		Theme.create("UIListLayout", {
-			FillDirection = Enum.FillDirection.Horizontal,
-			HorizontalAlignment = Enum.HorizontalAlignment.Right,
-			VerticalAlignment = Enum.VerticalAlignment.Center,
-			Padding = UDim.new(0, 10),
-			SortOrder = Enum.SortOrder.LayoutOrder,
-		}),
+		ZIndex = 37,
+		Parent = content,
+	}, { Theme.list(Enum.FillDirection.Horizontal, 10, Enum.HorizontalAlignment.Right) })
+
+	self.closeButton = Theme.button("FERMER", Palette.stroke, {
+		Size = UDim2.fromOffset(160, 32),
+		TextSize = 12,
+		TextColor3 = Palette.textDim,
+		LayoutOrder = 1,
+		ZIndex = 38,
+		Parent = buttons,
 	})
 
-	local function makeButton(text: string, color: Color3, order: number): TextButton
-		return Theme.create("TextButton", {
-			Size = UDim2.fromOffset(240, 34),
-			BackgroundColor3 = color,
-			BackgroundTransparency = 0.15,
-			AutoButtonColor = true,
-			Font = Theme.HeadingFont,
-			Text = text,
-			TextSize = 14,
-			TextColor3 = GameConfig.Palette.text,
-			LayoutOrder = order,
-			ZIndex = 37,
-			Parent = buttons,
-		}, { Theme.corner(6) })
-	end
+	self.actionButton = Theme.button("", Palette.accent, {
+		Size = UDim2.fromOffset(300, 32),
+		TextSize = 13,
+		LayoutOrder = 2,
+		ZIndex = 38,
+		Parent = buttons,
+	})
 
-	self.closeButton = makeButton("Fermer", GameConfig.Palette.panelLight, 1)
-	self.actionButton = makeButton("", GameConfig.Palette.accent, 2)
-	self.nextButton = makeButton("Suivant ▸", GameConfig.Palette.accentSoft, 3)
+	self.nextButton = Theme.button("SUIVANT  ›", Palette.accentSoft, {
+		Size = UDim2.fromOffset(180, 32),
+		TextSize = 13,
+		LayoutOrder = 3,
+		ZIndex = 38,
+		Parent = buttons,
+	})
+
+	-- Compteur de répliques, discret, en bas à gauche.
+	self.counter = Theme.create("TextLabel", {
+		AnchorPoint = Vector2.new(0, 1),
+		Position = UDim2.new(0, 0, 1, -8),
+		Size = UDim2.fromOffset(120, 16),
+		BackgroundTransparency = 1,
+		Font = Theme.BodyFont,
+		Text = "",
+		TextSize = 11,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextColor3 = Palette.textFaint,
+		ZIndex = 37,
+		Parent = content,
+	})
 
 	self.closeButton.Activated:Connect(function()
 		self:close()
@@ -5536,12 +5717,12 @@ local function buildLines(npc: any): { string }
 		local step = Guide.next(profile)
 		if step then
 			local done, total = Guide.progress(profile)
+			table.insert(lines, ("OBJECTIF %d/%d — %s\n%s"):format(done + 1, total, step.title, step.detail))
+		else
 			table.insert(
 				lines,
-				("OBJECTIF (%d/%d) — %s\n%s"):format(done + 1, total, step.title, step.detail)
+				"Tu as suivi tout mon enseignement. La suite ne dépend plus que de toi : les failles de rang S n'attendent personne."
 			)
-		else
-			table.insert(lines, "Tu as suivi tout mon enseignement. La suite ne dépend plus que de toi : les failles de rang S n'attendent personne.")
 		end
 	end
 
@@ -5561,30 +5742,66 @@ function Dialogue:open(npcId: string)
 	self.nameLabel.Text = npc.name
 	self.nameLabel.TextColor3 = npc.glow
 	self.roleLabel.Text = npc.role
-	self.actionButton.Text = npc.actionLabel
+	self.actionButton.Text = string.upper(npc.actionLabel)
 
-	local stroke = self.box:FindFirstChildOfClass("UIStroke")
-	if stroke then
-		stroke.Color = npc.glow
+	for _, target in ipairs({ self.box, self.plate }) do
+		local stroke = target:FindFirstChildOfClass("UIStroke")
+		if stroke then
+			stroke.Color = npc.glow
+		end
+		local accent = target:FindFirstChild("Équerres")
+		if accent then
+			for _, bar in ipairs(accent:GetChildren()) do
+				if bar:IsA("Frame") then
+					bar.BackgroundColor3 = npc.glow
+				end
+			end
+		end
 	end
 
 	self:render()
 
 	self.root.Visible = true
-	self.root.Position = UDim2.new(0.5, 0, 1, 40)
-	TweenService:Create(self.root, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-		Position = UDim2.new(0.5, 0, 1, -18),
+	self.root.Position = UDim2.new(0.5, 0, 1, 60)
+	TweenService:Create(self.root, TweenInfo.new(0.28, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+		Position = UDim2.new(0.5, 0, 1, -24),
 	}):Play()
 end
 
+--- Écrit la réplique lettre à lettre ; un second appui affiche tout.
 function Dialogue:render()
-	self.textLabel.Text = self.lines[self.index] or ""
+	local text = self.lines[self.index] or ""
+	self.textLabel.Text = text
+	self.counter.Text = ("%d / %d"):format(self.index, #self.lines)
+
 	local isLast = self.index >= #self.lines
 	self.nextButton.Visible = not isLast
 	self.actionButton.Visible = isLast
+
+	local total = utf8.len(text) or #text
+	self.textLabel.MaxVisibleGraphemes = 0
+	self.typing = true
+
+	task.spawn(function()
+		local shown = 0
+		while self.typing and shown < total do
+			shown = math.min(total, shown + math.max(1, math.floor(TYPE_SPEED * 0.03)))
+			self.textLabel.MaxVisibleGraphemes = shown
+			task.wait(0.03)
+		end
+		self.textLabel.MaxVisibleGraphemes = -1
+		self.typing = false
+	end)
 end
 
 function Dialogue:advance()
+	if self.typing then
+		-- Première pression : on affiche la réplique entière.
+		self.typing = false
+		self.textLabel.MaxVisibleGraphemes = -1
+		return
+	end
+
 	if self.index < #self.lines then
 		self.index += 1
 		self:render()
@@ -5592,6 +5809,7 @@ function Dialogue:advance()
 end
 
 function Dialogue:close()
+	self.typing = false
 	self.root.Visible = false
 	self.npc = nil
 end
@@ -5604,7 +5822,7 @@ return Dialogue
 ]]></string>
             </Properties>
           </Item>
-          <Item class="ModuleScript" referent="42">
+          <Item class="ModuleScript" referent="45">
             <Properties>
               <string name="Name">DungeonList</string>
               <string name="Source"><![CDATA[--!strict
@@ -5654,7 +5872,7 @@ function DungeonList.new(parent: ScreenGui, onEnter: (() -> ())?)
 		BorderSizePixel = 0,
 		CanvasSize = UDim2.new(),
 		AutomaticCanvasSize = Enum.AutomaticSize.Y,
-		ScrollBarThickness = 6,
+		ScrollBarThickness = 4,
 		ScrollBarImageColor3 = GameConfig.Palette.accent,
 		ZIndex = 32,
 		Parent = content,
@@ -5666,36 +5884,32 @@ function DungeonList.new(parent: ScreenGui, onEnter: (() -> ())?)
 	self.rows = {}
 	for index, rift in ipairs(RiftCatalog.List) do
 		local card = Theme.panel({
-			Size = UDim2.new(1, 0, 0, 108),
-			BackgroundTransparency = 0.2,
+			Size = UDim2.new(1, 0, 0, 112),
 			LayoutOrder = index,
 			ZIndex = 33,
 			Parent = scroll,
-		})
-		Theme.padding(14).Parent = card
+		}, { accent = rift.color, brackets = true })
+		Theme.padding(14, 16).Parent = card
 
-		local stroke = card:FindFirstChildOfClass("UIStroke")
-		if stroke then
-			stroke.Color = rift.color
-		end
-
+		-- Écusson de rang.
 		Theme.create("TextLabel", {
-			Size = UDim2.fromOffset(70, 44),
+			Size = UDim2.fromOffset(62, 46),
 			BackgroundColor3 = rift.color,
-			BackgroundTransparency = 0.75,
-			Font = Theme.TitleFont,
+			BackgroundTransparency = 0.82,
+			Font = Theme.NumberFont,
 			Text = rift.rank,
-			TextSize = 28,
+			TextSize = 26,
 			TextColor3 = rift.color,
+			BorderSizePixel = 0,
 			ZIndex = 34,
 			Parent = card,
-		}, { Theme.corner(8) })
+		}, { Theme.corner(3), Theme.stroke(rift.color, 1, 0.4) })
 
 		Theme.create("TextLabel", {
-			Position = UDim2.fromOffset(84, 0),
+			Position = UDim2.fromOffset(76, 0),
 			Size = UDim2.new(0.6, 0, 0, 24),
 			BackgroundTransparency = 1,
-			Font = Theme.HeadingFont,
+			Font = Theme.DisplayFont,
 			Text = rift.name,
 			TextSize = 18,
 			TextXAlignment = Enum.TextXAlignment.Left,
@@ -5705,7 +5919,7 @@ function DungeonList.new(parent: ScreenGui, onEnter: (() -> ())?)
 		})
 
 		Theme.create("TextLabel", {
-			Position = UDim2.fromOffset(84, 24),
+			Position = UDim2.fromOffset(76, 26),
 			Size = UDim2.new(0.6, 0, 0, 20),
 			BackgroundTransparency = 1,
 			Font = Theme.BodyFont,
@@ -5731,20 +5945,14 @@ function DungeonList.new(parent: ScreenGui, onEnter: (() -> ())?)
 			Parent = card,
 		})
 
-		local enter = Theme.create("TextButton", {
+		local enter = Theme.button("ENTRER DANS LA FAILLE", rift.color, {
 			AnchorPoint = Vector2.new(1, 1),
 			Position = UDim2.new(1, 0, 1, 0),
-			Size = UDim2.fromOffset(190, 38),
-			BackgroundColor3 = rift.color,
-			BackgroundTransparency = 0.2,
-			AutoButtonColor = true,
-			Font = Theme.HeadingFont,
-			Text = "Entrer",
-			TextSize = 15,
-			TextColor3 = Color3.fromRGB(10, 10, 16),
+			Size = UDim2.fromOffset(230, 34),
+			TextSize = 13,
 			ZIndex = 34,
 			Parent = card,
-		}, { Theme.corner(6) })
+		})
 
 		enter.Activated:Connect(function()
 			local profile = State.profile
@@ -5765,8 +5973,12 @@ function DungeonList.new(parent: ScreenGui, onEnter: (() -> ())?)
 	State.observe(function(profile)
 		for _, row in pairs(self.rows) do
 			local locked = profile.level < row.rift.minLevel
-			row.enter.Text = if locked then ("Niveau %d requis"):format(row.rift.minLevel) else "Entrer"
+			row.enter.Text = if locked
+				then ("NIVEAU %d REQUIS"):format(row.rift.minLevel)
+				else "ENTRER DANS LA FAILLE"
 			row.enter.BackgroundColor3 = if locked then GameConfig.Palette.panelLight else row.rift.color
+			row.enter.BackgroundTransparency = if locked then 0.4 else 0.25
+			row.enter.TextColor3 = if locked then GameConfig.Palette.textDim else GameConfig.Palette.text
 			row.enter.Active = not locked
 		end
 	end)
@@ -5786,14 +5998,15 @@ return DungeonList
 ]]></string>
             </Properties>
           </Item>
-          <Item class="ModuleScript" referent="43">
+          <Item class="ModuleScript" referent="46">
             <Properties>
               <string name="Name">HUD</string>
               <string name="Source"><![CDATA[--!strict
 --[[
 	HUD
-	Interface de jeu : vie, énergie maudite, XP, rang, barre de techniques,
-	monnaies et suivi de faille.
+	L'interface de jeu : bloc vital en bas à gauche, objectif en haut à gauche,
+	bourse en haut à droite, techniques en bas au centre, actions à droite,
+	et les bandeaux de faille / hub AFK en haut au centre.
 ]]
 
 local Players = game:GetService("Players")
@@ -5812,48 +6025,44 @@ local CombatController = require(script.Parent.Parent.CombatController)
 local State = require(script.Parent.Parent.State)
 local Theme = require(script.Parent.Theme)
 
+local Palette = GameConfig.Palette
 local player = Players.LocalPlayer
 
 local HUD = {}
 HUD.__index = HUD
 
-local function statLine(parent: Instance, order: number, color: Color3, label: string)
-	local holder = Theme.create("Frame", {
-		Size = UDim2.new(1, 0, 0, 26),
+--- Une jauge du bloc vital : libellé, barre, valeur chiffrée par-dessus.
+local function gauge(parent: Instance, y: number, height: number, color: Color3, caption: string)
+	Theme.create("TextLabel", {
+		Position = UDim2.fromOffset(0, y),
+		Size = UDim2.fromOffset(58, height),
 		BackgroundTransparency = 1,
-		LayoutOrder = order,
+		Font = Theme.HeadingFont,
+		Text = caption,
+		TextSize = 10,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextColor3 = color,
 		Parent = parent,
 	})
 
-	local caption = Theme.create("TextLabel", {
-		Size = UDim2.new(0, 62, 1, 0),
-		BackgroundTransparency = 1,
-		Font = Theme.HeadingFont,
-		Text = label,
-		TextSize = 13,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextColor3 = color,
-		Parent = holder,
-	})
-
 	local background, fill = Theme.bar(color)
-	background.Size = UDim2.new(1, -62, 0, 16)
-	background.Position = UDim2.new(0, 62, 0.5, -8)
-	background.Parent = holder
+	background.Position = UDim2.new(0, 58, 0, y)
+	background.Size = UDim2.new(1, -58, 0, height)
+	background.Parent = parent
 
 	local value = Theme.create("TextLabel", {
 		Size = UDim2.fromScale(1, 1),
 		BackgroundTransparency = 1,
 		Font = Theme.BodyFont,
 		Text = "",
-		TextSize = 12,
-		TextColor3 = GameConfig.Palette.text,
-		TextStrokeTransparency = 0.5,
-		ZIndex = 3,
+		TextSize = 11,
+		TextColor3 = Palette.text,
+		TextStrokeTransparency = 0.4,
+		ZIndex = 5,
 		Parent = background,
 	})
 
-	return fill, value, caption
+	return fill, value
 end
 
 function HUD.new(parent: ScreenGui)
@@ -5869,110 +6078,197 @@ function HUD.new(parent: ScreenGui)
 	self.root = root
 
 	------------------------------------------------------------------
-	-- Bloc de gauche : identité + jauges
+	-- Bloc vital (bas gauche)
 	------------------------------------------------------------------
-	local panel = Theme.panel({
-		Name = "Vitals",
+	local vitals = Theme.panel({
+		Name = "Vitalité",
 		AnchorPoint = Vector2.new(0, 1),
-		Position = UDim2.new(0, 18, 1, -18),
-		Size = UDim2.new(0, 320, 0, 150),
-		BackgroundTransparency = 0.15,
+		Position = UDim2.new(0, 20, 1, -20),
+		Size = UDim2.fromOffset(350, 132),
 		Parent = root,
-	})
-	Theme.padding(12).Parent = panel
+	}, { accent = Palette.accent, brackets = true })
+	local vitalsContent = Theme.content(vitals, 12, 14)
 
-	Theme.create("UIListLayout", {
-		Padding = UDim.new(0, 6),
-		SortOrder = Enum.SortOrder.LayoutOrder,
-		Parent = panel,
-	})
+	-- Écusson de niveau.
+	local badge = Theme.create("Frame", {
+		Name = "Niveau",
+		Size = UDim2.fromOffset(52, 52),
+		BackgroundColor3 = Palette.panelRaised,
+		BorderSizePixel = 0,
+		Parent = vitalsContent,
+	}, { Theme.corner(3), Theme.stroke(Palette.accent, 1, 0.2) })
+	self.badge = badge
+	self.badgeStroke = badge:FindFirstChildOfClass("UIStroke")
 
-	local header = Theme.create("Frame", {
-		Size = UDim2.new(1, 0, 0, 34),
+	self.levelNumber = Theme.create("TextLabel", {
+		Position = UDim2.fromScale(0, 0.06),
+		Size = UDim2.fromScale(1, 0.62),
 		BackgroundTransparency = 1,
-		LayoutOrder = 1,
-		Parent = panel,
+		Font = Theme.NumberFont,
+		Text = "1",
+		TextScaled = true,
+		TextColor3 = Palette.text,
+		Parent = badge,
+	})
+
+	Theme.create("TextLabel", {
+		Position = UDim2.fromScale(0, 0.66),
+		Size = UDim2.fromScale(1, 0.28),
+		BackgroundTransparency = 1,
+		Font = Theme.BodyFont,
+		Text = "NIVEAU",
+		TextScaled = true,
+		TextColor3 = Palette.textFaint,
+		Parent = badge,
 	})
 
 	self.rankLabel = Theme.create("TextLabel", {
-		Size = UDim2.new(0, 120, 1, 0),
+		Position = UDim2.fromOffset(62, 2),
+		Size = UDim2.new(1, -62, 0, 20),
 		BackgroundTransparency = 1,
-		Font = Theme.TitleFont,
+		Font = Theme.DisplayFont,
 		Text = "GRADE 4",
-		TextSize = 17,
+		TextSize = 14,
 		TextXAlignment = Enum.TextXAlignment.Left,
-		TextColor3 = GameConfig.Palette.accent,
-		Parent = header,
+		TextColor3 = Palette.accent,
+		Parent = vitalsContent,
 	})
 
-	self.levelLabel = Theme.create("TextLabel", {
-		AnchorPoint = Vector2.new(1, 0),
-		Position = UDim2.fromScale(1, 0),
-		Size = UDim2.new(0, 150, 1, 0),
+	self.nameLabel = Theme.create("TextLabel", {
+		Position = UDim2.fromOffset(62, 22),
+		Size = UDim2.new(1, -62, 0, 16),
+		BackgroundTransparency = 1,
+		Font = Theme.BodyFont,
+		Text = player.DisplayName,
+		TextSize = 12,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextColor3 = Palette.textDim,
+		Parent = vitalsContent,
+	})
+
+	self.healthFill, self.healthValue = gauge(vitalsContent, 60, 16, Palette.danger, "VIE")
+	self.energyFill, self.energyValue = gauge(vitalsContent, 80, 16, Palette.accentSoft, "MAGIE")
+	self.xpFill, self.xpValue = gauge(vitalsContent, 100, 10, Palette.accent, "XP")
+	self.xpValue.TextSize = 9
+
+	------------------------------------------------------------------
+	-- Objectif + zone (haut gauche)
+	------------------------------------------------------------------
+	local objective = Theme.panel({
+		Name = "Objectif",
+		Position = UDim2.fromOffset(20, 20),
+		Size = UDim2.fromOffset(340, 84),
+		Parent = root,
+	}, { accent = Palette.success, brackets = false })
+	self.objectivePanel = objective
+
+	Theme.create("Frame", {
+		Name = "Accent",
+		Size = UDim2.new(0, 2, 1, 0),
+		BackgroundColor3 = Palette.success,
+		BorderSizePixel = 0,
+		ZIndex = 3,
+		Parent = objective,
+	})
+
+	local objectiveContent = Theme.content(objective, 10, 14)
+
+	Theme.create("TextLabel", {
+		Size = UDim2.new(1, 0, 0, 12),
+		BackgroundTransparency = 1,
+		Font = Theme.DisplayFont,
+		Text = "SYSTÈME",
+		TextSize = 9,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextColor3 = Palette.textFaint,
+		Parent = objectiveContent,
+	})
+
+	self.objectiveTitle = Theme.create("TextLabel", {
+		Position = UDim2.fromOffset(0, 14),
+		Size = UDim2.new(1, 0, 0, 18),
 		BackgroundTransparency = 1,
 		Font = Theme.HeadingFont,
-		Text = "Niv. 1",
-		TextSize = 16,
-		TextXAlignment = Enum.TextXAlignment.Right,
-		TextColor3 = GameConfig.Palette.text,
-		Parent = header,
+		Text = "",
+		TextSize = 13,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextColor3 = Palette.success,
+		Parent = objectiveContent,
 	})
 
-	self.healthFill, self.healthValue = statLine(panel, 2, GameConfig.Palette.danger, "VIE")
-	self.energyFill, self.energyValue = statLine(panel, 3, GameConfig.Palette.accentSoft, "ÉNERGIE")
-	self.xpFill, self.xpValue = statLine(panel, 4, GameConfig.Palette.accent, "XP")
+	self.objectiveDetail = Theme.create("TextLabel", {
+		Position = UDim2.fromOffset(0, 34),
+		Size = UDim2.new(1, 0, 0, 30),
+		BackgroundTransparency = 1,
+		Font = Theme.BodyFont,
+		Text = "",
+		TextSize = 11,
+		TextWrapped = true,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextYAlignment = Enum.TextYAlignment.Top,
+		TextColor3 = Palette.textDim,
+		Parent = objectiveContent,
+	})
 
-	------------------------------------------------------------------
-	-- Monnaies (haut droite)
-	------------------------------------------------------------------
-	local wallet = Theme.panel({
-		Name = "Bourse",
-		AnchorPoint = Vector2.new(1, 0),
-		Position = UDim2.new(1, -18, 0, 18),
-		Size = UDim2.new(0, 210, 0, 62),
-		BackgroundTransparency = 0.15,
+	self.zoneBadge = Theme.chip("ZONE SÛRE", Palette.success, {
+		Name = "Zone",
+		Position = UDim2.fromOffset(20, 112),
+		Size = UDim2.fromOffset(168, 24),
+		TextSize = 11,
 		Parent = root,
 	})
-	Theme.padding(10).Parent = wallet
-	Theme.create("UIListLayout", { Padding = UDim.new(0, 2), Parent = wallet })
-
-	self.yensLabel = Theme.create("TextLabel", {
-		Size = UDim2.new(1, 0, 0, 20),
-		BackgroundTransparency = 1,
-		Font = Theme.HeadingFont,
-		Text = "0 yens",
-		TextSize = 15,
-		TextXAlignment = Enum.TextXAlignment.Right,
-		TextColor3 = GameConfig.Currencies.yens.color,
-		Parent = wallet,
-	})
-
-	self.fragmentsLabel = Theme.create("TextLabel", {
-		Size = UDim2.new(1, 0, 0, 20),
-		BackgroundTransparency = 1,
-		Font = Theme.HeadingFont,
-		Text = "0 fragments",
-		TextSize = 15,
-		TextXAlignment = Enum.TextXAlignment.Right,
-		TextColor3 = GameConfig.Currencies.fragments.color,
-		Parent = wallet,
-	})
 
 	------------------------------------------------------------------
-	-- Barre de techniques (bas centre)
+	-- Bourse (haut droite)
+	------------------------------------------------------------------
+	local wallet = Theme.create("Frame", {
+		Name = "Bourse",
+		AnchorPoint = Vector2.new(1, 0),
+		Position = UDim2.new(1, -20, 0, 20),
+		Size = UDim2.fromOffset(220, 64),
+		BackgroundTransparency = 1,
+		Parent = root,
+	}, { Theme.list(Enum.FillDirection.Vertical, 6, Enum.HorizontalAlignment.Right) })
+
+	local function purse(color: Color3, order: number): TextLabel
+		local pill = Theme.panel({
+			Size = UDim2.fromOffset(210, 28),
+			LayoutOrder = order,
+			Parent = wallet,
+		}, { accent = color, brackets = false })
+
+		return Theme.create("TextLabel", {
+			Size = UDim2.new(1, -14, 1, 0),
+			Position = UDim2.fromOffset(7, 0),
+			BackgroundTransparency = 1,
+			Font = Theme.HeadingFont,
+			Text = "0",
+			TextSize = 14,
+			TextXAlignment = Enum.TextXAlignment.Right,
+			TextColor3 = color,
+			ZIndex = 3,
+			Parent = pill,
+		})
+	end
+
+	self.yensLabel = purse(Palette.gold, 1)
+	self.fragmentsLabel = purse(Palette.accent, 2)
+
+	------------------------------------------------------------------
+	-- Techniques (bas centre)
 	------------------------------------------------------------------
 	local skillBar = Theme.create("Frame", {
 		Name = "Techniques",
 		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.new(0.5, 0, 1, -18),
-		Size = UDim2.new(0, 460, 0, 84),
+		Position = UDim2.new(0.5, 0, 1, -20),
+		Size = UDim2.fromOffset(490, 92),
 		BackgroundTransparency = 1,
 		Parent = root,
 	}, {
 		Theme.create("UIListLayout", {
 			FillDirection = Enum.FillDirection.Horizontal,
 			HorizontalAlignment = Enum.HorizontalAlignment.Center,
-			VerticalAlignment = Enum.VerticalAlignment.Center,
+			VerticalAlignment = Enum.VerticalAlignment.Bottom,
 			Padding = UDim.new(0, 10),
 			SortOrder = Enum.SortOrder.LayoutOrder,
 		}),
@@ -5982,39 +6278,55 @@ function HUD.new(parent: ScreenGui)
 	for index, skill in ipairs(SkillCatalog.List) do
 		local slot = Theme.create("TextButton", {
 			Name = skill.id,
-			Size = UDim2.fromOffset(78, 78),
-			BackgroundColor3 = GameConfig.Palette.panel,
+			Size = UDim2.fromOffset(84, 84),
+			BackgroundColor3 = Palette.panel,
 			BackgroundTransparency = 0.1,
 			AutoButtonColor = false,
 			Text = "",
 			LayoutOrder = index,
-			Parent = skillBar,
+			BorderSizePixel = 0,
 		}, {
-			Theme.corner(8),
-			Theme.stroke(skill.color, 2, 0.25),
+			Theme.corner(3),
+			Theme.stroke(skill.color, 1, 0.4),
+			Theme.create("UIGradient", {
+				Color = ColorSequence.new(Palette.panelLight, Palette.panel),
+				Rotation = 90,
+			}),
 		})
+		slot.Parent = skillBar
+		Theme.brackets(slot, skill.color, 10, 2)
 
-		local name = Theme.create("TextLabel", {
-			Position = UDim2.fromScale(0, 0.08),
-			Size = UDim2.new(1, 0, 0.42, 0),
+		Theme.create("TextLabel", {
+			Position = UDim2.fromScale(0.08, 0.12),
+			Size = UDim2.fromScale(0.84, 0.4),
 			BackgroundTransparency = 1,
 			Font = Theme.HeadingFont,
 			Text = skill.name,
 			TextSize = 11,
 			TextWrapped = true,
 			TextColor3 = skill.color,
+			ZIndex = 3,
 			Parent = slot,
 		})
 
-		local key = Theme.create("TextLabel", {
-			AnchorPoint = Vector2.new(0.5, 1),
-			Position = UDim2.fromScale(0.5, 0.96),
-			Size = UDim2.new(1, 0, 0.3, 0),
+		Theme.create("TextLabel", {
+			Position = UDim2.fromScale(0.08, 0.54),
+			Size = UDim2.fromScale(0.84, 0.16),
 			BackgroundTransparency = 1,
 			Font = Theme.BodyFont,
-			Text = if skill.keybind then skill.keybind.Name else "CLIC",
-			TextSize = 12,
-			TextColor3 = GameConfig.Palette.textDim,
+			Text = if skill.cost > 0 then ("%d magie"):format(skill.cost) else "sans coût",
+			TextSize = 9,
+			TextColor3 = Palette.textFaint,
+			ZIndex = 3,
+			Parent = slot,
+		})
+
+		local key = Theme.chip(if skill.keybind then skill.keybind.Name else "CLIC", skill.color, {
+			AnchorPoint = Vector2.new(0.5, 1),
+			Position = UDim2.fromScale(0.5, 0.94),
+			Size = UDim2.fromOffset(48, 16),
+			TextSize = 10,
+			ZIndex = 3,
 			Parent = slot,
 		})
 
@@ -6023,252 +6335,195 @@ function HUD.new(parent: ScreenGui)
 			AnchorPoint = Vector2.new(0, 1),
 			Position = UDim2.fromScale(0, 1),
 			Size = UDim2.fromScale(1, 0),
-			BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-			BackgroundTransparency = 0.45,
+			BackgroundColor3 = Palette.void,
+			BackgroundTransparency = 0.35,
 			BorderSizePixel = 0,
-			ZIndex = 4,
+			ZIndex = 6,
 			Parent = slot,
-		}, { Theme.corner(8) })
+		}, { Theme.corner(3) })
 
 		local lock = Theme.create("TextLabel", {
 			Name = "Verrou",
 			Size = UDim2.fromScale(1, 1),
-			BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-			BackgroundTransparency = 0.5,
+			BackgroundColor3 = Palette.void,
+			BackgroundTransparency = 0.35,
 			Font = Theme.HeadingFont,
-			Text = ("Niv. %d"):format(skill.unlockLevel),
-			TextSize = 13,
-			TextColor3 = GameConfig.Palette.textDim,
-			ZIndex = 5,
+			Text = ("NIV. %d"):format(skill.unlockLevel),
+			TextSize = 12,
+			TextColor3 = Palette.textFaint,
+			ZIndex = 7,
 			Visible = false,
 			Parent = slot,
-		}, { Theme.corner(8) })
+		}, { Theme.corner(3) })
 
 		slot.Activated:Connect(function()
 			CombatController.use(skill.id)
 		end)
 
-		table.insert(self.skillSlots, { skill = skill, button = slot, overlay = overlay, lock = lock, key = key, name = name })
+		table.insert(self.skillSlots, {
+			skill = skill,
+			button = slot,
+			overlay = overlay,
+			lock = lock,
+			key = key,
+			stroke = slot:FindFirstChildOfClass("UIStroke"),
+			wasReady = true,
+		})
 	end
 
 	------------------------------------------------------------------
-	-- Suivi de faille (haut centre)
-	------------------------------------------------------------------
-	local riftPanel = Theme.panel({
-		Name = "Faille",
-		AnchorPoint = Vector2.new(0.5, 0),
-		Position = UDim2.new(0.5, 0, 0, 18),
-		Size = UDim2.new(0, 340, 0, 92),
-		BackgroundTransparency = 0.1,
-		Visible = false,
-		Parent = root,
-	})
-	Theme.padding(10).Parent = riftPanel
-	self.riftPanel = riftPanel
-
-	self.riftTitle = Theme.create("TextLabel", {
-		Size = UDim2.new(1, 0, 0, 22),
-		BackgroundTransparency = 1,
-		Font = Theme.TitleFont,
-		Text = "",
-		TextSize = 16,
-		TextColor3 = GameConfig.Palette.accent,
-		Parent = riftPanel,
-	})
-
-	self.riftInfo = Theme.create("TextLabel", {
-		Position = UDim2.new(0, 0, 0, 26),
-		Size = UDim2.new(1, 0, 0, 20),
-		BackgroundTransparency = 1,
-		Font = Theme.BodyFont,
-		Text = "",
-		TextSize = 14,
-		TextColor3 = GameConfig.Palette.text,
-		Parent = riftPanel,
-	})
-
-	local leaveButton = Theme.create("TextButton", {
-		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.new(0.5, 0, 1, 0),
-		Size = UDim2.new(0, 150, 0, 24),
-		BackgroundColor3 = GameConfig.Palette.danger,
-		BackgroundTransparency = 0.25,
-		AutoButtonColor = true,
-		Font = Theme.HeadingFont,
-		Text = "Abandonner",
-		TextSize = 13,
-		TextColor3 = GameConfig.Palette.text,
-		Parent = riftPanel,
-	}, { Theme.corner(6) })
-
-	leaveButton.Activated:Connect(function()
-		Remotes.event("LeaveRift"):FireServer()
-	end)
-
-	------------------------------------------------------------------
-	-- Boutons latéraux
+	-- Actions (droite)
 	------------------------------------------------------------------
 	local sideBar = Theme.create("Frame", {
 		Name = "Actions",
 		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, -18, 0.5, 0),
-		Size = UDim2.new(0, 140, 0, 210),
+		Position = UDim2.new(1, -20, 0.5, 0),
+		Size = UDim2.fromOffset(168, 200),
 		BackgroundTransparency = 1,
 		Parent = root,
-	}, {
-		Theme.create("UIListLayout", {
-			Padding = UDim.new(0, 8),
-			HorizontalAlignment = Enum.HorizontalAlignment.Right,
-			SortOrder = Enum.SortOrder.LayoutOrder,
-		}),
-	})
-	self.sideBar = sideBar
+	}, { Theme.list(Enum.FillDirection.Vertical, 8, Enum.HorizontalAlignment.Right) })
 
 	self.buttons = {}
-	local sideDefinitions = {
-		{ id = "stats", text = "STATISTIQUES (C)" },
-		{ id = "quests", text = "QUÊTES (Q)" },
-		{ id = "dungeons", text = "DONJONS (J)" },
-		{ id = "shop", text = "BOUTIQUE (B)" },
-		{ id = "menu", text = "MENU (M)" },
-	}
-
-	for index, definition in ipairs(sideDefinitions) do
-		local button = Theme.create("TextButton", {
+	for index, definition in ipairs({
+		{ id = "stats", text = "STATISTIQUES", key = "C" },
+		{ id = "quests", text = "QUÊTES", key = "Q" },
+		{ id = "dungeons", text = "DONJONS", key = "J" },
+		{ id = "shop", text = "BOUTIQUE", key = "B" },
+		{ id = "menu", text = "MENU", key = "M" },
+	}) do
+		local button = Theme.button(definition.text, Palette.accent, {
 			Name = definition.id,
-			Size = UDim2.new(1, 0, 0, 34),
-			BackgroundColor3 = GameConfig.Palette.panel,
-			BackgroundTransparency = 0.1,
-			AutoButtonColor = true,
-			Font = Theme.HeadingFont,
-			Text = definition.text,
+			Size = UDim2.fromOffset(168, 32),
 			TextSize = 12,
-			TextColor3 = GameConfig.Palette.text,
+			TextXAlignment = Enum.TextXAlignment.Left,
 			LayoutOrder = index,
 			Parent = sideBar,
-		}, { Theme.corner(6), Theme.stroke(GameConfig.Palette.stroke, 1, 0.4) })
+		})
+		Theme.padding(0, 12).Parent = button
+
+		Theme.chip(definition.key, Palette.textDim, {
+			AnchorPoint = Vector2.new(1, 0.5),
+			Position = UDim2.new(1, -8, 0.5, 0),
+			Size = UDim2.fromOffset(22, 18),
+			TextSize = 10,
+			ZIndex = 3,
+			Parent = button,
+		})
 
 		self.buttons[definition.id] = button
 	end
 
-	-- Alerte de points de statistique disponibles.
+	-- Pastille de points de statistique à répartir.
 	self.statAlert = Theme.create("TextLabel", {
-		AnchorPoint = Vector2.new(1, 1),
-		Position = UDim2.new(1, 0, 0, -6),
-		Size = UDim2.new(1, 0, 0, 18),
-		BackgroundTransparency = 1,
+		Name = "Alerte",
+		AnchorPoint = Vector2.new(0, 0.5),
+		Position = UDim2.new(0, -10, 0.5, 0),
+		Size = UDim2.fromOffset(24, 20),
+		BackgroundColor3 = Palette.success,
+		BackgroundTransparency = 0.1,
 		Font = Theme.HeadingFont,
 		Text = "",
-		TextSize = 12,
-		TextXAlignment = Enum.TextXAlignment.Right,
-		TextColor3 = GameConfig.Palette.success,
+		TextSize = 11,
+		TextColor3 = Palette.void,
+		Visible = false,
+		ZIndex = 4,
 		Parent = self.buttons.stats,
-	})
+	}, { Theme.corner(3) })
 
 	------------------------------------------------------------------
-	-- Objectif en cours (haut gauche) et zone actuelle
+	-- Bandeaux de faille et de hub AFK (haut centre)
 	------------------------------------------------------------------
-	local objective = Theme.panel({
-		Name = "Objectif",
-		Position = UDim2.new(0, 18, 0, 18),
-		Size = UDim2.new(0, 330, 0, 74),
-		BackgroundTransparency = 0.15,
+	local riftPanel = Theme.panel({
+		Name = "Faille",
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.new(0.5, 0, 0, 20),
+		Size = UDim2.fromOffset(380, 104),
+		Visible = false,
 		Parent = root,
-	})
-	Theme.padding(12).Parent = objective
-	self.objectivePanel = objective
+	}, { accent = Palette.danger, brackets = true, glow = true })
+	self.riftPanel = riftPanel
+	local riftContent = Theme.content(riftPanel, 12, 16)
 
-	self.objectiveTitle = Theme.create("TextLabel", {
+	self.riftTitle = Theme.create("TextLabel", {
 		Size = UDim2.new(1, 0, 0, 20),
 		BackgroundTransparency = 1,
-		Font = Theme.HeadingFont,
+		Font = Theme.DisplayFont,
 		Text = "",
 		TextSize = 14,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextColor3 = GameConfig.Palette.success,
-		Parent = objective,
+		TextColor3 = Palette.danger,
+		Parent = riftContent,
 	})
 
-	self.objectiveDetail = Theme.create("TextLabel", {
-		Position = UDim2.fromOffset(0, 22),
-		Size = UDim2.new(1, 0, 0, 30),
+	self.riftInfo = Theme.create("TextLabel", {
+		Position = UDim2.fromOffset(0, 24),
+		Size = UDim2.new(1, 0, 0, 18),
 		BackgroundTransparency = 1,
 		Font = Theme.BodyFont,
 		Text = "",
-		TextSize = 12,
-		TextWrapped = true,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextYAlignment = Enum.TextYAlignment.Top,
-		TextColor3 = GameConfig.Palette.textDim,
-		Parent = objective,
+		TextSize = 13,
+		TextColor3 = Palette.text,
+		Parent = riftContent,
 	})
 
-	self.zoneBadge = Theme.create("TextLabel", {
-		Name = "Zone",
-		Position = UDim2.new(0, 18, 0, 98),
-		Size = UDim2.fromOffset(180, 26),
-		BackgroundColor3 = GameConfig.Palette.success,
-		BackgroundTransparency = 0.25,
-		Font = Theme.HeadingFont,
-		Text = "ZONE SÛRE",
-		TextSize = 13,
-		TextColor3 = Color3.fromRGB(10, 18, 12),
-		Parent = root,
-	}, { Theme.corner(6) })
+	local riftBackground, riftFill = Theme.bar(Palette.danger)
+	riftBackground.Position = UDim2.fromOffset(0, 46)
+	riftBackground.Size = UDim2.new(1, 0, 0, 8)
+	riftBackground.Parent = riftContent
+	self.riftFill = riftFill
 
-	------------------------------------------------------------------
-	-- Panneau du hub AFK
-	------------------------------------------------------------------
+	local leaveButton = Theme.button("ABANDONNER", Palette.danger, {
+		AnchorPoint = Vector2.new(0.5, 1),
+		Position = UDim2.new(0.5, 0, 1, 0),
+		Size = UDim2.fromOffset(180, 24),
+		TextSize = 11,
+		Parent = riftContent,
+	})
+	leaveButton.Activated:Connect(function()
+		Remotes.event("LeaveRift"):FireServer()
+	end)
+
 	local afkPanel = Theme.panel({
 		Name = "HubAFK",
 		AnchorPoint = Vector2.new(0.5, 0),
-		Position = UDim2.new(0.5, 0, 0, 18),
-		Size = UDim2.new(0, 340, 0, 96),
-		BackgroundTransparency = 0.1,
+		Position = UDim2.new(0.5, 0, 0, 20),
+		Size = UDim2.fromOffset(360, 104),
 		Visible = false,
 		Parent = root,
-	})
-	Theme.padding(12).Parent = afkPanel
+	}, { accent = Palette.accent, brackets = true, glow = true })
 	self.afkPanel = afkPanel
+	local afkContent = Theme.content(afkPanel, 12, 16)
 
 	Theme.create("TextLabel", {
-		Size = UDim2.new(1, 0, 0, 22),
+		Size = UDim2.new(1, 0, 0, 20),
 		BackgroundTransparency = 1,
-		Font = Theme.TitleFont,
+		Font = Theme.DisplayFont,
 		Text = "HUB AFK",
-		TextSize = 17,
-		TextColor3 = GameConfig.Palette.accent,
-		Parent = afkPanel,
+		TextSize = 15,
+		TextColor3 = Palette.accent,
+		Parent = afkContent,
 	})
 
 	Theme.create("TextLabel", {
 		Position = UDim2.fromOffset(0, 24),
-		Size = UDim2.new(1, 0, 0, 30),
+		Size = UDim2.new(1, 0, 0, 32),
 		BackgroundTransparency = 1,
 		Font = Theme.BodyFont,
 		Text = ("Gains passifs toutes les %d secondes.\nAucun esprit ne peut t'atteindre ici."):format(
 			GameConfig.AfkRewardInterval
 		),
-		TextSize = 13,
+		TextSize = 12,
 		TextWrapped = true,
-		TextColor3 = GameConfig.Palette.textDim,
-		Parent = afkPanel,
+		TextColor3 = Palette.textDim,
+		Parent = afkContent,
 	})
 
-	local returnButton = Theme.create("TextButton", {
+	local returnButton = Theme.button("RETOUR AU HALL", Palette.accentSoft, {
 		AnchorPoint = Vector2.new(0.5, 1),
 		Position = UDim2.new(0.5, 0, 1, 0),
-		Size = UDim2.new(0, 190, 0, 26),
-		BackgroundColor3 = GameConfig.Palette.accentSoft,
-		BackgroundTransparency = 0.2,
-		AutoButtonColor = true,
-		Font = Theme.HeadingFont,
-		Text = "Retour au hall",
-		TextSize = 13,
-		TextColor3 = Color3.fromRGB(10, 16, 22),
-		Parent = afkPanel,
-	}, { Theme.corner(6) })
-
+		Size = UDim2.fromOffset(200, 26),
+		TextSize = 12,
+		Parent = afkContent,
+	})
 	returnButton.Activated:Connect(function()
 		Remotes.event("Teleport"):FireServer("hall")
 	end)
@@ -6278,31 +6533,34 @@ function HUD.new(parent: ScreenGui)
 end
 
 function HUD:_bind()
-	-- Profil -> textes.
 	State.observe(function(profile)
 		local rank = GameConfig.rankForLevel(profile.level)
 		self.rankLabel.Text = string.upper(rank.name)
 		self.rankLabel.TextColor3 = rank.color
-		self.levelLabel.Text = ("Niv. %d"):format(profile.level)
+		self.levelNumber.Text = tostring(profile.level)
+		if self.badgeStroke then
+			self.badgeStroke.Color = rank.color
+		end
 
 		local required = GameConfig.xpForNextLevel(profile.level)
 		local ratio = math.clamp(profile.xp / math.max(required, 1), 0, 1)
-		self.xpFill.Size = UDim2.fromScale(ratio, 1)
+		TweenService:Create(self.xpFill, TweenInfo.new(0.3), { Size = UDim2.fromScale(ratio, 1) }):Play()
 		self.xpValue.Text = ("%s / %s"):format(Util.formatNumber(profile.xp), Util.formatNumber(required))
 
-		self.yensLabel.Text = ("%s yens"):format(Util.formatNumber(profile.currencies.yens))
-		self.fragmentsLabel.Text = ("%s fragments"):format(Util.formatNumber(profile.currencies.fragments))
+		self.yensLabel.Text = ("%s  YENS"):format(Util.formatNumber(profile.currencies.yens))
+		self.fragmentsLabel.Text = ("%s  FRAGMENTS"):format(Util.formatNumber(profile.currencies.fragments))
 
-		self.statAlert.Text = if profile.statPoints > 0 then ("+%d"):format(profile.statPoints) else ""
+		self.statAlert.Visible = profile.statPoints > 0
+		self.statAlert.Text = tostring(profile.statPoints)
 
 		local step = Guide.next(profile)
 		if step then
 			local done, total = Guide.progress(profile)
-			self.objectiveTitle.Text = ("OBJECTIF %d/%d — %s"):format(done + 1, total, step.title)
+			self.objectiveTitle.Text = ("%d/%d  •  %s"):format(done + 1, total, step.title)
 			self.objectiveDetail.Text = step.detail
 		else
 			self.objectiveTitle.Text = "TOUS LES OBJECTIFS TERMINÉS"
-			self.objectiveDetail.Text = "Les failles de rang S t'attendent. Parle à Maître Renzo si tu veux relire ses conseils."
+			self.objectiveDetail.Text = "Les failles de rang S t'attendent."
 		end
 
 		for _, slot in ipairs(self.skillSlots) do
@@ -6321,7 +6579,9 @@ function HUD:_bind()
 
 		local function update()
 			local ratio = if humanoid.MaxHealth > 0 then humanoid.Health / humanoid.MaxHealth else 0
-			self.healthFill.Size = UDim2.fromScale(math.clamp(ratio, 0, 1), 1)
+			TweenService:Create(self.healthFill, TweenInfo.new(0.2), {
+				Size = UDim2.fromScale(math.clamp(ratio, 0, 1), 1),
+			}):Play()
 			self.healthValue.Text = ("%d / %d"):format(math.ceil(humanoid.Health), math.ceil(humanoid.MaxHealth))
 		end
 
@@ -6350,18 +6610,24 @@ function HUD:_bind()
 	player:GetAttributeChangedSignal("EnergieMax"):Connect(updateEnergy)
 	updateEnergy()
 
-	-- Zone courante : hall (sûre), terrain de chasse, faille ou hub AFK.
-	local ZONE_LABELS = {
-		hall = { text = "ZONE SÛRE — HALL", color = GameConfig.Palette.success },
-		afk = { text = "HUB AFK — SÛR", color = GameConfig.Palette.accent },
-		chasse = { text = "TERRAIN DE CHASSE", color = GameConfig.Palette.danger },
-		faille = { text = "FAILLE", color = GameConfig.Palette.danger },
+	-- Zone courante.
+	local ZONES = {
+		hall = { text = "ZONE SÛRE — HALL", color = Palette.success },
+		afk = { text = "HUB AFK — SÛR", color = Palette.accent },
+		chasse = { text = "TERRAIN DE CHASSE", color = Palette.danger },
+		faille = { text = "FAILLE OUVERTE", color = Palette.danger },
 	}
 
 	local function updateZone(zone: string?)
-		local info = ZONE_LABELS[zone or "hall"] or ZONE_LABELS.hall
+		local info = ZONES[zone or "hall"] or ZONES.hall
 		self.zoneBadge.Text = info.text
+		self.zoneBadge.TextColor3 = info.color
 		self.zoneBadge.BackgroundColor3 = info.color
+		local stroke = self.zoneBadge:FindFirstChildOfClass("UIStroke")
+		if stroke then
+			stroke.Color = info.color
+		end
+
 		self.afkPanel.Visible = zone == "afk"
 		self.objectivePanel.Visible = zone ~= "faille"
 	end
@@ -6378,11 +6644,15 @@ function HUD:_bind()
 
 		self.riftPanel.Visible = true
 		self.riftTitle.Text = ("FAILLE %s — %s"):format(state.rank, state.riftName)
-		self.riftInfo.Text = ("Vague %d/%d — %d esprit(s) restant(s)")
+		self.riftInfo.Text = ("Vague %d/%d   •   %d esprit(s) restant(s)")
 			:format(state.wave, state.totalWaves, state.remaining or 0)
+		self.riftFill.Size = UDim2.fromScale(
+			math.clamp((state.wave - 1) / math.max(state.totalWaves, 1), 0, 1),
+			1
+		)
 	end)
 
-	-- Recharges : mise à jour continue des voiles sur les techniques.
+	-- Recharges : voile qui descend, éclat quand la technique redevient prête.
 	RunService.RenderStepped:Connect(function()
 		if not self.root.Visible then
 			return
@@ -6391,6 +6661,15 @@ function HUD:_bind()
 			local remaining = CombatController.remaining(slot.skill.id)
 			local ratio = if slot.skill.cooldown > 0 then remaining / slot.skill.cooldown else 0
 			slot.overlay.Size = UDim2.fromScale(1, math.clamp(ratio, 0, 1))
+
+			local ready = remaining <= 0
+			if ready ~= slot.wasReady then
+				slot.wasReady = ready
+				if ready and slot.stroke then
+					slot.stroke.Transparency = 0
+					TweenService:Create(slot.stroke, TweenInfo.new(0.45), { Transparency = 0.4 }):Play()
+				end
+			end
 		end
 	end)
 end
@@ -6399,17 +6678,23 @@ function HUD:setVisible(value: boolean)
 	self.root.Visible = value
 end
 
+--- Éclat rouge sur les bords quand on encaisse un coup.
 function HUD:flashDamage()
 	local flash = Theme.create("Frame", {
 		Size = UDim2.fromScale(1, 1),
-		BackgroundColor3 = GameConfig.Palette.danger,
-		BackgroundTransparency = 0.75,
+		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
 		ZIndex = 0,
 		Parent = self.root,
+	}, {
+		Theme.stroke(Palette.danger, 6, 0.15),
 	})
-	TweenService:Create(flash, TweenInfo.new(0.35), { BackgroundTransparency = 1 }):Play()
-	task.delay(0.4, function()
+
+	local stroke = flash:FindFirstChildOfClass("UIStroke")
+	if stroke then
+		TweenService:Create(stroke, TweenInfo.new(0.45), { Transparency = 1, Thickness = 14 }):Play()
+	end
+	task.delay(0.5, function()
 		flash:Destroy()
 	end)
 end
@@ -6418,16 +6703,17 @@ return HUD
 ]]></string>
             </Properties>
           </Item>
-          <Item class="ModuleScript" referent="44">
+          <Item class="ModuleScript" referent="47">
             <Properties>
               <string name="Name">MainMenu</string>
               <string name="Source"><![CDATA[--!strict
 --[[
 	MainMenu
-	Deux pages, dans le même grand cadre :
-	  1. le nom du jeu, puis JOUER / BOUTIQUE / CRÉDIT
-	  2. « JOUER », puis IN THE GAME / DONJONS / HUB AFK
-	Le fond est une vue caméra qui tourne lentement autour du hall.
+	Deux pages dans le même cadre : le nom du jeu puis JOUER / BOUTIQUE /
+	CRÉDIT, et la page JOUER avec IN THE GAME / DONJONS / HUB AFK.
+
+	Le fond est une vue caméra qui tourne autour du hall, assombrie par un
+	vignettage et parcourue de poussières d'énergie maudite.
 ]]
 
 local Lighting = game:GetService("Lighting")
@@ -6441,9 +6727,10 @@ local GameConfig = require(Shared.GameConfig)
 
 local Theme = require(script.Parent.Theme)
 
-local ORBIT_CENTER = Vector3.new(0, 14, 0)
-local ORBIT_RADIUS = 105
-local ORBIT_SPEED = 0.06
+local ORBIT_CENTER = Vector3.new(0, 16, 0)
+local ORBIT_RADIUS = 112
+local ORBIT_SPEED = 0.05
+local DUST_COUNT = 22
 
 local PAGES = {
 	main = {
@@ -6459,9 +6746,9 @@ local PAGES = {
 		title = "JOUER",
 		subtitle = "Où veux-tu aller ?",
 		buttons = {
-			{ text = "IN THE GAME", handler = "onInGame", hint = "Le hall des sorciers, zone sûre" },
+			{ text = "IN THE GAME", handler = "onInGame", hint = "Le hall des sorciers — zone sûre" },
 			{ text = "DONJONS", handler = "onDungeons", hint = "Choisir une faille à nettoyer" },
-			{ text = "HUB AFK", handler = "onAfk", hint = "Gains passifs, sans danger" },
+			{ text = "HUB AFK", handler = "onAfk", hint = "Gains passifs, aucun danger" },
 		},
 	},
 }
@@ -6471,28 +6758,13 @@ MainMenu.__index = MainMenu
 
 local player = Players.LocalPlayer
 
-local function styleHover(button: TextButton)
-	local stroke = button:FindFirstChildOfClass("UIStroke")
-
-	button.MouseEnter:Connect(function()
-		TweenService:Create(button, TweenInfo.new(0.15), {
-			BackgroundColor3 = GameConfig.Palette.accent,
-			BackgroundTransparency = 0.35,
-		}):Play()
-		if stroke then
-			TweenService:Create(stroke, TweenInfo.new(0.15), { Color = GameConfig.Palette.accent }):Play()
-		end
-	end)
-
-	button.MouseLeave:Connect(function()
-		TweenService:Create(button, TweenInfo.new(0.15), {
-			BackgroundColor3 = GameConfig.Palette.panel,
-			BackgroundTransparency = 0.15,
-		}):Play()
-		if stroke then
-			TweenService:Create(stroke, TweenInfo.new(0.15), { Color = GameConfig.Palette.text }):Play()
-		end
-	end)
+--- Espace les lettres d'un titre, à la manière des jaquettes d'anime.
+local function spaced(text: string): string
+	local pieces = {}
+	for _, code in utf8.codes(text) do
+		table.insert(pieces, utf8.char(code))
+	end
+	return table.concat(pieces, utf8.char(0x2009))
 end
 
 function MainMenu.new(parent: ScreenGui, handlers: { [string]: () -> () })
@@ -6505,8 +6777,8 @@ function MainMenu.new(parent: ScreenGui, handlers: { [string]: () -> () })
 	local root = Theme.create("Frame", {
 		Name = "MenuPrincipal",
 		Size = UDim2.fromScale(1, 1),
-		BackgroundColor3 = GameConfig.Palette.background,
-		BackgroundTransparency = 0.25,
+		BackgroundColor3 = GameConfig.Palette.void,
+		BackgroundTransparency = 0.28,
 		BorderSizePixel = 0,
 		Visible = false,
 		ZIndex = 20,
@@ -6514,60 +6786,123 @@ function MainMenu.new(parent: ScreenGui, handlers: { [string]: () -> () })
 	})
 	self.root = root
 
-	-- Dégradé sombre : lisibilité du texte par-dessus la vue 3D.
+	-- Vignettage : sombre en haut et en bas, dégagé au centre.
 	Theme.create("UIGradient", {
-		Color = ColorSequence.new(Color3.fromRGB(4, 4, 10), Color3.fromRGB(16, 10, 30)),
+		Color = ColorSequence.new(GameConfig.Palette.void, Color3.fromRGB(18, 10, 34)),
 		Transparency = NumberSequence.new({
-			NumberSequenceKeypoint.new(0, 0.15),
-			NumberSequenceKeypoint.new(0.5, 0.55),
-			NumberSequenceKeypoint.new(1, 0.15),
+			NumberSequenceKeypoint.new(0, 0.02),
+			NumberSequenceKeypoint.new(0.45, 0.6),
+			NumberSequenceKeypoint.new(0.55, 0.6),
+			NumberSequenceKeypoint.new(1, 0.02),
 		}),
 		Rotation = 90,
 		Parent = root,
 	})
 
-	-- Le grand cadre du croquis.
+	-- Poussières d'énergie qui montent lentement.
+	local dust = Theme.create("Frame", {
+		Name = "Poussières",
+		Size = UDim2.fromScale(1, 1),
+		BackgroundTransparency = 1,
+		ZIndex = 20,
+		Parent = root,
+	})
+
+	for index = 1, DUST_COUNT do
+		local size = math.random(2, 4)
+		local mote = Theme.create("Frame", {
+			Name = "Poussière" .. index,
+			Size = UDim2.fromOffset(size, size),
+			Position = UDim2.fromScale(math.random(), math.random()),
+			BackgroundColor3 = if index % 3 == 0 then GameConfig.Palette.accentSoft else GameConfig.Palette.accent,
+			BackgroundTransparency = 0.35 + math.random() * 0.4,
+			BorderSizePixel = 0,
+			ZIndex = 20,
+			Parent = dust,
+		}, { Theme.corner(size) })
+
+		task.spawn(function()
+			while mote.Parent do
+				local duration = 9 + math.random() * 10
+				local startX = math.random()
+				mote.Position = UDim2.fromScale(startX, 1.05)
+				local drift = startX + (math.random() - 0.5) * 0.08
+				local tween = TweenService:Create(mote, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
+					Position = UDim2.fromScale(drift, -0.05),
+				})
+				tween:Play()
+				tween.Completed:Wait()
+			end
+		end)
+	end
+
+	-- Le grand cadre de la maquette.
 	local board = Theme.create("Frame", {
 		Name = "Cadre",
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.fromScale(0.78, 0.8),
-		BackgroundColor3 = Color3.fromRGB(8, 8, 14),
-		BackgroundTransparency = 0.35,
+		Size = UDim2.fromScale(0.8, 0.82),
+		BackgroundColor3 = Color3.fromRGB(7, 6, 12),
+		BackgroundTransparency = 0.42,
 		BorderSizePixel = 0,
 		ZIndex = 21,
 		Parent = root,
 	}, {
 		Theme.corner(4),
-		Theme.stroke(GameConfig.Palette.text, 3, 0.1),
-		Theme.create("UIAspectRatioConstraint", { AspectRatio = 1.55, DominantAxis = Enum.DominantAxis.Width }),
+		Theme.stroke(GameConfig.Palette.stroke, 1, 0.25),
+		Theme.create("UIAspectRatioConstraint", { AspectRatio = 1.6, DominantAxis = Enum.DominantAxis.Width }),
+	})
+	Theme.brackets(board, GameConfig.Palette.accent, 34, 3)
+	Theme.glow(board, GameConfig.Palette.accentDeep, 1.4)
+
+	-- Bandeau supérieur : petite mention « système ».
+	Theme.create("TextLabel", {
+		Name = "Mention",
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.fromScale(0.5, 0.045),
+		Size = UDim2.fromScale(0.6, 0.035),
+		BackgroundTransparency = 1,
+		Font = Theme.DisplayFont,
+		Text = spaced("SYSTÈME D'ÉVEIL"),
+		TextScaled = true,
+		TextColor3 = GameConfig.Palette.accentSoft,
+		TextTransparency = 0.35,
+		ZIndex = 22,
+		Parent = board,
 	})
 
 	self.title = Theme.create("TextLabel", {
 		Name = "Titre",
 		AnchorPoint = Vector2.new(0.5, 0),
-		Position = UDim2.fromScale(0.5, 0.06),
-		Size = UDim2.fromScale(0.9, 0.16),
+		Position = UDim2.fromScale(0.5, 0.095),
+		Size = UDim2.fromScale(0.92, 0.13),
 		BackgroundTransparency = 1,
 		Font = Theme.TitleFont,
-		Text = GameConfig.GameName,
+		Text = spaced(GameConfig.GameName),
 		TextScaled = true,
 		TextColor3 = GameConfig.Palette.text,
-		TextStrokeTransparency = 0.6,
 		ZIndex = 22,
 		Parent = board,
-	}, {
-		Theme.create("UIGradient", {
-			Color = ColorSequence.new(GameConfig.Palette.text, GameConfig.Palette.accent),
-			Rotation = 90,
-		}),
 	})
+	Theme.shimmer(self.title, GameConfig.Palette.text, 4.5)
+
+	local underline = Theme.create("Frame", {
+		Name = "Filet",
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.fromScale(0.5, 0.235),
+		Size = UDim2.fromScale(0.34, 0.004),
+		BackgroundColor3 = GameConfig.Palette.accent,
+		BorderSizePixel = 0,
+		ZIndex = 22,
+		Parent = board,
+	})
+	Theme.shimmer(underline, GameConfig.Palette.accent, 3)
 
 	self.subtitle = Theme.create("TextLabel", {
 		Name = "SousTitre",
 		AnchorPoint = Vector2.new(0.5, 0),
-		Position = UDim2.fromScale(0.5, 0.225),
-		Size = UDim2.fromScale(0.8, 0.05),
+		Position = UDim2.fromScale(0.5, 0.255),
+		Size = UDim2.fromScale(0.8, 0.042),
 		BackgroundTransparency = 1,
 		Font = Theme.BodyFont,
 		Text = PAGES.main.subtitle,
@@ -6577,14 +6912,14 @@ function MainMenu.new(parent: ScreenGui, handlers: { [string]: () -> () })
 		Parent = board,
 	})
 
-	-- Une colonne de boutons par page, superposées et affichées tour à tour.
+	-- Une colonne de boutons par page, superposées.
 	self.pages = {}
 	for pageName, page in pairs(PAGES) do
 		local column = Theme.create("Frame", {
 			Name = "Page_" .. pageName,
 			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.fromScale(0.5, 0.58),
-			Size = UDim2.fromScale(0.46, 0.44),
+			Position = UDim2.fromScale(0.5, 0.615),
+			Size = UDim2.fromScale(0.5, 0.44),
 			BackgroundTransparency = 1,
 			Visible = pageName == "main",
 			ZIndex = 22,
@@ -6594,7 +6929,7 @@ function MainMenu.new(parent: ScreenGui, handlers: { [string]: () -> () })
 				FillDirection = Enum.FillDirection.Vertical,
 				HorizontalAlignment = Enum.HorizontalAlignment.Center,
 				VerticalAlignment = Enum.VerticalAlignment.Center,
-				Padding = UDim.new(0, 16),
+				Padding = UDim.new(0, 14),
 				SortOrder = Enum.SortOrder.LayoutOrder,
 			}),
 		})
@@ -6603,34 +6938,59 @@ function MainMenu.new(parent: ScreenGui, handlers: { [string]: () -> () })
 			local button = Theme.menuButton(definition.text, index)
 			button.ZIndex = 23
 			button.Parent = column
-			styleHover(button)
 
-			-- Une ligne d'explication sous le libellé, quand il y en a une.
+			local label = Theme.create("TextLabel", {
+				Name = "Libellé",
+				Position = UDim2.fromScale(0.08, if definition.hint then 0.14 else 0.22),
+				Size = UDim2.fromScale(0.84, if definition.hint then 0.42 else 0.56),
+				BackgroundTransparency = 1,
+				Font = Theme.HeadingFont,
+				Text = spaced(definition.text),
+				TextScaled = true,
+				TextXAlignment = Enum.TextXAlignment.Left,
+				TextColor3 = GameConfig.Palette.text,
+				ZIndex = 24,
+				Parent = button,
+			})
+
 			if definition.hint then
-				button.Text = ""
 				Theme.create("TextLabel", {
-					Position = UDim2.fromScale(0, 0.12),
-					Size = UDim2.fromScale(1, 0.48),
-					BackgroundTransparency = 1,
-					Font = Theme.HeadingFont,
-					Text = definition.text,
-					TextScaled = true,
-					TextColor3 = GameConfig.Palette.text,
-					ZIndex = 24,
-					Parent = button,
-				})
-				Theme.create("TextLabel", {
-					Position = UDim2.fromScale(0, 0.6),
-					Size = UDim2.fromScale(1, 0.3),
+					Name = "Indice",
+					Position = UDim2.fromScale(0.08, 0.58),
+					Size = UDim2.fromScale(0.84, 0.26),
 					BackgroundTransparency = 1,
 					Font = Theme.BodyFont,
 					Text = definition.hint,
 					TextScaled = true,
+					TextXAlignment = Enum.TextXAlignment.Left,
 					TextColor3 = GameConfig.Palette.textDim,
 					ZIndex = 24,
 					Parent = button,
 				})
 			end
+
+			-- Chevron discret à droite.
+			Theme.create("TextLabel", {
+				Name = "Chevron",
+				AnchorPoint = Vector2.new(1, 0.5),
+				Position = UDim2.fromScale(0.94, 0.5),
+				Size = UDim2.fromScale(0.06, 0.4),
+				BackgroundTransparency = 1,
+				Font = Theme.HeadingFont,
+				Text = "›",
+				TextScaled = true,
+				TextColor3 = GameConfig.Palette.accent,
+				TextTransparency = 0.3,
+				ZIndex = 24,
+				Parent = button,
+			})
+
+			button.MouseEnter:Connect(function()
+				TweenService:Create(label, TweenInfo.new(0.15), { TextColor3 = GameConfig.Palette.accent }):Play()
+			end)
+			button.MouseLeave:Connect(function()
+				TweenService:Create(label, TweenInfo.new(0.15), { TextColor3 = GameConfig.Palette.text }):Play()
+			end)
 
 			button.Activated:Connect(function()
 				if definition.handler == "onPlayPage" then
@@ -6647,23 +7007,16 @@ function MainMenu.new(parent: ScreenGui, handlers: { [string]: () -> () })
 		self.pages[pageName] = column
 	end
 
-	-- Retour vers la première page.
-	self.backButton = Theme.create("TextButton", {
+	self.backButton = Theme.button("‹  RETOUR", GameConfig.Palette.stroke, {
 		Name = "Retour",
 		AnchorPoint = Vector2.new(0, 1),
-		Position = UDim2.fromScale(0.06, 0.94),
-		Size = UDim2.fromScale(0.18, 0.07),
-		BackgroundColor3 = GameConfig.Palette.panel,
-		BackgroundTransparency = 0.2,
-		AutoButtonColor = true,
-		Font = Theme.HeadingFont,
-		Text = "← RETOUR",
-		TextScaled = true,
+		Position = UDim2.fromScale(0.07, 0.93),
+		Size = UDim2.fromScale(0.16, 0.06),
 		TextColor3 = GameConfig.Palette.textDim,
 		Visible = false,
 		ZIndex = 23,
 		Parent = board,
-	}, { Theme.corner(6), Theme.stroke(GameConfig.Palette.stroke, 2, 0.4) })
+	})
 
 	self.backButton.Activated:Connect(function()
 		self:setPage("main")
@@ -6671,15 +7024,15 @@ function MainMenu.new(parent: ScreenGui, handlers: { [string]: () -> () })
 
 	Theme.create("TextLabel", {
 		Name = "Version",
-		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.fromScale(0.5, 0.97),
-		Size = UDim2.fromScale(0.6, 0.045),
+		AnchorPoint = Vector2.new(1, 1),
+		Position = UDim2.fromScale(0.93, 0.93),
+		Size = UDim2.fromScale(0.4, 0.04),
 		BackgroundTransparency = 1,
 		Font = Theme.BodyFont,
-		Text = ("v%s — touche M pour rouvrir le menu"):format(GameConfig.Version),
+		Text = ("v%s   •   touche M pour rouvrir le menu"):format(GameConfig.Version),
 		TextScaled = true,
-		TextColor3 = GameConfig.Palette.textDim,
-		TextTransparency = 0.25,
+		TextXAlignment = Enum.TextXAlignment.Right,
+		TextColor3 = GameConfig.Palette.textFaint,
 		ZIndex = 22,
 		Parent = board,
 	})
@@ -6696,12 +7049,20 @@ function MainMenu:setPage(pageName: string)
 	end
 
 	self.page = pageName
-	self.title.Text = page.title
+	self.title.Text = spaced(page.title)
 	self.subtitle.Text = page.subtitle
 	self.backButton.Visible = pageName ~= "main"
 
 	for name, column in pairs(self.pages) do
-		column.Visible = name == pageName
+		local active = name == pageName
+		column.Visible = active
+		if active then
+			-- Petite entrée par le bas, pour marquer le changement de page.
+			column.Position = UDim2.fromScale(0.5, 0.66)
+			TweenService:Create(column, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+				Position = UDim2.fromScale(0.5, 0.615),
+			}):Play()
+		end
 	end
 end
 
@@ -6716,8 +7077,9 @@ local function startOrbit(self)
 
 	self._orbitConnection = RunService.RenderStepped:Connect(function(delta)
 		angle += delta * ORBIT_SPEED
+		local height = 36 + math.sin(angle * 0.7) * 8
 		local position = ORBIT_CENTER
-			+ Vector3.new(math.cos(angle) * ORBIT_RADIUS, 34, math.sin(angle) * ORBIT_RADIUS)
+			+ Vector3.new(math.cos(angle) * ORBIT_RADIUS, height, math.sin(angle) * ORBIT_RADIUS)
 		camera.CFrame = CFrame.lookAt(position, ORBIT_CENTER)
 	end)
 end
@@ -6744,7 +7106,7 @@ function MainMenu:show(pageName: string?)
 	self.visible = true
 	self.root.Visible = true
 
-	TweenService:Create(self.blur, TweenInfo.new(0.4), { Size = 18 }):Play()
+	TweenService:Create(self.blur, TweenInfo.new(0.45), { Size = 22 }):Play()
 	startOrbit(self)
 end
 
@@ -6767,14 +7129,14 @@ return MainMenu
 ]]></string>
             </Properties>
           </Item>
-          <Item class="ModuleScript" referent="45">
+          <Item class="ModuleScript" referent="48">
             <Properties>
               <string name="Name">Notifications</string>
               <string name="Source"><![CDATA[--!strict
 --[[
 	Notifications
-	Fenêtres « Système » qui glissent depuis la droite (montées de niveau,
-	quêtes, entrées/sorties de faille).
+	Fenêtres « Système » qui glissent depuis la droite. Les montées de niveau
+	ont droit à un bandeau plein écran, plus solennel.
 ]]
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -6786,15 +7148,17 @@ local Remotes = require(Shared.Remotes)
 
 local Theme = require(script.Parent.Theme)
 
+local Palette = GameConfig.Palette
+
 local KIND_COLORS = {
-	info = GameConfig.Palette.accentSoft,
-	levelup = GameConfig.Palette.accent,
-	quest = GameConfig.Currencies.yens.color,
-	success = GameConfig.Palette.success,
-	danger = GameConfig.Palette.danger,
+	info = Palette.accentSoft,
+	levelup = Palette.accent,
+	quest = Palette.gold,
+	success = Palette.success,
+	danger = Palette.danger,
 }
 
-local LIFETIME = 5
+local LIFETIME = 5.5
 
 local Notifications = {}
 Notifications.__index = Notifications
@@ -6805,64 +7169,137 @@ function Notifications.new(parent: ScreenGui)
 	self.container = Theme.create("Frame", {
 		Name = "Notifications",
 		AnchorPoint = Vector2.new(1, 0),
-		Position = UDim2.new(1, -18, 0, 92),
-		Size = UDim2.new(0, 320, 0, 400),
+		Position = UDim2.new(1, -20, 0, 96),
+		Size = UDim2.fromOffset(330, 460),
 		BackgroundTransparency = 1,
 		ZIndex = 40,
 		Parent = parent,
-	}, {
-		Theme.create("UIListLayout", {
-			Padding = UDim.new(0, 8),
-			HorizontalAlignment = Enum.HorizontalAlignment.Right,
-			SortOrder = Enum.SortOrder.LayoutOrder,
-		}),
+	}, { Theme.list(Enum.FillDirection.Vertical, 8, Enum.HorizontalAlignment.Right) })
+
+	-- Bandeau de montée de niveau, au centre de l'écran.
+	self.banner = Theme.create("Frame", {
+		Name = "Bandeau",
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.3),
+		Size = UDim2.new(1, 0, 0, 96),
+		BackgroundColor3 = Palette.void,
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		Visible = false,
+		ZIndex = 45,
+		Parent = parent,
+	})
+
+	self.bannerTitle = Theme.create("TextLabel", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.42),
+		Size = UDim2.fromScale(0.8, 0.5),
+		BackgroundTransparency = 1,
+		Font = Theme.TitleFont,
+		Text = "",
+		TextScaled = true,
+		TextColor3 = Palette.accent,
+		ZIndex = 46,
+		Parent = self.banner,
+	})
+
+	self.bannerBody = Theme.create("TextLabel", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.82),
+		Size = UDim2.fromScale(0.7, 0.24),
+		BackgroundTransparency = 1,
+		Font = Theme.BodyFont,
+		Text = "",
+		TextScaled = true,
+		TextColor3 = Palette.textDim,
+		ZIndex = 46,
+		Parent = self.banner,
 	})
 
 	self.counter = 0
 
 	Remotes.event("SystemMessage").OnClientEvent:Connect(function(message)
-		if typeof(message) == "table" then
-			self:push(message.title or "SYSTÈME", message.body or "", message.kind)
+		if typeof(message) ~= "table" then
+			return
 		end
+		if message.kind == "levelup" then
+			self:banner_(message.title or "", message.body or "")
+		end
+		self:push(message.title or "SYSTÈME", message.body or "", message.kind)
 	end)
 
 	return self
 end
 
+--- Bandeau central, réservé aux moments forts.
+function Notifications:banner_(title: string, body: string)
+	self.bannerTitle.Text = title
+	self.bannerBody.Text = body
+	self.banner.Visible = true
+
+	self.banner.BackgroundTransparency = 0.25
+	self.bannerTitle.TextTransparency = 1
+	self.bannerTitle.Size = UDim2.fromScale(0.6, 0.5)
+
+	TweenService:Create(self.bannerTitle, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+		TextTransparency = 0,
+		Size = UDim2.fromScale(0.8, 0.5),
+	}):Play()
+
+	task.delay(1.8, function()
+		TweenService:Create(self.banner, TweenInfo.new(0.5), { BackgroundTransparency = 1 }):Play()
+		TweenService:Create(self.bannerTitle, TweenInfo.new(0.5), { TextTransparency = 1 }):Play()
+		TweenService:Create(self.bannerBody, TweenInfo.new(0.5), { TextTransparency = 1 }):Play()
+		task.wait(0.55)
+		self.banner.Visible = false
+		self.bannerBody.TextTransparency = 0
+	end)
+end
+
 function Notifications:push(title: string, body: string, kind: string?)
-	local color = KIND_COLORS[kind or "info"] or GameConfig.Palette.accentSoft
+	local color = KIND_COLORS[kind or "info"] or Palette.accentSoft
 	self.counter += 1
 
 	local card = Theme.panel({
 		Name = "Notif" .. self.counter,
 		Size = UDim2.new(1, 0, 0, 10),
 		AutomaticSize = Enum.AutomaticSize.Y,
-		BackgroundTransparency = 0.05,
+		BackgroundTransparency = 0.03,
 		LayoutOrder = self.counter,
 		ZIndex = 41,
 		Parent = self.container,
+	}, { accent = color, brackets = false })
+
+	-- Barre d'accent verticale, comme une fiche de dossier.
+	Theme.create("Frame", {
+		Name = "Accent",
+		Size = UDim2.new(0, 2, 1, 0),
+		BackgroundColor3 = color,
+		BorderSizePixel = 0,
+		ZIndex = 42,
+		Parent = card,
 	})
-	Theme.padding(12).Parent = card
 
-	local stroke = card:FindFirstChildOfClass("UIStroke")
-	if stroke then
-		stroke.Color = color
-		stroke.Transparency = 0.1
-	end
-
-	Theme.create("UIListLayout", { Padding = UDim.new(0, 4), SortOrder = Enum.SortOrder.LayoutOrder, Parent = card })
+	local content = Theme.create("Frame", {
+		Name = "Contenu",
+		Size = UDim2.new(1, 0, 0, 10),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundTransparency = 1,
+		ZIndex = 42,
+		Parent = card,
+	}, { Theme.list(Enum.FillDirection.Vertical, 4), Theme.padding(12, 14) })
 
 	Theme.create("TextLabel", {
-		Size = UDim2.new(1, 0, 0, 20),
+		Size = UDim2.new(1, 0, 0, 18),
 		BackgroundTransparency = 1,
-		Font = Theme.TitleFont,
+		Font = Theme.DisplayFont,
 		Text = title,
-		TextSize = 15,
+		TextSize = 13,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextColor3 = color,
 		LayoutOrder = 1,
-		ZIndex = 42,
-		Parent = card,
+		ZIndex = 43,
+		Parent = content,
 	})
 
 	Theme.create("TextLabel", {
@@ -6871,21 +7308,21 @@ function Notifications:push(title: string, body: string, kind: string?)
 		BackgroundTransparency = 1,
 		Font = Theme.BodyFont,
 		Text = body,
-		TextSize = 13,
+		TextSize = 12,
 		TextWrapped = true,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextYAlignment = Enum.TextYAlignment.Top,
-		TextColor3 = GameConfig.Palette.text,
+		TextColor3 = Palette.text,
 		LayoutOrder = 2,
-		ZIndex = 42,
-		Parent = card,
+		ZIndex = 43,
+		Parent = content,
 	})
 
-	-- Entrée : glissement + fondu.
+	-- Entrée : glissement depuis la droite.
 	card.BackgroundTransparency = 1
-	card.Position = UDim2.fromOffset(40, 0)
-	TweenService:Create(card, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-		BackgroundTransparency = 0.05,
+	card.Position = UDim2.fromOffset(50, 0)
+	TweenService:Create(card, TweenInfo.new(0.28, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+		BackgroundTransparency = 0.03,
 		Position = UDim2.fromOffset(0, 0),
 	}):Play()
 
@@ -6893,17 +7330,19 @@ function Notifications:push(title: string, body: string, kind: string?)
 		if not card.Parent then
 			return
 		end
-		local fade = TweenService:Create(card, TweenInfo.new(0.35), {
-			BackgroundTransparency = 1,
-			Position = UDim2.fromOffset(40, 0),
-		})
 		for _, child in ipairs(card:GetDescendants()) do
 			if child:IsA("TextLabel") then
 				TweenService:Create(child, TweenInfo.new(0.35), { TextTransparency = 1 }):Play()
 			elseif child:IsA("UIStroke") then
 				TweenService:Create(child, TweenInfo.new(0.35), { Transparency = 1 }):Play()
+			elseif child:IsA("Frame") then
+				TweenService:Create(child, TweenInfo.new(0.35), { BackgroundTransparency = 1 }):Play()
 			end
 		end
+		local fade = TweenService:Create(card, TweenInfo.new(0.35), {
+			BackgroundTransparency = 1,
+			Position = UDim2.fromOffset(50, 0),
+		})
 		fade:Play()
 		fade.Completed:Wait()
 		card:Destroy()
@@ -6914,7 +7353,7 @@ return Notifications
 ]]></string>
             </Properties>
           </Item>
-          <Item class="ModuleScript" referent="46">
+          <Item class="ModuleScript" referent="49">
             <Properties>
               <string name="Name">QuestPanel</string>
               <string name="Source"><![CDATA[--!strict
@@ -6952,16 +7391,22 @@ local function sectionTitle(parent: Instance, text: string, subtitle: string, or
 	})
 
 	Theme.create("TextLabel", {
-		Size = UDim2.new(1, 0, 0, 24),
+		Size = UDim2.new(1, 0, 0, 22),
 		BackgroundTransparency = 1,
-		Font = Theme.TitleFont,
+		Font = Theme.DisplayFont,
 		Text = text,
-		TextSize = 17,
+		TextSize = 15,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextColor3 = GameConfig.Palette.accentSoft,
 		ZIndex = 34,
 		Parent = holder,
 	})
+
+	local rule = Theme.rule(GameConfig.Palette.accentSoft, 1)
+	rule.Position = UDim2.fromOffset(0, 22)
+	rule.Size = UDim2.new(1, 0, 0, 1)
+	rule.ZIndex = 34
+	rule.Parent = holder
 
 	Theme.create("TextLabel", {
 		Position = UDim2.fromOffset(0, 24),
@@ -6999,7 +7444,7 @@ function QuestPanel.new(parent: ScreenGui)
 		BorderSizePixel = 0,
 		CanvasSize = UDim2.new(),
 		AutomaticCanvasSize = Enum.AutomaticSize.Y,
-		ScrollBarThickness = 6,
+		ScrollBarThickness = 4,
 		ScrollBarImageColor3 = GameConfig.Palette.accent,
 		ZIndex = 32,
 		Parent = content,
@@ -7026,25 +7471,19 @@ function QuestPanel.new(parent: ScreenGui)
 	for _, hunt in ipairs(HuntCatalog.List) do
 		order += 1
 		local card = Theme.panel({
-			Size = UDim2.new(1, 0, 0, 116),
-			BackgroundTransparency = 0.2,
+			Size = UDim2.new(1, 0, 0, 118),
 			LayoutOrder = order,
 			ZIndex = 33,
 			Parent = scroll,
-		})
-		Theme.padding(14).Parent = card
-
-		local stroke = card:FindFirstChildOfClass("UIStroke")
-		if stroke then
-			stroke.Color = hunt.color
-		end
+		}, { accent = hunt.color, brackets = true })
+		Theme.padding(14, 16).Parent = card
 
 		Theme.create("TextLabel", {
 			Size = UDim2.new(0.62, 0, 0, 22),
 			BackgroundTransparency = 1,
-			Font = Theme.HeadingFont,
+			Font = Theme.DisplayFont,
 			Text = hunt.name,
-			TextSize = 17,
+			TextSize = 15,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			TextColor3 = hunt.color,
 			ZIndex = 34,
@@ -7116,35 +7555,25 @@ function QuestPanel.new(parent: ScreenGui)
 			Parent = card,
 		})
 
-		local action = Theme.create("TextButton", {
+		local action = Theme.button("ACCEPTER", hunt.color, {
 			AnchorPoint = Vector2.new(1, 1),
 			Position = UDim2.new(1, 0, 1, 0),
-			Size = UDim2.fromOffset(200, 34),
-			BackgroundColor3 = hunt.color,
-			BackgroundTransparency = 0.2,
-			AutoButtonColor = true,
-			Font = Theme.HeadingFont,
-			Text = "Accepter",
-			TextSize = 14,
-			TextColor3 = Color3.fromRGB(10, 10, 16),
+			Size = UDim2.fromOffset(200, 32),
+			TextSize = 13,
 			ZIndex = 34,
 			Parent = card,
-		}, { Theme.corner(6) })
+		})
 
-		local abandon = Theme.create("TextButton", {
+		local abandon = Theme.button("ABANDONNER", GameConfig.Palette.danger, {
 			AnchorPoint = Vector2.new(1, 1),
 			Position = UDim2.new(1, -208, 1, 0),
-			Size = UDim2.fromOffset(110, 34),
-			BackgroundColor3 = GameConfig.Palette.panelLight,
-			AutoButtonColor = true,
-			Font = Theme.BodyFont,
-			Text = "Abandonner",
-			TextSize = 12,
+			Size = UDim2.fromOffset(120, 32),
+			TextSize = 11,
 			TextColor3 = GameConfig.Palette.textDim,
 			Visible = false,
 			ZIndex = 34,
 			Parent = card,
-		}, { Theme.corner(6) })
+		})
 
 		-- En cas de succès, l'état du profil rafraîchit le libellé tout seul ;
 		-- en cas d'échec, on affiche la raison quelques secondes.
@@ -7168,14 +7597,14 @@ function QuestPanel.new(parent: ScreenGui)
 			end
 			local progress = profile.hunts.active[hunt.id]
 			if progress == nil then
-				request("accept", action, "Accepter")
+				request("accept", action, "ACCEPTER")
 			elseif progress >= hunt.goal then
-				request("claim", action, "Réclamer la prime")
+				request("claim", action, "RÉCLAMER LA PRIME")
 			end
 		end)
 
 		abandon.Activated:Connect(function()
-			request("abandon", abandon, "Abandonner")
+			request("abandon", abandon, "ABANDONNER")
 		end)
 
 		self.hunts[hunt.id] = {
@@ -7202,13 +7631,12 @@ function QuestPanel.new(parent: ScreenGui)
 	for _, quest in ipairs(QuestCatalog.List) do
 		order += 1
 		local row = Theme.panel({
-			Size = UDim2.new(1, 0, 0, 96),
-			BackgroundTransparency = 0.2,
+			Size = UDim2.new(1, 0, 0, 98),
 			LayoutOrder = order,
 			ZIndex = 33,
 			Parent = scroll,
-		})
-		Theme.padding(12).Parent = row
+		}, { accent = GameConfig.Palette.accent, brackets = false })
+		Theme.padding(14, 16).Parent = row
 
 		Theme.create("TextLabel", {
 			Size = UDim2.new(0.65, 0, 0, 20),
@@ -7273,20 +7701,14 @@ function QuestPanel.new(parent: ScreenGui)
 			Parent = row,
 		})
 
-		local claim = Theme.create("TextButton", {
+		local claim = Theme.button("RÉCLAMER", GameConfig.Palette.success, {
 			AnchorPoint = Vector2.new(1, 1),
 			Position = UDim2.new(1, 0, 1, 0),
-			Size = UDim2.fromOffset(160, 32),
-			BackgroundColor3 = GameConfig.Palette.success,
-			BackgroundTransparency = 0.2,
-			AutoButtonColor = true,
-			Font = Theme.HeadingFont,
-			Text = "Réclamer",
-			TextSize = 14,
-			TextColor3 = Color3.fromRGB(12, 20, 14),
+			Size = UDim2.fromOffset(170, 30),
+			TextSize = 12,
 			ZIndex = 34,
 			Parent = row,
-		}, { Theme.corner(6) })
+		})
 
 		claim.Activated:Connect(function()
 			claim.Text = "..."
@@ -7322,12 +7744,12 @@ function QuestPanel.new(parent: ScreenGui)
 
 			if progress == nil then
 				row.status.Text = ("Non accepté%s"):format(suffix)
-				row.action.Text = if locked then ("Niveau %d requis"):format(hunt.minLevel) else "Accepter"
+				row.action.Text = if locked then ("NIVEAU %d REQUIS"):format(hunt.minLevel) else "ACCEPTER"
 				row.action.BackgroundColor3 = if locked then GameConfig.Palette.panelLight else hunt.color
 				row.action.Active = not locked
 			elseif progress >= hunt.goal then
 				row.status.Text = ("Terminé : %d / %d%s"):format(progress, hunt.goal, suffix)
-				row.action.Text = "Réclamer la prime"
+				row.action.Text = "RÉCLAMER LA PRIME"
 				row.action.BackgroundColor3 = GameConfig.Palette.success
 				row.action.Active = true
 			else
@@ -7347,15 +7769,15 @@ function QuestPanel.new(parent: ScreenGui)
 			row.progress.Text = ("%s / %s"):format(Util.formatNumber(current), Util.formatNumber(quest.goal))
 
 			if profile.quests.claimed[questId] then
-				row.claim.Text = "Réclamée"
+				row.claim.Text = "RÉCLAMÉE"
 				row.claim.BackgroundColor3 = GameConfig.Palette.panelLight
 				row.claim.Active = false
 			elseif current >= quest.goal then
-				row.claim.Text = "Réclamer"
+				row.claim.Text = "RÉCLAMER"
 				row.claim.BackgroundColor3 = GameConfig.Palette.success
 				row.claim.Active = true
 			else
-				row.claim.Text = "En cours"
+				row.claim.Text = "EN COURS"
 				row.claim.BackgroundColor3 = GameConfig.Palette.panelLight
 				row.claim.Active = false
 			end
@@ -7377,7 +7799,7 @@ return QuestPanel
 ]]></string>
             </Properties>
           </Item>
-          <Item class="ModuleScript" referent="47">
+          <Item class="ModuleScript" referent="50">
             <Properties>
               <string name="Name">Shop</string>
               <string name="Source"><![CDATA[--!strict
@@ -7456,16 +7878,17 @@ function Shop.new(parent: ScreenGui)
 			Name = definition.mode,
 			Size = UDim2.fromOffset(163, 28),
 			BackgroundColor3 = GameConfig.Palette.panelLight,
-			BackgroundTransparency = 0.2,
-			AutoButtonColor = true,
+			BackgroundTransparency = 0.35,
+			AutoButtonColor = false,
 			Font = Theme.HeadingFont,
 			Text = definition.label,
-			TextSize = 13,
+			TextSize = 12,
 			TextColor3 = GameConfig.Palette.textDim,
+			BorderSizePixel = 0,
 			LayoutOrder = index,
 			ZIndex = 33,
 			Parent = switch,
-		}, { Theme.corner(6) })
+		}, { Theme.corner(3) })
 
 		button.Activated:Connect(function()
 			self:setMode(definition.mode)
@@ -7526,11 +7949,10 @@ function Shop.new(parent: ScreenGui)
 	for index = 1, ITEMS_PER_PAGE do
 		local card = Theme.panel({
 			Name = "Case" .. index,
-			BackgroundTransparency = 0.15,
 			LayoutOrder = index,
 			ZIndex = 33,
 			Parent = grid,
-		})
+		}, { accent = GameConfig.Palette.accent, brackets = true })
 
 		local category = Theme.create("TextLabel", {
 			Position = UDim2.fromScale(0.05, 0.05),
@@ -7562,9 +7984,9 @@ function Shop.new(parent: ScreenGui)
 			Position = UDim2.fromScale(0.05, 0.17),
 			Size = UDim2.fromScale(0.9, 0.16),
 			BackgroundTransparency = 1,
-			Font = Theme.HeadingFont,
+			Font = Theme.DisplayFont,
 			Text = "",
-			TextSize = 16,
+			TextSize = 14,
 			TextWrapped = true,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			TextColor3 = GameConfig.Palette.text,
@@ -7600,20 +8022,14 @@ function Shop.new(parent: ScreenGui)
 			Parent = card,
 		})
 
-		local action = Theme.create("TextButton", {
+		local action = Theme.button("", GameConfig.Palette.accent, {
 			AnchorPoint = Vector2.new(0.5, 1),
 			Position = UDim2.fromScale(0.5, 0.94),
 			Size = UDim2.fromScale(0.9, 0.18),
-			BackgroundColor3 = GameConfig.Palette.accent,
-			BackgroundTransparency = 0.15,
-			AutoButtonColor = true,
-			Font = Theme.HeadingFont,
-			Text = "",
-			TextSize = 14,
-			TextColor3 = GameConfig.Palette.text,
+			TextSize = 13,
 			ZIndex = 34,
 			Parent = card,
-		}, { Theme.corner(6) })
+		})
 
 		local slot = {
 			card = card,
@@ -7655,18 +8071,13 @@ function Shop.new(parent: ScreenGui)
 	})
 
 	local function arrow(text: string, delta: number, order: number): TextButton
-		local button = Theme.create("TextButton", {
-			Size = UDim2.fromOffset(46, 32),
-			BackgroundColor3 = GameConfig.Palette.panelLight,
-			AutoButtonColor = true,
-			Font = Theme.TitleFont,
-			Text = text,
+		local button = Theme.button(text, GameConfig.Palette.accent, {
+			Size = UDim2.fromOffset(48, 32),
 			TextSize = 18,
-			TextColor3 = GameConfig.Palette.text,
 			LayoutOrder = order,
 			ZIndex = 33,
 			Parent = footer,
-		}, { Theme.corner(6) })
+		})
 
 		button.Activated:Connect(function()
 			self:setPage(self.page + delta)
@@ -7677,9 +8088,9 @@ function Shop.new(parent: ScreenGui)
 	arrow("‹", -1, 1)
 
 	self.pageLabel = Theme.create("TextLabel", {
-		Size = UDim2.fromOffset(160, 32),
+		Size = UDim2.fromOffset(170, 32),
 		BackgroundTransparency = 1,
-		Font = Theme.HeadingFont,
+		Font = Theme.DisplayFont,
 		Text = "",
 		TextSize = 14,
 		TextColor3 = GameConfig.Palette.textDim,
@@ -7736,7 +8147,7 @@ function Shop:activate(slot: any)
 
 	if self.mode == "robux" then
 		if item.productId == 0 then
-			slot.action.Text = "Produit non configuré"
+			slot.action.Text = "PRODUIT NON CONFIGURÉ"
 			task.delay(2, function()
 				self:refresh()
 			end)
@@ -7805,34 +8216,34 @@ function Shop:bind(slot: any, item: any?)
 	local equipped = profile.equipped.arme == item.id or profile.equipped.aura == item.id
 
 	if equipped then
-		slot.action.Text = "Équipé — retirer"
+		slot.action.Text = "ÉQUIPÉ — RETIRER"
 		slot.action.BackgroundColor3 = GameConfig.Palette.success
 		slot.action.Active = true
 	elseif owned then
 		local equipable = item.category == "arme" or item.category == "aura"
-		slot.action.Text = if equipable then "Équiper" else "Acquis"
+		slot.action.Text = if equipable then "ÉQUIPER" else "ACQUIS"
 		slot.action.BackgroundColor3 = GameConfig.Palette.panelLight
 		slot.action.Active = equipable
 	elseif profile.level < item.requiredLevel then
-		slot.action.Text = ("Niveau %d requis"):format(item.requiredLevel)
+		slot.action.Text = ("NIVEAU %d REQUIS"):format(item.requiredLevel)
 		slot.action.BackgroundColor3 = GameConfig.Palette.panelLight
 		slot.action.Active = false
 	elseif self.mode == "robux" then
 		if item.productId == 0 then
-			slot.action.Text = "Bientôt en Robux"
+			slot.action.Text = "BIENTÔT EN ROBUX"
 			slot.action.BackgroundColor3 = GameConfig.Palette.panelLight
 			slot.action.Active = false
 		else
-			slot.action.Text = ("Acheter — R$ %d"):format(item.robuxPrice)
+			slot.action.Text = ("ACHETER — R$ %d"):format(item.robuxPrice)
 			slot.action.BackgroundColor3 = ROBUX_COLOR
 			slot.action.Active = true
 		end
 	elseif (profile.currencies[item.currency] or 0) < item.price then
-		slot.action.Text = "Fonds insuffisants"
+		slot.action.Text = "FONDS INSUFFISANTS"
 		slot.action.BackgroundColor3 = GameConfig.Palette.panelLight
 		slot.action.Active = false
 	else
-		slot.action.Text = "Acheter"
+		slot.action.Text = "ACHETER"
 		slot.action.BackgroundColor3 = item.color
 		slot.action.Active = true
 	end
@@ -7876,17 +8287,19 @@ return Shop
 ]]></string>
             </Properties>
           </Item>
-          <Item class="ModuleScript" referent="48">
+          <Item class="ModuleScript" referent="51">
             <Properties>
               <string name="Name">StatsPanel</string>
               <string name="Source"><![CDATA[--!strict
 --[[
 	StatsPanel
-	Répartition des points de statistique, façon fenêtre du « Système ».
+	Répartition des points, et récapitulatif des valeurs réelles calculées par
+	le serveur.
 ]]
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local GameConfig = require(Shared.GameConfig)
@@ -7896,7 +8309,15 @@ local Util = require(Shared.Util)
 local State = require(script.Parent.Parent.State)
 local Theme = require(script.Parent.Theme)
 
+local Palette = GameConfig.Palette
 local player = Players.LocalPlayer
+
+local STAT_COLORS = {
+	magie = Palette.accent,
+	force = Palette.danger,
+	vie = Palette.success,
+	agilite = Palette.accentSoft,
+}
 
 local StatsPanel = {}
 StatsPanel.__index = StatsPanel
@@ -7904,114 +8325,201 @@ StatsPanel.__index = StatsPanel
 function StatsPanel.new(parent: ScreenGui)
 	local self = setmetatable({}, StatsPanel)
 
-	local root, content = Theme.window(parent, "STATISTIQUES", UDim2.fromOffset(560, 520))
+	local root, content = Theme.window(parent, "STATISTIQUES", UDim2.fromOffset(620, 600))
 	self.root = root
 
 	self.pointsLabel = Theme.create("TextLabel", {
-		Size = UDim2.new(1, 0, 0, 26),
+		Size = UDim2.new(1, 0, 0, 24),
 		BackgroundTransparency = 1,
 		Font = Theme.HeadingFont,
-		Text = "Points disponibles : 0",
-		TextSize = 16,
+		Text = "",
+		TextSize = 14,
 		TextXAlignment = Enum.TextXAlignment.Left,
-		TextColor3 = GameConfig.Palette.success,
+		TextColor3 = Palette.success,
 		ZIndex = 32,
 		Parent = content,
 	})
 
 	local list = Theme.create("Frame", {
-		Position = UDim2.fromOffset(0, 36),
-		Size = UDim2.new(1, 0, 1, -130),
+		Position = UDim2.fromOffset(0, 32),
+		Size = UDim2.new(1, 0, 0, 268),
 		BackgroundTransparency = 1,
 		ZIndex = 32,
 		Parent = content,
-	}, {
-		Theme.create("UIListLayout", { Padding = UDim.new(0, 10), SortOrder = Enum.SortOrder.LayoutOrder }),
-	})
+	}, { Theme.list(Enum.FillDirection.Vertical, 10) })
 
 	self.rows = {}
 	for index, stat in ipairs(GameConfig.Stats) do
+		local color = STAT_COLORS[stat.id] or Palette.accent
+
 		local row = Theme.panel({
-			Size = UDim2.new(1, 0, 0, 62),
-			BackgroundTransparency = 0.2,
+			Size = UDim2.new(1, 0, 0, 60),
 			LayoutOrder = index,
 			ZIndex = 32,
 			Parent = list,
-		})
-		Theme.padding(10).Parent = row
+		}, { accent = color, brackets = false })
 
-		local name = Theme.create("TextLabel", {
+		-- Initiale de la statistique, dans un carré coloré.
+		local initial = Theme.create("TextLabel", {
+			Position = UDim2.fromOffset(12, 12),
+			Size = UDim2.fromOffset(36, 36),
+			BackgroundColor3 = color,
+			BackgroundTransparency = 0.82,
+			Font = Theme.NumberFont,
+			Text = string.upper(string.sub(stat.name, 1, 1)),
+			TextSize = 20,
+			TextColor3 = color,
+			BorderSizePixel = 0,
+			ZIndex = 33,
+			Parent = row,
+		}, { Theme.corner(3), Theme.stroke(color, 1, 0.5) })
+
+		Theme.create("TextLabel", {
+			Position = UDim2.fromOffset(58, 10),
 			Size = UDim2.new(0.5, 0, 0, 20),
 			BackgroundTransparency = 1,
 			Font = Theme.HeadingFont,
-			Text = stat.name,
-			TextSize = 16,
+			Text = string.upper(stat.name),
+			TextSize = 15,
 			TextXAlignment = Enum.TextXAlignment.Left,
-			TextColor3 = GameConfig.Palette.text,
+			TextColor3 = Palette.text,
 			ZIndex = 33,
 			Parent = row,
 		})
 
 		Theme.create("TextLabel", {
-			Position = UDim2.fromOffset(0, 22),
-			Size = UDim2.new(0.7, 0, 0, 18),
+			Position = UDim2.fromOffset(58, 30),
+			Size = UDim2.new(0.62, 0, 0, 18),
 			BackgroundTransparency = 1,
 			Font = Theme.BodyFont,
 			Text = stat.description,
-			TextSize = 13,
+			TextSize = 12,
 			TextXAlignment = Enum.TextXAlignment.Left,
-			TextColor3 = GameConfig.Palette.textDim,
+			TextColor3 = Palette.textDim,
 			ZIndex = 33,
 			Parent = row,
 		})
 
 		local value = Theme.create("TextLabel", {
 			AnchorPoint = Vector2.new(1, 0.5),
-			Position = UDim2.new(1, -50, 0.5, 0),
+			Position = UDim2.new(1, -56, 0.5, 0),
 			Size = UDim2.fromOffset(70, 30),
 			BackgroundTransparency = 1,
-			Font = Theme.TitleFont,
+			Font = Theme.NumberFont,
 			Text = "0",
 			TextSize = 22,
 			TextXAlignment = Enum.TextXAlignment.Right,
-			TextColor3 = GameConfig.Palette.accent,
+			TextColor3 = color,
 			ZIndex = 33,
 			Parent = row,
 		})
 
-		local plus = Theme.create("TextButton", {
+		local plus = Theme.button("+", color, {
 			AnchorPoint = Vector2.new(1, 0.5),
-			Position = UDim2.new(1, 0, 0.5, 0),
+			Position = UDim2.new(1, -12, 0.5, 0),
 			Size = UDim2.fromOffset(38, 38),
-			BackgroundColor3 = GameConfig.Palette.accent,
-			BackgroundTransparency = 0.2,
-			AutoButtonColor = true,
-			Font = Theme.TitleFont,
-			Text = "+",
-			TextSize = 22,
-			TextColor3 = GameConfig.Palette.text,
+			TextSize = 20,
 			ZIndex = 33,
 			Parent = row,
-		}, { Theme.corner(8) })
+		})
 
 		plus.Activated:Connect(function()
 			Remotes.event("SpendStatPoint"):FireServer(stat.id, 1)
+			-- Retour immédiat : le carré pulse même avant la réponse serveur.
+			TweenService:Create(initial, TweenInfo.new(0.12), { BackgroundTransparency = 0.5 }):Play()
+			task.delay(0.14, function()
+				TweenService:Create(initial, TweenInfo.new(0.2), { BackgroundTransparency = 0.82 }):Play()
+			end)
 		end)
 
-		self.rows[stat.id] = { value = value, plus = plus, name = name }
+		self.rows[stat.id] = { value = value, plus = plus }
 	end
 
-	self.summary = Theme.create("TextLabel", {
+	------------------------------------------------------------------
+	-- Récapitulatif en tuiles
+	------------------------------------------------------------------
+	Theme.create("TextLabel", {
+		Position = UDim2.fromOffset(0, 310),
+		Size = UDim2.new(1, 0, 0, 20),
+		BackgroundTransparency = 1,
+		Font = Theme.DisplayFont,
+		Text = "VALEURS RÉELLES",
+		TextSize = 12,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextColor3 = Palette.textFaint,
+		ZIndex = 32,
+		Parent = content,
+	})
+
+	local tiles = Theme.create("Frame", {
+		Position = UDim2.fromOffset(0, 334),
+		Size = UDim2.new(1, 0, 0, 150),
+		BackgroundTransparency = 1,
+		ZIndex = 32,
+		Parent = content,
+	}, {
+		Theme.create("UIGridLayout", {
+			CellSize = UDim2.new(0.32, 0, 0, 62),
+			CellPadding = UDim2.new(0.02, 0, 0, 10),
+			SortOrder = Enum.SortOrder.LayoutOrder,
+			FillDirectionMaxCells = 3,
+		}),
+	})
+
+	self.tiles = {}
+	for index, definition in ipairs({
+		{ id = "physique", caption = "DÉGÂTS PHYSIQUES", color = Palette.danger },
+		{ id = "magique", caption = "DÉGÂTS DE TECHNIQUE", color = Palette.accent },
+		{ id = "energie", caption = "MAGIE MAXIMALE", color = Palette.accentSoft },
+		{ id = "vitesse", caption = "VITESSE", color = Palette.success },
+		{ id = "recharge", caption = "RÉDUCTION DE RECHARGE", color = Palette.gold },
+		{ id = "kills", caption = "ESPRITS ÉLIMINÉS", color = Palette.textDim },
+	}) do
+		local tile = Theme.panel({
+			LayoutOrder = index,
+			ZIndex = 32,
+			Parent = tiles,
+		}, { accent = definition.color, brackets = false })
+
+		local value = Theme.create("TextLabel", {
+			Position = UDim2.fromScale(0, 0.12),
+			Size = UDim2.fromScale(1, 0.45),
+			BackgroundTransparency = 1,
+			Font = Theme.NumberFont,
+			Text = "0",
+			TextScaled = true,
+			TextColor3 = definition.color,
+			ZIndex = 33,
+			Parent = tile,
+		})
+
+		Theme.create("TextLabel", {
+			Position = UDim2.fromScale(0.05, 0.62),
+			Size = UDim2.fromScale(0.9, 0.26),
+			BackgroundTransparency = 1,
+			Font = Theme.BodyFont,
+			Text = definition.caption,
+			TextScaled = true,
+			TextColor3 = Palette.textFaint,
+			ZIndex = 33,
+			Parent = tile,
+		})
+
+		self.tiles[definition.id] = value
+	end
+
+	self.footer = Theme.create("TextLabel", {
 		AnchorPoint = Vector2.new(0, 1),
 		Position = UDim2.new(0, 0, 1, 0),
-		Size = UDim2.new(1, 0, 0, 80),
+		Size = UDim2.new(1, 0, 0, 36),
 		BackgroundTransparency = 1,
 		Font = Theme.BodyFont,
 		Text = "",
-		TextSize = 14,
+		TextSize = 12,
+		TextWrapped = true,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextYAlignment = Enum.TextYAlignment.Top,
-		TextColor3 = GameConfig.Palette.textDim,
+		TextColor3 = Palette.textDim,
 		ZIndex = 32,
 		Parent = content,
 	})
@@ -8022,25 +8530,27 @@ function StatsPanel.new(parent: ScreenGui)
 			return
 		end
 
-		self.pointsLabel.Text = ("Points disponibles : %d"):format(profile.statPoints)
+		local points = profile.statPoints
+		self.pointsLabel.Text = if points > 0
+			then ("%d POINT(S) À RÉPARTIR"):format(points)
+			else "Aucun point disponible — monte de niveau pour en gagner."
+		self.pointsLabel.TextColor3 = if points > 0 then Palette.success else Palette.textDim
+
 		for statId, row in pairs(self.rows) do
 			row.value.Text = tostring(profile.stats[statId] or 0)
-			row.plus.Visible = profile.statPoints > 0
+			row.plus.Visible = points > 0
 		end
 
+		self.tiles.physique.Text = tostring(player:GetAttribute("Degats") or 0)
+		self.tiles.magique.Text = tostring(player:GetAttribute("DegatsMagie") or 0)
+		self.tiles.energie.Text = tostring(player:GetAttribute("EnergieMax") or 0)
+		self.tiles.vitesse.Text = string.format("%.1f", player:GetAttribute("Vitesse") or GameConfig.BaseWalkSpeed)
+		self.tiles.recharge.Text = ("%d%%"):format(math.floor((player:GetAttribute("ReductionCooldown") or 0) * 100))
+		self.tiles.kills.Text = Util.formatNumber(profile.totals.kills)
+
 		local rank = GameConfig.rankForLevel(profile.level)
-		self.summary.Text = ("Rang : %s   •   Dégâts physiques : %d   •   Dégâts de technique : %d   •   Énergie max : %d   •   Vitesse : %.1f\nRéduction de recharge : %d%%   •   Éliminations : %s   •   Failles nettoyées : %d (meilleur rang %s)")
-			:format(
-				rank.name,
-				player:GetAttribute("Degats") or 0,
-				player:GetAttribute("DegatsMagie") or 0,
-				player:GetAttribute("EnergieMax") or 0,
-				player:GetAttribute("Vitesse") or GameConfig.BaseWalkSpeed,
-				math.floor((player:GetAttribute("ReductionCooldown") or 0) * 100),
-				Util.formatNumber(profile.totals.kills),
-				profile.totals.riftsCleared,
-				profile.bestRiftRank
-			)
+		self.footer.Text = ("Rang %s — niveau %d   •   Failles nettoyées : %d (meilleur rang %s)")
+			:format(rank.name, profile.level, profile.totals.riftsCleared, profile.bestRiftRank)
 	end
 
 	State.observe(refresh)
@@ -8063,17 +8573,23 @@ return StatsPanel
 ]]></string>
             </Properties>
           </Item>
-          <Item class="ModuleScript" referent="49">
+          <Item class="ModuleScript" referent="52">
             <Properties>
               <string name="Name">Theme</string>
               <string name="Source"><![CDATA[--!strict
 --[[
 	Theme
-	Petits utilitaires de construction d'interface, pour éviter de répéter
-	trente lignes de propriétés à chaque frame.
+	Le système de design du jeu. Tout ce qui donne son identité visuelle à
+	l'interface vit ici : palette, typographies, panneaux anguleux à équerres,
+	boutons, jauges, fenêtres modales et animations.
+
+	Principe : des cadres nets plutôt que des coins arrondis, des équerres aux
+	angles comme sur les interfaces « système » d'anime, des dégradés sombres
+	et deux accents lumineux (violet maudit, cyan spirituel).
 ]]
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local GameConfig = require(Shared.GameConfig)
@@ -8081,9 +8597,33 @@ local GameConfig = require(Shared.GameConfig)
 local Theme = {}
 
 Theme.Palette = GameConfig.Palette
-Theme.TitleFont = Enum.Font.GothamBlack
-Theme.HeadingFont = Enum.Font.GothamBold
-Theme.BodyFont = Enum.Font.Gotham
+
+------------------------------------------------------------------
+-- Typographies
+------------------------------------------------------------------
+-- Certaines polices n'existent pas sur toutes les versions du client :
+-- on tente la première disponible, avec un repli sûr.
+local function resolveFont(candidates: { string }, fallback: Enum.Font): Enum.Font
+	for _, name in ipairs(candidates) do
+		local ok, value = pcall(function()
+			return (Enum.Font :: any)[name]
+		end)
+		if ok and value then
+			return value
+		end
+	end
+	return fallback
+end
+
+Theme.TitleFont = resolveFont({ "Sarpanch", "GothamBlack" }, Enum.Font.GothamBlack)
+Theme.DisplayFont = resolveFont({ "Michroma", "Sarpanch", "GothamBlack" }, Enum.Font.GothamBlack)
+Theme.HeadingFont = resolveFont({ "GothamBold", "GothamBlack" }, Enum.Font.GothamBold)
+Theme.BodyFont = resolveFont({ "Gotham", "SourceSans" }, Enum.Font.Gotham)
+Theme.NumberFont = resolveFont({ "GothamBlack", "SourceSansBold" }, Enum.Font.GothamBlack)
+
+------------------------------------------------------------------
+-- Base
+------------------------------------------------------------------
 
 --- Crée une instance avec ses propriétés et ses enfants d'un coup.
 function Theme.create(className: string, props: { [string]: any }?, children: { Instance }?): any
@@ -8111,382 +8651,364 @@ function Theme.create(className: string, props: { [string]: any }?, children: { 
 end
 
 function Theme.corner(radius: number): UICorner
-	--- Fenêtre modale : fond assombri, cadre, titre et bouton de fermeture.
---- Renvoie la racine (à afficher/masquer) et le conteneur de contenu.
-function Theme.window(parent: Instance, titleText: string, size: UDim2): (Frame, Frame)
-	local root = Theme.create("Frame", {
-		Name = titleText,
-		Size = UDim2.fromScale(1, 1),
-		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-		BackgroundTransparency = 0.45,
-		BorderSizePixel = 0,
-		Visible = false,
-		ZIndex = 30,
-		Parent = parent,
-	})
-
-	local window = Theme.panel({
-		Name = "Fenêtre",
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.5),
-		Size = size,
-		BackgroundTransparency = 0.02,
-		ZIndex = 31,
-		Parent = root,
-	})
-
-	local header = Theme.create("Frame", {
-		Name = "Entête",
-		Size = UDim2.new(1, 0, 0, 54),
-		BackgroundTransparency = 1,
-		ZIndex = 32,
-		Parent = window,
-	})
-
-	Theme.create("TextLabel", {
-		Position = UDim2.fromOffset(20, 0),
-		Size = UDim2.new(1, -80, 1, 0),
-		BackgroundTransparency = 1,
-		Font = Theme.TitleFont,
-		Text = titleText,
-		TextSize = 24,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextColor3 = Theme.Palette.text,
-		ZIndex = 32,
-		Parent = header,
-	})
-
-	local close = Theme.create("TextButton", {
-		Name = "Fermer",
-		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, -16, 0.5, 0),
-		Size = UDim2.fromOffset(38, 38),
-		BackgroundColor3 = Theme.Palette.panelLight,
-		AutoButtonColor = true,
-		Font = Theme.HeadingFont,
-		Text = "X",
-		TextSize = 18,
-		TextColor3 = Theme.Palette.text,
-		ZIndex = 32,
-		Parent = header,
-	}, { Theme.corner(8) })
-
-	close.Activated:Connect(function()
-		root.Visible = false
-	end)
-
-	local content = Theme.create("Frame", {
-		Name = "Contenu",
-		Position = UDim2.fromOffset(0, 54),
-		Size = UDim2.new(1, 0, 1, -54),
-		BackgroundTransparency = 1,
-		ZIndex = 31,
-		Parent = window,
-	})
-	Theme.padding(16).Parent = content
-
-	return root, content
-end
-
-return Theme.create("UICorner", { CornerRadius = UDim.new(0, radius) })
+	return Theme.create("UICorner", { CornerRadius = UDim.new(0, radius) })
 end
 
 function Theme.stroke(color: Color3?, thickness: number?, transparency: number?): UIStroke
-	--- Fenêtre modale : fond assombri, cadre, titre et bouton de fermeture.
---- Renvoie la racine (à afficher/masquer) et le conteneur de contenu.
-function Theme.window(parent: Instance, titleText: string, size: UDim2): (Frame, Frame)
-	local root = Theme.create("Frame", {
-		Name = titleText,
-		Size = UDim2.fromScale(1, 1),
-		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-		BackgroundTransparency = 0.45,
-		BorderSizePixel = 0,
-		Visible = false,
-		ZIndex = 30,
-		Parent = parent,
-	})
-
-	local window = Theme.panel({
-		Name = "Fenêtre",
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.5),
-		Size = size,
-		BackgroundTransparency = 0.02,
-		ZIndex = 31,
-		Parent = root,
-	})
-
-	local header = Theme.create("Frame", {
-		Name = "Entête",
-		Size = UDim2.new(1, 0, 0, 54),
-		BackgroundTransparency = 1,
-		ZIndex = 32,
-		Parent = window,
-	})
-
-	Theme.create("TextLabel", {
-		Position = UDim2.fromOffset(20, 0),
-		Size = UDim2.new(1, -80, 1, 0),
-		BackgroundTransparency = 1,
-		Font = Theme.TitleFont,
-		Text = titleText,
-		TextSize = 24,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextColor3 = Theme.Palette.text,
-		ZIndex = 32,
-		Parent = header,
-	})
-
-	local close = Theme.create("TextButton", {
-		Name = "Fermer",
-		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, -16, 0.5, 0),
-		Size = UDim2.fromOffset(38, 38),
-		BackgroundColor3 = Theme.Palette.panelLight,
-		AutoButtonColor = true,
-		Font = Theme.HeadingFont,
-		Text = "X",
-		TextSize = 18,
-		TextColor3 = Theme.Palette.text,
-		ZIndex = 32,
-		Parent = header,
-	}, { Theme.corner(8) })
-
-	close.Activated:Connect(function()
-		root.Visible = false
-	end)
-
-	local content = Theme.create("Frame", {
-		Name = "Contenu",
-		Position = UDim2.fromOffset(0, 54),
-		Size = UDim2.new(1, 0, 1, -54),
-		BackgroundTransparency = 1,
-		ZIndex = 31,
-		Parent = window,
-	})
-	Theme.padding(16).Parent = content
-
-	return root, content
-end
-
-return Theme.create("UIStroke", {
+	return Theme.create("UIStroke", {
 		Color = color or Theme.Palette.stroke,
-		Thickness = thickness or 2,
+		Thickness = thickness or 1,
 		Transparency = transparency or 0,
 		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 	})
 end
 
-function Theme.padding(all: number): UIPadding
-	--- Fenêtre modale : fond assombri, cadre, titre et bouton de fermeture.
---- Renvoie la racine (à afficher/masquer) et le conteneur de contenu.
-function Theme.window(parent: Instance, titleText: string, size: UDim2): (Frame, Frame)
-	local root = Theme.create("Frame", {
-		Name = titleText,
-		Size = UDim2.fromScale(1, 1),
-		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-		BackgroundTransparency = 0.45,
-		BorderSizePixel = 0,
-		Visible = false,
-		ZIndex = 30,
-		Parent = parent,
-	})
-
-	local window = Theme.panel({
-		Name = "Fenêtre",
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.5),
-		Size = size,
-		BackgroundTransparency = 0.02,
-		ZIndex = 31,
-		Parent = root,
-	})
-
-	local header = Theme.create("Frame", {
-		Name = "Entête",
-		Size = UDim2.new(1, 0, 0, 54),
-		BackgroundTransparency = 1,
-		ZIndex = 32,
-		Parent = window,
-	})
-
-	Theme.create("TextLabel", {
-		Position = UDim2.fromOffset(20, 0),
-		Size = UDim2.new(1, -80, 1, 0),
-		BackgroundTransparency = 1,
-		Font = Theme.TitleFont,
-		Text = titleText,
-		TextSize = 24,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextColor3 = Theme.Palette.text,
-		ZIndex = 32,
-		Parent = header,
-	})
-
-	local close = Theme.create("TextButton", {
-		Name = "Fermer",
-		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, -16, 0.5, 0),
-		Size = UDim2.fromOffset(38, 38),
-		BackgroundColor3 = Theme.Palette.panelLight,
-		AutoButtonColor = true,
-		Font = Theme.HeadingFont,
-		Text = "X",
-		TextSize = 18,
-		TextColor3 = Theme.Palette.text,
-		ZIndex = 32,
-		Parent = header,
-	}, { Theme.corner(8) })
-
-	close.Activated:Connect(function()
-		root.Visible = false
-	end)
-
-	local content = Theme.create("Frame", {
-		Name = "Contenu",
-		Position = UDim2.fromOffset(0, 54),
-		Size = UDim2.new(1, 0, 1, -54),
-		BackgroundTransparency = 1,
-		ZIndex = 31,
-		Parent = window,
-	})
-	Theme.padding(16).Parent = content
-
-	return root, content
-end
-
-return Theme.create("UIPadding", {
+function Theme.padding(all: number, horizontal: number?): UIPadding
+	local side = horizontal or all
+	return Theme.create("UIPadding", {
 		PaddingTop = UDim.new(0, all),
 		PaddingBottom = UDim.new(0, all),
-		PaddingLeft = UDim.new(0, all),
-		PaddingRight = UDim.new(0, all),
+		PaddingLeft = UDim.new(0, side),
+		PaddingRight = UDim.new(0, side),
+	})
+end
+
+function Theme.list(direction: Enum.FillDirection?, padding: number?, align: Enum.HorizontalAlignment?): UIListLayout
+	return Theme.create("UIListLayout", {
+		FillDirection = direction or Enum.FillDirection.Vertical,
+		Padding = UDim.new(0, padding or 8),
+		HorizontalAlignment = align or Enum.HorizontalAlignment.Left,
+		SortOrder = Enum.SortOrder.LayoutOrder,
 	})
 end
 
 function Theme.gradient(from: Color3, to: Color3, rotation: number?): UIGradient
-	--- Fenêtre modale : fond assombri, cadre, titre et bouton de fermeture.
---- Renvoie la racine (à afficher/masquer) et le conteneur de contenu.
-function Theme.window(parent: Instance, titleText: string, size: UDim2): (Frame, Frame)
-	local root = Theme.create("Frame", {
-		Name = titleText,
-		Size = UDim2.fromScale(1, 1),
-		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-		BackgroundTransparency = 0.45,
-		BorderSizePixel = 0,
-		Visible = false,
-		ZIndex = 30,
-		Parent = parent,
-	})
-
-	local window = Theme.panel({
-		Name = "Fenêtre",
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.5),
-		Size = size,
-		BackgroundTransparency = 0.02,
-		ZIndex = 31,
-		Parent = root,
-	})
-
-	local header = Theme.create("Frame", {
-		Name = "Entête",
-		Size = UDim2.new(1, 0, 0, 54),
-		BackgroundTransparency = 1,
-		ZIndex = 32,
-		Parent = window,
-	})
-
-	Theme.create("TextLabel", {
-		Position = UDim2.fromOffset(20, 0),
-		Size = UDim2.new(1, -80, 1, 0),
-		BackgroundTransparency = 1,
-		Font = Theme.TitleFont,
-		Text = titleText,
-		TextSize = 24,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextColor3 = Theme.Palette.text,
-		ZIndex = 32,
-		Parent = header,
-	})
-
-	local close = Theme.create("TextButton", {
-		Name = "Fermer",
-		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, -16, 0.5, 0),
-		Size = UDim2.fromOffset(38, 38),
-		BackgroundColor3 = Theme.Palette.panelLight,
-		AutoButtonColor = true,
-		Font = Theme.HeadingFont,
-		Text = "X",
-		TextSize = 18,
-		TextColor3 = Theme.Palette.text,
-		ZIndex = 32,
-		Parent = header,
-	}, { Theme.corner(8) })
-
-	close.Activated:Connect(function()
-		root.Visible = false
-	end)
-
-	local content = Theme.create("Frame", {
-		Name = "Contenu",
-		Position = UDim2.fromOffset(0, 54),
-		Size = UDim2.new(1, 0, 1, -54),
-		BackgroundTransparency = 1,
-		ZIndex = 31,
-		Parent = window,
-	})
-	Theme.padding(16).Parent = content
-
-	return root, content
-end
-
-return Theme.create("UIGradient", {
+	return Theme.create("UIGradient", {
 		Color = ColorSequence.new(from, to),
 		Rotation = rotation or 90,
 	})
 end
 
---- Panneau standard (fond sombre + liseré violet).
-function Theme.panel(props: { [string]: any }?): Frame
-	local options: { [string]: any } = props or {}
-	if options.BackgroundColor3 == nil then
-		options.BackgroundColor3 = Theme.Palette.panel
+------------------------------------------------------------------
+-- Décorations
+------------------------------------------------------------------
+
+--- Équerres lumineuses aux quatre angles : la signature visuelle du jeu.
+function Theme.brackets(parent: GuiObject, color: Color3?, length: number?, thickness: number?)
+	local tone = color or Theme.Palette.accent
+	local size = length or 16
+	local weight = thickness or 2
+
+	local corners = {
+		{ anchor = Vector2.new(0, 0), position = UDim2.fromScale(0, 0), x = 1, y = 1 },
+		{ anchor = Vector2.new(1, 0), position = UDim2.fromScale(1, 0), x = -1, y = 1 },
+		{ anchor = Vector2.new(0, 1), position = UDim2.fromScale(0, 1), x = 1, y = -1 },
+		{ anchor = Vector2.new(1, 1), position = UDim2.fromScale(1, 1), x = -1, y = -1 },
+	}
+
+	local holder = Theme.create("Frame", {
+		Name = "Équerres",
+		Size = UDim2.fromScale(1, 1),
+		BackgroundTransparency = 1,
+		ZIndex = (parent.ZIndex or 1) + 1,
+		Parent = parent,
+	})
+
+	for index, corner in ipairs(corners) do
+		-- Une barre horizontale et une barre verticale par angle.
+		Theme.create("Frame", {
+			Name = "H" .. index,
+			AnchorPoint = corner.anchor,
+			Position = corner.position,
+			Size = UDim2.fromOffset(size, weight),
+			BackgroundColor3 = tone,
+			BorderSizePixel = 0,
+			ZIndex = holder.ZIndex,
+			Parent = holder,
+		})
+		Theme.create("Frame", {
+			Name = "V" .. index,
+			AnchorPoint = corner.anchor,
+			Position = corner.position,
+			Size = UDim2.fromOffset(weight, size),
+			BackgroundColor3 = tone,
+			BorderSizePixel = 0,
+			ZIndex = holder.ZIndex,
+			Parent = holder,
+		})
 	end
-	local frame = Theme.create("Frame", options)
+
+	return holder
+end
+
+--- Halo : deux cadres concentriques translucides, faute d'ombres portées.
+function Theme.glow(target: GuiObject, color: Color3?, intensity: number?)
+	local tone = color or Theme.Palette.accent
+	local strength = intensity or 1
+
+	for index = 1, 2 do
+		local spread = 4 * index
+		Theme.create("Frame", {
+			Name = "Halo" .. index,
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.fromScale(0.5, 0.5),
+			Size = UDim2.new(1, spread * 2, 1, spread * 2),
+			BackgroundTransparency = 1,
+			ZIndex = math.max((target.ZIndex or 1) - 1, 0),
+			Parent = target,
+		}, {
+			Theme.stroke(tone, 1, 1 - (0.16 * strength) / index),
+		})
+	end
+end
+
+--- Filet lumineux horizontal (séparateur, soulignement de titre).
+function Theme.rule(color: Color3?, thickness: number?): Frame
+	return Theme.create("Frame", {
+		Name = "Filet",
+		Size = UDim2.new(1, 0, 0, thickness or 1),
+		BackgroundColor3 = color or Theme.Palette.stroke,
+		BorderSizePixel = 0,
+	}, {
+		Theme.create("UIGradient", {
+			Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 0.1),
+				NumberSequenceKeypoint.new(0.75, 0.75),
+				NumberSequenceKeypoint.new(1, 1),
+			}),
+		}),
+	})
+end
+
+--- Petite étiquette anguleuse (catégorie, rang, raccourci clavier).
+function Theme.chip(text: string, color: Color3, props: { [string]: any }?): TextLabel
+	local options: { [string]: any } = props or {}
+	options.BackgroundColor3 = color
+	options.BackgroundTransparency = 0.82
+	options.BorderSizePixel = 0
+	options.Font = Theme.HeadingFont
+	options.Text = text
+	options.TextColor3 = color
+	options.TextSize = options.TextSize or 11
+
+	local chip = Theme.create("TextLabel", options)
+	Theme.corner(3).Parent = chip
+	Theme.stroke(color, 1, 0.55).Parent = chip
+	return chip
+end
+
+------------------------------------------------------------------
+-- Panneaux
+------------------------------------------------------------------
+
+export type PanelOptions = {
+	accent: Color3?,
+	brackets: boolean?,
+	glow: boolean?,
+	gradient: boolean?,
+}
+
+--- Panneau standard : fond dégradé, liseré fin, équerres aux angles.
+function Theme.panel(props: { [string]: any }?, options: PanelOptions?): Frame
+	local settings: PanelOptions = options or {}
+	local tone = settings.accent or Theme.Palette.stroke
+
+	local values: { [string]: any } = props or {}
+	if values.BackgroundColor3 == nil then
+		values.BackgroundColor3 = Theme.Palette.panel
+	end
+	if values.BackgroundTransparency == nil then
+		values.BackgroundTransparency = 0.06
+	end
+
+	local frame = Theme.create("Frame", values)
 	frame.BorderSizePixel = 0
-	Theme.corner(10).Parent = frame
-	Theme.stroke(Theme.Palette.stroke, 2, 0.35).Parent = frame
+
+	Theme.corner(4).Parent = frame
+	Theme.stroke(tone, 1, 0.45).Parent = frame
+
+	if settings.gradient ~= false then
+		Theme.create("UIGradient", {
+			Color = ColorSequence.new(Theme.Palette.panelLight, Theme.Palette.panel),
+			Rotation = 90,
+			Parent = frame,
+		})
+	end
+
+	if settings.brackets ~= false then
+		Theme.brackets(frame, settings.accent or Theme.Palette.accent, 14, 2)
+	end
+
+	if settings.glow then
+		Theme.glow(frame, settings.accent or Theme.Palette.accent)
+	end
+
 	return frame
 end
 
---- Bouton rectangulaire du menu (style du croquis : cadre fin, texte centré).
-function Theme.menuButton(text: string, order: number): TextButton
-	local button = Theme.create("TextButton", {
-		Name = text,
-		Size = UDim2.new(1, 0, 0, 62),
-		BackgroundColor3 = Theme.Palette.panel,
-		BackgroundTransparency = 0.15,
-		AutoButtonColor = false,
-		Text = text,
-		Font = Theme.HeadingFont,
-		TextSize = 28,
-		TextColor3 = Theme.Palette.text,
-		LayoutOrder = order,
-		BorderSizePixel = 0,
-	}, {
-		Theme.corner(6),
-		Theme.stroke(Theme.Palette.text, 2, 0.15),
+--- Zone de contenu d'un panneau. À utiliser dès qu'on veut un UIListLayout
+--- ou un UIGridLayout dedans : les décorations (équerres, halos) sont des
+--- GuiObject, un layout posé sur le panneau leur donnerait une place.
+function Theme.content(panel: GuiObject, padding: number?, side: number?): Frame
+	local frame = Theme.create("Frame", {
+		Name = "Contenu",
+		Size = UDim2.fromScale(1, 1),
+		BackgroundTransparency = 1,
+		ZIndex = (panel.ZIndex or 1) + 1,
+		Parent = panel,
 	})
+	if padding then
+		Theme.padding(padding, side).Parent = frame
+	end
+	return frame
+end
+
+------------------------------------------------------------------
+-- Boutons
+------------------------------------------------------------------
+
+--- Anime un bouton au survol : liseré qui s'allume, fond qui se teinte.
+function Theme.hover(button: GuiButton, accent: Color3, baseColor: Color3?, baseTransparency: number?)
+	local stroke = button:FindFirstChildOfClass("UIStroke")
+	local restColor = baseColor or button.BackgroundColor3
+	local restTransparency = baseTransparency or button.BackgroundTransparency
+
+	local function animate(hovering: boolean)
+		TweenService:Create(button, TweenInfo.new(0.14, Enum.EasingStyle.Quad), {
+			BackgroundColor3 = if hovering then accent else restColor,
+			BackgroundTransparency = if hovering then 0.35 else restTransparency,
+		}):Play()
+		if stroke then
+			TweenService:Create(stroke, TweenInfo.new(0.14), {
+				Color = accent,
+				Transparency = if hovering then 0 else 0.45,
+			}):Play()
+		end
+	end
+
+	button.MouseEnter:Connect(function()
+		-- On mémorise l'état courant : il a pu changer depuis la création.
+		restColor = button.BackgroundColor3
+		restTransparency = button.BackgroundTransparency
+		animate(true)
+	end)
+	button.MouseLeave:Connect(function()
+		animate(false)
+	end)
+end
+
+--- Bouton d'action compact, utilisé partout dans les fenêtres.
+function Theme.button(text: string, accent: Color3, props: { [string]: any }?): TextButton
+	local values: { [string]: any } = props or {}
+	values.BackgroundColor3 = values.BackgroundColor3 or Theme.Palette.panelLight
+	values.BackgroundTransparency = values.BackgroundTransparency or 0.2
+	values.AutoButtonColor = false
+	values.Font = Theme.HeadingFont
+	values.Text = text
+	values.TextSize = values.TextSize or 14
+	values.TextColor3 = values.TextColor3 or Theme.Palette.text
+	values.BorderSizePixel = 0
+
+	local button = Theme.create("TextButton", values)
+	Theme.corner(3).Parent = button
+	Theme.stroke(accent, 1, 0.45).Parent = button
+	Theme.hover(button, accent)
+
+	-- Barre d'accent à gauche : donne du poids sans surcharger.
+	Theme.create("Frame", {
+		Name = "Accent",
+		Size = UDim2.new(0, 2, 1, 0),
+		BackgroundColor3 = accent,
+		BorderSizePixel = 0,
+		ZIndex = button.ZIndex + 1,
+		Parent = button,
+	})
+
 	return button
 end
 
---- Barre de progression simple (vie, énergie, XP).
+--- Grande dalle du menu principal (« JOUER », « BOUTIQUE »…).
+function Theme.menuButton(text: string, order: number): TextButton
+	local button = Theme.create("TextButton", {
+		Name = text,
+		Size = UDim2.new(1, 0, 0, 64),
+		BackgroundColor3 = Theme.Palette.panel,
+		BackgroundTransparency = 0.25,
+		AutoButtonColor = false,
+		Text = "",
+		LayoutOrder = order,
+		BorderSizePixel = 0,
+	}, {
+		Theme.corner(3),
+		Theme.stroke(Theme.Palette.stroke, 1, 0.4),
+		Theme.create("UIGradient", {
+			Color = ColorSequence.new(Theme.Palette.panelLight, Theme.Palette.panel),
+			Rotation = 90,
+		}),
+	})
+
+	Theme.brackets(button, Theme.Palette.accent, 12, 2)
+
+	-- Barre d'accent qui s'étire au survol.
+	local accentBar = Theme.create("Frame", {
+		Name = "Accent",
+		Size = UDim2.new(0, 3, 0, 18),
+		Position = UDim2.new(0, 0, 0.5, 0),
+		AnchorPoint = Vector2.new(0, 0.5),
+		BackgroundColor3 = Theme.Palette.accent,
+		BorderSizePixel = 0,
+		ZIndex = button.ZIndex + 2,
+		Parent = button,
+	})
+
+	local stroke = button:FindFirstChildOfClass("UIStroke")
+
+	button.MouseEnter:Connect(function()
+		TweenService:Create(button, TweenInfo.new(0.16, Enum.EasingStyle.Quad), {
+			BackgroundTransparency = 0.08,
+		}):Play()
+		TweenService:Create(accentBar, TweenInfo.new(0.2, Enum.EasingStyle.Back), {
+			Size = UDim2.new(0, 3, 1, 0),
+		}):Play()
+		if stroke then
+			TweenService:Create(stroke, TweenInfo.new(0.16), {
+				Color = Theme.Palette.accent,
+				Transparency = 0,
+			}):Play()
+		end
+	end)
+
+	button.MouseLeave:Connect(function()
+		TweenService:Create(button, TweenInfo.new(0.16, Enum.EasingStyle.Quad), {
+			BackgroundTransparency = 0.25,
+		}):Play()
+		TweenService:Create(accentBar, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+			Size = UDim2.new(0, 3, 0, 18),
+		}):Play()
+		if stroke then
+			TweenService:Create(stroke, TweenInfo.new(0.16), {
+				Color = Theme.Palette.stroke,
+				Transparency = 0.4,
+			}):Play()
+		end
+	end)
+
+	return button
+end
+
+------------------------------------------------------------------
+-- Jauges
+------------------------------------------------------------------
+
+--- Jauge : fond creusé, remplissage dégradé, reflet en haut.
 function Theme.bar(color: Color3): (Frame, Frame)
 	local background = Theme.create("Frame", {
-		BackgroundColor3 = Color3.fromRGB(14, 14, 22),
+		BackgroundColor3 = Color3.fromRGB(10, 9, 16),
 		BorderSizePixel = 0,
-	}, { Theme.corner(6), Theme.stroke(Color3.fromRGB(60, 60, 84), 1, 0.4) })
+	}, {
+		Theme.corner(2),
+		Theme.stroke(Color3.fromRGB(52, 48, 76), 1, 0.35),
+	})
 
 	local fill = Theme.create("Frame", {
 		Name = "Remplissage",
@@ -8494,19 +9016,77 @@ function Theme.bar(color: Color3): (Frame, Frame)
 		BackgroundColor3 = color,
 		BorderSizePixel = 0,
 		Parent = background,
-	}, { Theme.corner(6) })
+	}, {
+		Theme.corner(2),
+		Theme.create("UIGradient", {
+			Color = ColorSequence.new(color, color:Lerp(Color3.new(0, 0, 0), 0.45)),
+			Rotation = 90,
+		}),
+	})
+
+	-- Reflet supérieur.
+	Theme.create("Frame", {
+		Name = "Reflet",
+		Size = UDim2.new(1, 0, 0.35, 0),
+		BackgroundColor3 = Color3.new(1, 1, 1),
+		BackgroundTransparency = 0.82,
+		BorderSizePixel = 0,
+		ZIndex = fill.ZIndex + 1,
+		Parent = fill,
+	})
 
 	return background, fill
 end
 
---- Fenêtre modale : fond assombri, cadre, titre et bouton de fermeture.
+------------------------------------------------------------------
+-- Animations utilitaires
+------------------------------------------------------------------
+
+--- Fait glisser un dégradé en boucle : effet de balayage lumineux.
+function Theme.shimmer(target: GuiObject, color: Color3, duration: number?)
+	local gradient = Theme.create("UIGradient", {
+		Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, color),
+			ColorSequenceKeypoint.new(0.45, color),
+			ColorSequenceKeypoint.new(0.5, Color3.new(1, 1, 1)),
+			ColorSequenceKeypoint.new(0.55, color),
+			ColorSequenceKeypoint.new(1, color),
+		}),
+		Offset = Vector2.new(-1, 0),
+		Parent = target,
+	})
+
+	local tween = TweenService:Create(
+		gradient,
+		TweenInfo.new(duration or 3.5, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, false, 1.5),
+		{ Offset = Vector2.new(1, 0) }
+	)
+	tween:Play()
+	return gradient
+end
+
+--- Pulsation lente d'un liseré, pour attirer l'œil sans agresser.
+function Theme.pulse(stroke: UIStroke, from: number?, to: number?, duration: number?)
+	stroke.Transparency = from or 0.6
+	TweenService:Create(
+		stroke,
+		TweenInfo.new(duration or 1.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+		{ Transparency = to or 0.05 }
+	):Play()
+end
+
+------------------------------------------------------------------
+-- Fenêtres modales
+------------------------------------------------------------------
+
+--- Fenêtre : fond assombri, cadre à équerres, titre en police d'affichage.
 --- Renvoie la racine (à afficher/masquer) et le conteneur de contenu.
 function Theme.window(parent: Instance, titleText: string, size: UDim2): (Frame, Frame)
 	local root = Theme.create("Frame", {
 		Name = titleText,
 		Size = UDim2.fromScale(1, 1),
-		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-		BackgroundTransparency = 0.45,
+		BackgroundColor3 = Theme.Palette.void,
+		BackgroundTransparency = 0.35,
 		BorderSizePixel = 0,
 		Visible = false,
 		ZIndex = 30,
@@ -8517,47 +9097,68 @@ function Theme.window(parent: Instance, titleText: string, size: UDim2): (Frame,
 		Name = "Fenêtre",
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.fromScale(0.5, 0.5),
-		Size = size,
+		Size = UDim2.new(0.92, 0, 0.88, 0),
 		BackgroundTransparency = 0.02,
 		ZIndex = 31,
 		Parent = root,
+	}, { accent = Theme.Palette.accent, brackets = true, glow = true })
+
+	-- Reste lisible sur petit écran, sans jamais dépasser la taille voulue.
+	Theme.create("UISizeConstraint", {
+		MaxSize = Vector2.new(size.X.Offset, size.Y.Offset),
+		MinSize = Vector2.new(360, 320),
+		Parent = window,
 	})
 
 	local header = Theme.create("Frame", {
 		Name = "Entête",
-		Size = UDim2.new(1, 0, 0, 54),
+		Size = UDim2.new(1, 0, 0, 62),
 		BackgroundTransparency = 1,
 		ZIndex = 32,
 		Parent = window,
 	})
 
 	Theme.create("TextLabel", {
-		Position = UDim2.fromOffset(20, 0),
-		Size = UDim2.new(1, -80, 1, 0),
+		Position = UDim2.fromOffset(24, 12),
+		Size = UDim2.new(1, -90, 0, 26),
 		BackgroundTransparency = 1,
-		Font = Theme.TitleFont,
+		Font = Theme.DisplayFont,
 		Text = titleText,
-		TextSize = 24,
+		TextSize = 20,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextColor3 = Theme.Palette.text,
 		ZIndex = 32,
 		Parent = header,
 	})
 
+	local underline = Theme.create("Frame", {
+		Name = "Soulignement",
+		Position = UDim2.fromOffset(24, 44),
+		Size = UDim2.fromOffset(64, 2),
+		BackgroundColor3 = Theme.Palette.accent,
+		BorderSizePixel = 0,
+		ZIndex = 32,
+		Parent = header,
+	})
+	Theme.shimmer(underline, Theme.Palette.accent, 2.5)
+
 	local close = Theme.create("TextButton", {
 		Name = "Fermer",
 		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, -16, 0.5, 0),
-		Size = UDim2.fromOffset(38, 38),
+		Position = UDim2.new(1, -18, 0.5, 0),
+		Size = UDim2.fromOffset(34, 34),
 		BackgroundColor3 = Theme.Palette.panelLight,
-		AutoButtonColor = true,
+		BackgroundTransparency = 0.2,
+		AutoButtonColor = false,
 		Font = Theme.HeadingFont,
-		Text = "X",
-		TextSize = 18,
-		TextColor3 = Theme.Palette.text,
+		Text = "✕",
+		TextSize = 16,
+		TextColor3 = Theme.Palette.textDim,
+		BorderSizePixel = 0,
 		ZIndex = 32,
 		Parent = header,
-	}, { Theme.corner(8) })
+	}, { Theme.corner(3), Theme.stroke(Theme.Palette.stroke, 1, 0.45) })
+	Theme.hover(close, Theme.Palette.danger)
 
 	close.Activated:Connect(function()
 		root.Visible = false
@@ -8565,13 +9166,27 @@ function Theme.window(parent: Instance, titleText: string, size: UDim2): (Frame,
 
 	local content = Theme.create("Frame", {
 		Name = "Contenu",
-		Position = UDim2.fromOffset(0, 54),
-		Size = UDim2.new(1, 0, 1, -54),
+		Position = UDim2.fromOffset(0, 62),
+		Size = UDim2.new(1, 0, 1, -62),
 		BackgroundTransparency = 1,
 		ZIndex = 31,
 		Parent = window,
 	})
-	Theme.padding(16).Parent = content
+	Theme.padding(20, 24).Parent = content
+
+	-- Ouverture animée : la fenêtre grandit légèrement en apparaissant.
+	root:GetPropertyChangedSignal("Visible"):Connect(function()
+		if not root.Visible then
+			return
+		end
+		window.Size = UDim2.new(0.9, 0, 0.85, 0)
+		TweenService:Create(window, TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+			Size = UDim2.new(0.92, 0, 0.88, 0),
+		}):Play()
+
+		root.BackgroundTransparency = 1
+		TweenService:Create(root, TweenInfo.new(0.2), { BackgroundTransparency = 0.35 }):Play()
+	end)
 
 	return root, content
 end
@@ -8584,7 +9199,7 @@ return Theme
       </Item>
     </Item>
   </Item>
-  <Item class="Workspace" referent="50">
+  <Item class="Workspace" referent="53">
     <Properties>
       <string name="Name">Workspace</string>
       <bool name="FilteringEnabled">true</bool>

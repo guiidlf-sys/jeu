@@ -84,17 +84,24 @@ GameConfig.PvpEnabled = false
 GameConfig.MaxHitsPerSwing = 8
 
 -- Palette UI ------------------------------------------------------------
+-- Fond très sombre, deux accents (violet maudit, cyan spirituel) et trois
+-- couleurs d'état. Tout le reste de l'interface s'y réfère.
 GameConfig.Palette = {
-	background = Color3.fromRGB(10, 10, 16),
-	panel = Color3.fromRGB(18, 18, 28),
-	panelLight = Color3.fromRGB(28, 28, 42),
-	stroke = Color3.fromRGB(120, 90, 220),
-	accent = Color3.fromRGB(150, 110, 255),
-	accentSoft = Color3.fromRGB(96, 200, 255),
-	text = Color3.fromRGB(238, 238, 248),
-	textDim = Color3.fromRGB(150, 150, 170),
-	danger = Color3.fromRGB(235, 80, 90),
-	success = Color3.fromRGB(110, 230, 150),
+	void = Color3.fromRGB(4, 4, 8), -- le noir absolu, derrière tout
+	background = Color3.fromRGB(9, 8, 14),
+	panel = Color3.fromRGB(16, 15, 24),
+	panelLight = Color3.fromRGB(26, 25, 38),
+	panelRaised = Color3.fromRGB(34, 32, 50),
+	stroke = Color3.fromRGB(78, 66, 128),
+	accent = Color3.fromRGB(168, 120, 255), -- violet : énergie maudite
+	accentDeep = Color3.fromRGB(96, 52, 190),
+	accentSoft = Color3.fromRGB(88, 214, 255), -- cyan : énergie spirituelle
+	gold = Color3.fromRGB(255, 205, 110),
+	text = Color3.fromRGB(242, 241, 250),
+	textDim = Color3.fromRGB(152, 148, 178),
+	textFaint = Color3.fromRGB(96, 92, 122),
+	danger = Color3.fromRGB(255, 74, 96),
+	success = Color3.fromRGB(96, 235, 162),
 }
 
 return GameConfig

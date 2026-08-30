@@ -74,16 +74,17 @@ function Shop.new(parent: ScreenGui)
 			Name = definition.mode,
 			Size = UDim2.fromOffset(163, 28),
 			BackgroundColor3 = GameConfig.Palette.panelLight,
-			BackgroundTransparency = 0.2,
-			AutoButtonColor = true,
+			BackgroundTransparency = 0.35,
+			AutoButtonColor = false,
 			Font = Theme.HeadingFont,
 			Text = definition.label,
-			TextSize = 13,
+			TextSize = 12,
 			TextColor3 = GameConfig.Palette.textDim,
+			BorderSizePixel = 0,
 			LayoutOrder = index,
 			ZIndex = 33,
 			Parent = switch,
-		}, { Theme.corner(6) })
+		}, { Theme.corner(3) })
 
 		button.Activated:Connect(function()
 			self:setMode(definition.mode)
@@ -144,11 +145,10 @@ function Shop.new(parent: ScreenGui)
 	for index = 1, ITEMS_PER_PAGE do
 		local card = Theme.panel({
 			Name = "Case" .. index,
-			BackgroundTransparency = 0.15,
 			LayoutOrder = index,
 			ZIndex = 33,
 			Parent = grid,
-		})
+		}, { accent = GameConfig.Palette.accent, brackets = true })
 
 		local category = Theme.create("TextLabel", {
 			Position = UDim2.fromScale(0.05, 0.05),
@@ -180,9 +180,9 @@ function Shop.new(parent: ScreenGui)
 			Position = UDim2.fromScale(0.05, 0.17),
 			Size = UDim2.fromScale(0.9, 0.16),
 			BackgroundTransparency = 1,
-			Font = Theme.HeadingFont,
+			Font = Theme.DisplayFont,
 			Text = "",
-			TextSize = 16,
+			TextSize = 14,
 			TextWrapped = true,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			TextColor3 = GameConfig.Palette.text,
@@ -218,20 +218,14 @@ function Shop.new(parent: ScreenGui)
 			Parent = card,
 		})
 
-		local action = Theme.create("TextButton", {
+		local action = Theme.button("", GameConfig.Palette.accent, {
 			AnchorPoint = Vector2.new(0.5, 1),
 			Position = UDim2.fromScale(0.5, 0.94),
 			Size = UDim2.fromScale(0.9, 0.18),
-			BackgroundColor3 = GameConfig.Palette.accent,
-			BackgroundTransparency = 0.15,
-			AutoButtonColor = true,
-			Font = Theme.HeadingFont,
-			Text = "",
-			TextSize = 14,
-			TextColor3 = GameConfig.Palette.text,
+			TextSize = 13,
 			ZIndex = 34,
 			Parent = card,
-		}, { Theme.corner(6) })
+		})
 
 		local slot = {
 			card = card,
@@ -273,18 +267,13 @@ function Shop.new(parent: ScreenGui)
 	})
 
 	local function arrow(text: string, delta: number, order: number): TextButton
-		local button = Theme.create("TextButton", {
-			Size = UDim2.fromOffset(46, 32),
-			BackgroundColor3 = GameConfig.Palette.panelLight,
-			AutoButtonColor = true,
-			Font = Theme.TitleFont,
-			Text = text,
+		local button = Theme.button(text, GameConfig.Palette.accent, {
+			Size = UDim2.fromOffset(48, 32),
 			TextSize = 18,
-			TextColor3 = GameConfig.Palette.text,
 			LayoutOrder = order,
 			ZIndex = 33,
 			Parent = footer,
-		}, { Theme.corner(6) })
+		})
 
 		button.Activated:Connect(function()
 			self:setPage(self.page + delta)
@@ -295,9 +284,9 @@ function Shop.new(parent: ScreenGui)
 	arrow("‹", -1, 1)
 
 	self.pageLabel = Theme.create("TextLabel", {
-		Size = UDim2.fromOffset(160, 32),
+		Size = UDim2.fromOffset(170, 32),
 		BackgroundTransparency = 1,
-		Font = Theme.HeadingFont,
+		Font = Theme.DisplayFont,
 		Text = "",
 		TextSize = 14,
 		TextColor3 = GameConfig.Palette.textDim,
@@ -354,7 +343,7 @@ function Shop:activate(slot: any)
 
 	if self.mode == "robux" then
 		if item.productId == 0 then
-			slot.action.Text = "Produit non configuré"
+			slot.action.Text = "PRODUIT NON CONFIGURÉ"
 			task.delay(2, function()
 				self:refresh()
 			end)
@@ -423,34 +412,34 @@ function Shop:bind(slot: any, item: any?)
 	local equipped = profile.equipped.arme == item.id or profile.equipped.aura == item.id
 
 	if equipped then
-		slot.action.Text = "Équipé — retirer"
+		slot.action.Text = "ÉQUIPÉ — RETIRER"
 		slot.action.BackgroundColor3 = GameConfig.Palette.success
 		slot.action.Active = true
 	elseif owned then
 		local equipable = item.category == "arme" or item.category == "aura"
-		slot.action.Text = if equipable then "Équiper" else "Acquis"
+		slot.action.Text = if equipable then "ÉQUIPER" else "ACQUIS"
 		slot.action.BackgroundColor3 = GameConfig.Palette.panelLight
 		slot.action.Active = equipable
 	elseif profile.level < item.requiredLevel then
-		slot.action.Text = ("Niveau %d requis"):format(item.requiredLevel)
+		slot.action.Text = ("NIVEAU %d REQUIS"):format(item.requiredLevel)
 		slot.action.BackgroundColor3 = GameConfig.Palette.panelLight
 		slot.action.Active = false
 	elseif self.mode == "robux" then
 		if item.productId == 0 then
-			slot.action.Text = "Bientôt en Robux"
+			slot.action.Text = "BIENTÔT EN ROBUX"
 			slot.action.BackgroundColor3 = GameConfig.Palette.panelLight
 			slot.action.Active = false
 		else
-			slot.action.Text = ("Acheter — R$ %d"):format(item.robuxPrice)
+			slot.action.Text = ("ACHETER — R$ %d"):format(item.robuxPrice)
 			slot.action.BackgroundColor3 = ROBUX_COLOR
 			slot.action.Active = true
 		end
 	elseif (profile.currencies[item.currency] or 0) < item.price then
-		slot.action.Text = "Fonds insuffisants"
+		slot.action.Text = "FONDS INSUFFISANTS"
 		slot.action.BackgroundColor3 = GameConfig.Palette.panelLight
 		slot.action.Active = false
 	else
-		slot.action.Text = "Acheter"
+		slot.action.Text = "ACHETER"
 		slot.action.BackgroundColor3 = item.color
 		slot.action.Active = true
 	end

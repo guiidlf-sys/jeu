@@ -1,7 +1,8 @@
 --!strict
 --[[
 	DamageNumbers
-	Chiffres de dégâts flottants et retour visuel quand on encaisse un coup.
+	Chiffres de dégâts flottants. Les coups critiques sont plus gros, dorés,
+	et partent plus haut.
 ]]
 
 local Debris = game:GetService("Debris")
@@ -15,9 +16,10 @@ local Util = require(Shared.Util)
 
 local Theme = require(script.Parent.Theme)
 
+local Palette = GameConfig.Palette
+
 local DamageNumbers = {}
 
---- Affiche un chiffre de dégâts dans le monde, à la position touchée.
 local function spawnNumber(position: Vector3, amount: number, crit: boolean)
 	local anchor = Instance.new("Part")
 	anchor.Anchored = true
@@ -26,38 +28,71 @@ local function spawnNumber(position: Vector3, amount: number, crit: boolean)
 	anchor.CanTouch = false
 	anchor.Transparency = 1
 	anchor.Size = Vector3.one
-	anchor.Position = position + Vector3.new(math.random(-2, 2), 3, math.random(-2, 2))
+	anchor.Position = position + Vector3.new(math.random(-25, 25) / 10, 3, math.random(-25, 25) / 10)
 	anchor.Parent = workspace
 
 	local gui = Theme.create("BillboardGui", {
-		Size = UDim2.fromScale(4, 2),
+		Size = if crit then UDim2.fromScale(7, 3.4) else UDim2.fromScale(4.4, 2.2),
 		AlwaysOnTop = true,
-		MaxDistance = 200,
+		MaxDistance = 220,
 		Adornee = anchor,
 		Parent = anchor,
 	})
 
-	local label = Theme.create("TextLabel", {
+	Theme.create("TextLabel", {
 		Size = UDim2.fromScale(1, 1),
 		BackgroundTransparency = 1,
-		Font = if crit then Theme.TitleFont else Theme.HeadingFont,
-		Text = if crit then ("%s !"):format(Util.formatNumber(amount)) else Util.formatNumber(amount),
+		Font = Theme.NumberFont,
+		Text = Util.formatNumber(amount),
 		TextScaled = true,
-		TextColor3 = if crit then GameConfig.Palette.danger else GameConfig.Palette.text,
-		TextStrokeTransparency = 0.35,
+		TextColor3 = if crit then Palette.gold else Palette.text,
+		TextStrokeTransparency = 0.25,
 		Parent = gui,
 	})
 
-	local goal = anchor.Position + Vector3.new(0, 6, 0)
-	TweenService:Create(anchor, TweenInfo.new(0.9, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-		Position = goal,
-	}):Play()
-	TweenService:Create(label, TweenInfo.new(0.9), {
-		TextTransparency = 1,
-		TextStrokeTransparency = 1,
+	if crit then
+		Theme.create("TextLabel", {
+			AnchorPoint = Vector2.new(0.5, 0),
+			Position = UDim2.fromScale(0.5, 0.72),
+			Size = UDim2.fromScale(1, 0.28),
+			BackgroundTransparency = 1,
+			Font = Theme.DisplayFont,
+			Text = "CRITIQUE",
+			TextScaled = true,
+			TextColor3 = Palette.danger,
+			TextStrokeTransparency = 0.4,
+			Parent = gui,
+		})
+	end
+
+	-- Montée avec une légère dérive latérale.
+	local rise = if crit then 8 else 5.5
+	local drift = Vector3.new(math.random(-15, 15) / 10, rise, math.random(-15, 15) / 10)
+	local duration = if crit then 1.15 else 0.85
+
+	TweenService:Create(anchor, TweenInfo.new(duration, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+		Position = anchor.Position + drift,
 	}):Play()
 
-	Debris:AddItem(anchor, 1)
+	-- Petit sursaut d'échelle à l'apparition.
+	local target = gui.Size
+	gui.Size = UDim2.fromScale(target.X.Scale * 0.5, target.Y.Scale * 0.5)
+	TweenService:Create(gui, TweenInfo.new(0.16, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+		Size = target,
+	}):Play()
+
+	task.delay(duration * 0.4, function()
+		for _, child in ipairs(gui:GetChildren()) do
+			if child:IsA("TextLabel") then
+				TweenService:Create(child, TweenInfo.new(duration * 0.6), {
+					TextTransparency = 1,
+					TextStrokeTransparency = 1,
+				}):Play()
+			end
+		end
+	end)
+
+	Debris:AddItem(anchor, duration + 0.3)
 end
 
 function DamageNumbers.init(onDamageTaken: (() -> ())?)
