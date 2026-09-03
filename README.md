@@ -259,3 +259,21 @@ décidé côté client.
 - Failles coopératives à plusieurs joueurs.
 - Classement des meilleurs sorciers (OrderedDataStore).
 - Animations et effets sonores sur les techniques.
+
+---
+
+## Promotion : automatisation TikTok
+
+Le dossier [`tiktok/`](tiktok/README.md) contient un pipeline qui fabrique des
+clips verticaux à partir d'un plan de contenu (`content_plan.yaml`) et les
+envoie sur TikTok via l'API officielle, planifié par GitHub Actions.
+
+```bash
+cd tiktok
+pip install -r requirements.txt
+python -m tiktokbot check
+python -m tiktokbot publish --dry-run
+```
+
+La mise en place (app TikTok, refresh token, secrets GitHub) est décrite dans
+[`tiktok/README.md`](tiktok/README.md).

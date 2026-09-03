@@ -14,3 +14,9 @@ sourcemap.json
 # Éditeurs
 .DS_Store
 .vscode/
+
+# Automatisation TikTok
+tiktok/out/
+tiktok/.env
+__pycache__/
+*.pyc

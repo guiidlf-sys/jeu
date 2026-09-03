@@ -1,0 +1,147 @@
+# Plan de contenu TikTok — MALÉDICTION : ÉVEIL
+#
+# Chaque entrée de `clips` produit un mp4 vertical 1080x1920. Le workflow
+# publie le premier clip qui n'est pas encore dans tiktok/state.json, donc
+# l'ordre de ce fichier est l'ordre de publication.
+#
+# Remplace `assets/backgrounds/placeholder.png` par de vraies captures du jeu
+# (Roblox Studio : Fichier → capture d'écran, ou l'outil Capture de Windows).
+# Un fond peut aussi être une vidéo (.mp4/.mov) : elle est recadrée en 9:16 et
+# bouclée si elle est plus courte que le clip.
+
+defaults:
+  duration: 12
+  motion: zoom-in
+  music_volume: 0.35
+  watermark: "MALÉDICTION : ÉVEIL — Roblox"
+  caption_suffix: "Jouable sur Roblox. Lien en bio."
+  hashtags:
+    - roblox
+    - robloxfr
+    - animegame
+    - sololeveling
+    - jujutsukaisen
+    - gamedev
+  # Dépose un fichier audio libre de droits dans assets/music/ et décommente :
+  # music: assets/music/theme.mp3
+
+clips:
+  - id: 01-grade-4
+    background: assets/backgrounds/placeholder.png
+    duration: 12
+    caption: >-
+      Tu démarres Grade 4. Personne ne mise sur toi. 120 niveaux plus tard,
+      tu franchis une faille de rang S tout seul.
+    slides:
+      - text: "Tu commences Grade 4."
+        position: center
+        size: 88
+      - text: "Le plus bas rang de sorcier."
+        position: center
+        size: 74
+      - text: "120 niveaux et 6 grades te séparent du Grade Spécial."
+        position: center
+        size: 66
+      - text: "Personne ne t'attend là-haut."
+        position: center
+        size: 78
+
+  - id: 02-techniques
+    background: assets/backgrounds/placeholder.png
+    duration: 13
+    motion: zoom-out
+    caption: >-
+      5 techniques maudites, débloquées au niveau. La dernière arrive au 30.
+    slides:
+      - text: "5 techniques maudites."
+        position: top
+        size: 84
+      - text: "E — Lame de Vide, niveau 3"
+        position: center
+        size: 68
+      - text: "R — Éclat d'Âme, niveau 8"
+        position: center
+        size: 68
+      - text: "F — Chaînes Funestes, niveau 15"
+        position: center
+        size: 68
+      - text: "G — Domaine Restreint, niveau 30"
+        position: center
+        size: 72
+
+  - id: 03-failles
+    background: assets/backgrounds/placeholder.png
+    duration: 12
+    caption: >-
+      5 failles, du rang E au rang S. Vagues d'esprits dans une arène générée
+      rien que pour toi.
+    slides:
+      - text: "Rang E : 120 yens."
+        position: center
+        size: 76
+      - text: "Rang C : 850 yens."
+        position: center
+        size: 76
+      - text: "Rang S : 7 500 yens."
+        position: center
+        size: 88
+      - text: "Encore faut-il en ressortir."
+        position: center
+        size: 70
+
+  - id: 04-contrats
+    background: assets/backgrounds/placeholder.png
+    duration: 13
+    caption: >-
+      Hors des failles, les esprits te laissent tranquille. Sauf si tu signes
+      un contrat de chasse sur leur espèce.
+    slides:
+      - text: "Un esprit ne t'attaque pas."
+        position: center
+        size: 80
+      - text: "Tant que tu ne l'as pas frappé."
+        position: center
+        size: 72
+      - text: "Accepte un contrat de chasse…"
+        position: center
+        size: 72
+      - text: "…et toute l'espèce te saute dessus. Jusqu'à 16 000 yens."
+        position: center
+        size: 64
+
+  - id: 05-stats
+    background: assets/backgrounds/placeholder.png
+    duration: 11
+    motion: zoom-out
+    caption: >-
+      3 points par niveau, 4 statistiques. Ta build se décide là.
+    slides:
+      - text: "3 points de stat par niveau."
+        position: top
+        size: 78
+      - text: "MAGIE — dégâts des techniques"
+        position: center
+        size: 62
+      - text: "FORCE — dégâts du poing, gratuit"
+        position: center
+        size: 62
+      - text: "VIE — points de vie / AGILITÉ — vitesse et recharges"
+        position: center
+        size: 56
+
+  - id: 06-hub-afk
+    background: assets/backgrounds/placeholder.png
+    duration: 10
+    caption: >-
+      Une île flottante où l'XP et les yens tombent tout seuls, même quand tu
+      ne joues pas.
+    slides:
+      - text: "Le Hub AFK."
+        position: center
+        size: 96
+      - text: "Une île flottante."
+        position: center
+        size: 76
+      - text: "L'XP et les yens tombent tout seuls."
+        position: center
+        size: 64
